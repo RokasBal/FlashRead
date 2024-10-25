@@ -15,7 +15,7 @@ interface Mode2TaskProps {
 
 
 const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStarted, setPoints, setCombo, difficulty }) => {
-    const [canvasSize, setCanvasSize] = useState<vec2>({ x: 1200, y: 600 });
+    const [canvasSize, setCanvasSize] = useState<vec2>({ x: 600, y: 300 });
     const [playerPos, setPlayerPos] = useState<vec2>({ x: 0, y: 0.1});
     const [textArray, setTextArray] = useState<droppingText[]>([]);
     const playerPosRef = useRef<vec2>(); playerPosRef.current = playerPos;
@@ -39,7 +39,24 @@ const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
         const pos = { x: e.clientX / canvasSize.x - getCanvasOffset(), y: 0.1 };
         setPlayerPos(pos);
     };
-    
+
+    useEffect(() => {
+        const handleResize = () => {
+            const gamePageElement = document.getElementById("mainGameMode2");
+            if (gamePageElement) {
+                const { width, height } = gamePageElement.getBoundingClientRect();
+                setCanvasSize({ x: width, y: height });
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     useEffect(() => {
         const temp = (context: CanvasRenderingContext2D, dt: number) => {
             if (context === undefined) return undefined;
@@ -149,8 +166,7 @@ const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
                 textArray.splice(i, 1);
                 i--;
             }
-    
-    
+
             return {
                 playerPos: playerPosRef.current,
                 textArray: textArray,

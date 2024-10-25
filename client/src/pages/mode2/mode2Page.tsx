@@ -32,8 +32,10 @@ const Mode2Page: React.FC = () => {
                     <p className="pointsText">Combo:</p>
                     <p className="pointsText" id="combo">{combo}</p>
                 </div>
-                <div className="w-full h-full gamePage">
-                    <Mode2Task wordArray = {textArray} fillerArray = {fillerArray} gameStarted={gameStarted} setPoints={setPoints} setCombo={setCombo} difficulty={mode2Difficulty} />
+                <div className="gameContainer">
+                    <div className="gamePage" id="mainGameMode2">
+                        <Mode2Task wordArray = {textArray} fillerArray = {fillerArray} gameStarted={gameStarted} setPoints={setPoints} setCombo={setCombo} difficulty={mode2Difficulty} />
+                    </div>
                 </div>
             </div>
             <div className="mode2_lowerDiv" id="buttonDiv">
@@ -48,7 +50,7 @@ const Mode2Page: React.FC = () => {
                         }))
                     }}/>
                 </div>
-                <div>
+                <div className="mode2_lowerLowerDiv">
                     <CustomButton label="Return" className="wideButton" id="MainBoard_returnButton" onClick={() => navigate("/home")}/>
                 </div>
             </div>
