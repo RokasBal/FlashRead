@@ -1,0 +1,121 @@
+.profilePage {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: var(--backgroundColor);
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    min-height: 160px;
+}
+
+.pageContainer {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    flex: 2;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 15%;
+    color: var(--textColor);
+    font-family: var(--fontStyle);
+    font-weight: bold;
+    font-size: 3.5em;
+}
+
+.content {
+    display: flex;
+    flex: 7;
+    height: 80%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.footer {
+    display: flex;
+    flex: 1;
+    height: 5%;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 3em;
+}
+
+.profileDetailsContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: cadetblue;
+}
+
+.gameDetailsContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: blueviolet;
+}
+
+.detailHeader {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    /* gap: 2vw; */
+    background-color: green;
+}
+
+.detailContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 90%;
+    background-color: blue;
+}
+
+.profileDetails {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 30%;
+    background-color: green;
+}
+
+.restOfProfile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 70%;
+    background-color: blue;
+}
+
+.textButton {
+    background: none;
+    border: none;
+    color: var(--textColor);
+    cursor: pointer;
+    font-size: inherit;
+    font-family: var(--fontStyle);
+    padding: 0;
+    margin: 0 10px;
+}

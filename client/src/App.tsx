@@ -12,6 +12,7 @@ import Mode3Page from './pages/mode3/mode3Page';
 import SettingsPage from './pages/settings/settingsPage';
 import ChangePasswordPage from './pages/settings/changePassword';
 import DeleteAccountPage from './pages/settings/deleteAccount';
+import ProfilePage from './pages/profile/profilePage';
 import axios from './components/axiosWrapper';
 import './boards/css/variables.css';
 import { AuthProvider } from './context/AuthContext';
@@ -54,6 +55,7 @@ const App: React.FC = () => {
               <Route path="/mode3" element={<Mode3Page/>}/>
               <Route path="/about" element={<AboutPage />}/>
               <Route path="/contact" element={<ContactPage />}/>
+              <Route path="/profile" element={<ProfilePage />}/>
           </Routes>
           </BrowserRouter>
         </VisualSettingsProvider>

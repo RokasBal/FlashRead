@@ -16,16 +16,16 @@ const HomePage: React.FC = () => {
 
             <div className="MainBoard_header" id="headerDiv">
                 <div className="headerLinks">
-                        <div className="outerLinkContainer">
-                            <div className="innerLinkContainer">
-                                <a className="linksText" href="/about">About Us</a>
-                            </div>
+                    <div className="outerLinkContainer">
+                        <div className="innerLinkContainer">
+                            <a className="linksText" href="/about">About Us</a>
                         </div>
-                        <div className="outerLinkContainer">
-                            <div className="innerLinkContainer">
-                                <a className="linksText" href="/contact"> Contacts</a>
-                            </div>
+                    </div>
+                    <div className="outerLinkContainer">
+                        <div className="innerLinkContainer">
+                            <a className="linksText" href="/contact"> Contacts</a>
                         </div>
+                    </div>
                 </div>
                 <Dropdown onSelect={function (item: string): void {
                 if (item === "Login") {
@@ -36,6 +36,9 @@ const HomePage: React.FC = () => {
                 }
                 else if (item === "Settings") {
                     navigate("/settings");
+                } 
+                else if (item === "Profile") {
+                    navigate("/profile");
                 }
                 } } />
             </div>

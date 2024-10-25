@@ -19,7 +19,7 @@ const AboutPage: React.FC = () => {
                 </div>
 
                 <div className="footer">
-                <CustomButton label="Return" className="wideButton" id="settingsReturnButton" onClick={() => navigate("/home")}/>
+                    <CustomButton label="Return" className="wideButton" id="settingsReturnButton" onClick={() => navigate("/home")}/>
                 </div>
             </div>
         </div>
