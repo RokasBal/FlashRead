@@ -114,6 +114,7 @@ btRigidBody* PhysicsWorld::CreateRigidBody(std::shared_ptr<btCollisionShape> col
 	auto userData = new RigidBodyUserData();
 	userData->collisionShape = std::move(colShape);
 	body->setUserPointer(userData);
+	body->setRollingFriction(0.05f); // stops objects rolling by themselves without any forces
 
 	return body;
 }

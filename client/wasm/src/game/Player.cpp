@@ -8,10 +8,11 @@ Player::Player(PhysicsWorld& physicsWorld, const glm::vec3& position)
     m_camera = std::make_shared<Camera>();
     m_camera->position = position;
 
-    auto collider = m_physicsWorld.get().GetCapsuleCollider(1, 2);
-    m_rigidBody = m_physicsWorld.get().CreateRigidBody(collider, 5.f, position, {0, 0, 0});
+    auto collider = m_physicsWorld.get().GetCapsuleCollider(10, 20);
+    m_rigidBody = m_physicsWorld.get().CreateRigidBody(collider, 50.f, position, {0, 0, 0});
     m_rigidBody->setAngularFactor(btVector3(0, 0, 0));
     m_rigidBody->setFriction(8.f);
+    m_rigidBody->setGravity({0, -100, 0});
 }
 Player::~Player() {
     Cleanup();
@@ -45,7 +46,7 @@ void Player::UpdateCameraAfterPhysics()
     if (m_rigidBody->getMotionState()) m_rigidBody->getMotionState()->getWorldTransform(transform);
     else transform = m_rigidBody->getWorldTransform();
 
-    m_camera->position = {transform.getOrigin().x(), transform.getOrigin().y() + 1.f, transform.getOrigin().z()};
+    m_camera->position = {transform.getOrigin().x(), transform.getOrigin().y() + 15.f, transform.getOrigin().z()};
 }
 void Player::UpdateInput(float dt) {
     // user data
@@ -82,7 +83,7 @@ void Player::UpdateInput(float dt) {
 
     if (fly && Input::IsHeld(SDL_SCANCODE_LSHIFT)) velocity -= m_camera->GetUp();
     if ((fly || (userData->onGround && TimePoint() - m_lastJump > 250ms)) && Input::IsHeld(SDL_SCANCODE_SPACE)) {
-        velocity += m_camera->GetUp();
+        velocity += m_camera->GetUp() * moveSpeed * 10.f;
         m_lastJump.reset();
     }
     if (!userData->onGround) {

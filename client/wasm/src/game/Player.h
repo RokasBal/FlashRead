@@ -21,7 +21,7 @@ public:
     const std::shared_ptr<Camera>& GetCamera() const { return m_camera; }
 
     float mouseSensitivity = 0.5f;
-    float moveSpeed = 0.05f;
+    float moveSpeed = 0.2f;
     bool fly = false;
 private:
     void Cleanup();

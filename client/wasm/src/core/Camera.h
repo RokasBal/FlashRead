@@ -32,8 +32,8 @@ private:
     float m_yaw = 0;
     float m_pitch = 0;
 
-    float m_near = 0.1f;
-    float m_far = 10000.f;
+    float m_near = 1.0f;
+    float m_far = 100000.f;
 
     glm::vec3 m_front{1, 0, 0};
     glm::vec3 m_up{0, 1, 0};
