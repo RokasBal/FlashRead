@@ -48,11 +48,13 @@ const RegisterPage: React.FC = () => {
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                             '& .MuiOutlinedInput-root': {
@@ -81,11 +83,13 @@ const RegisterPage: React.FC = () => {
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                         '& .MuiOutlinedInput-root': {
@@ -114,11 +118,13 @@ const RegisterPage: React.FC = () => {
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                         '& .MuiOutlinedInput-root': {
@@ -147,11 +153,13 @@ const RegisterPage: React.FC = () => {
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                         '& .MuiOutlinedInput-root': {

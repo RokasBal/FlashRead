@@ -49,6 +49,7 @@ const TimerInput: React.FC<TimerInputProps> = ({ className, id, onTimeChange, ..
         <TextField
             variant='outlined'
             label="Timer:"
+            
             value={displayValue}
             onChange={handleInputChange}
             onFocus={() => setFocused(true)}
@@ -56,11 +57,13 @@ const TimerInput: React.FC<TimerInputProps> = ({ className, id, onTimeChange, ..
             sx={{
                 '& .MuiFormLabel-root': {
                     color: 'var(--textColor)', 
+                    fontFamily: 'var(--fontStyle)',
                 },
                 '& .MuiFormLabel-root.Mui-focused': {
                     color: '#1976d2',
                 },
                 '& .MuiInputBase-input': {
+                    fontFamily: 'var(--fontStyle)',
                     color: 'var(--textColor)',
                 },
                 '& .MuiOutlinedInput-root': {
