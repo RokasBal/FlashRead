@@ -14,41 +14,26 @@
 #include "../meshes/pencil.h"
 #include "../meshes/table.h"
 
+#define LOAD_MESH(name) do { \
+    Mesh mesh = MeshRegistry::Create(#name); \
+    mesh->Load(name##_vertexCount, name##_vertices, name##_materialCount, name##_materials); \
+    m_sceneBuilder.AddModel(#name); \
+} while(0)
 
 TestScene::TestScene()
     : m_player(m_physicsWorld, {0, 5, 0}) {
     SetCamera(m_player.GetCamera());
     sunPosition = glm::vec3{1000, 3500, 800} * 1000.f;
 
-    
-    Mesh mesh = MeshRegistry::Create("table");
-    mesh->Load(table_vertexCount, reinterpret_cast<const Vertex*>(table_vertices));
-    mesh = MeshRegistry::Create("candle");
-    mesh->Load(candle_vertexCount, reinterpret_cast<const Vertex*>(candle_vertices));
-    mesh = MeshRegistry::Create("chair");
-    mesh->Load(chair_vertexCount, reinterpret_cast<const Vertex*>(chair_vertices));
-    mesh = MeshRegistry::Create("closedBook");
-    mesh->Load(closedBook_vertexCount, reinterpret_cast<const Vertex*>(closedBook_vertices));
-    mesh = MeshRegistry::Create("emptyBookshelf");
-    mesh->Load(emptyBookshelf_vertexCount, reinterpret_cast<const Vertex*>(emptyBookshelf_vertices));
-    mesh = MeshRegistry::Create("fullBookshelf");
-    mesh->Load(fullBookshelf_vertexCount, reinterpret_cast<const Vertex*>(fullBookshelf_vertices));
-    mesh = MeshRegistry::Create("lectern");
-    mesh->Load(lectern_vertexCount, reinterpret_cast<const Vertex*>(lectern_vertices));
-    mesh = MeshRegistry::Create("openBook");
-    mesh->Load(openBook_vertexCount, reinterpret_cast<const Vertex*>(openBook_vertices));
-    mesh = MeshRegistry::Create("pencil");
-    mesh->Load(pencil_vertexCount, reinterpret_cast<const Vertex*>(pencil_vertices));
-
-    m_sceneBuilder.AddModel("candle");
-    m_sceneBuilder.AddModel("chair");
-    m_sceneBuilder.AddModel("closedBook");
-    m_sceneBuilder.AddModel("emptyBookshelf");
-    m_sceneBuilder.AddModel("fullBookshelf");
-    m_sceneBuilder.AddModel("lectern");
-    m_sceneBuilder.AddModel("openBook");
-    m_sceneBuilder.AddModel("pencil");
-    m_sceneBuilder.AddModel("table");
+    LOAD_MESH(candle);
+    LOAD_MESH(chair);
+    LOAD_MESH(closedBook);
+    LOAD_MESH(emptyBookshelf);
+    LOAD_MESH(fullBookshelf);
+    LOAD_MESH(lectern);
+    LOAD_MESH(openBook);
+    LOAD_MESH(pencil);
+    LOAD_MESH(table);
 
 // #ifndef SHADER_HOT_RELOAD
 //     m_sceneBuilder.Load(testscene_stateCount, testscene_states);

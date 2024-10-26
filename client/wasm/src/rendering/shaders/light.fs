@@ -12,6 +12,13 @@ layout(std140) uniform LightingInfo {
     vec2 viewportSize;
 };
 
+struct Material {
+    vec4 diffuse;
+};
+layout(std140) uniform MaterialInfo {
+    Material materials[1024];
+};
+
 in vec2 uv;
 
 vec3 getColor();
@@ -28,12 +35,13 @@ void main() {
 
 vec3 getColor() {
     vec3 position = texture(tPosition, uv).rgb;
-    vec3 color = texture(tColor, uv).rgb;
+    uint materialId = uint(floor(texture(tColor, uv).a + 0.5));
     vec3 normal = texture(tNormal, uv).rgb;
 
     if (length(normal) < 0.8) {
-        return color;
+        return texture(tColor, uv).rgb;
     }
+    vec3 color = materials[materialId].diffuse.rgb;
 
     float ambient = 0.08;
 

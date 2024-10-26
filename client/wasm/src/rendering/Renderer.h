@@ -67,4 +67,10 @@ private:
         float p3, p4;
     };
     UniformBuffer<LightingInfoUniform> m_lightingInfoUniform;
+
+    constexpr static inline uint32_t m_materialsPerUniformBuffer = 1024;
+    struct MaterialUniform {
+        Material materials[m_materialsPerUniformBuffer];
+    };
+    UniformBuffer<MaterialUniform> m_materialUniform;
 };

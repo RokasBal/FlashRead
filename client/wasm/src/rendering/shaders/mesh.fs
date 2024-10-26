@@ -12,6 +12,7 @@ layout(std140) uniform Camera {
 
 in vec3 u_fragPos;
 in vec3 u_normal;
+flat in uint u_materialId;
 
 float linearDepth(float depth) {
     float near = nearFarPlane.x;
@@ -22,7 +23,7 @@ float linearDepth(float depth) {
 
 void main() {
     gPosition = vec4(u_fragPos, linearDepth(gl_FragCoord.z));
-    gColor = vec4(0.9, 0.8, 0.7, 1.0);
+    gColor = vec4(0.9, 0.8, 0.7, float(u_materialId));
     gNormal = vec4(normalize(u_normal), 1.0);
 }
 )"

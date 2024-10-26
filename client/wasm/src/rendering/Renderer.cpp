@@ -148,6 +148,10 @@ void Renderer::SetupUniforms() {
     m_lightingProgram->AddUniformBufferBinding("LightingInfo", m_lightingInfoUniform.GetBindingIndex());
     m_lightingInfoUniform.Bind();
 
+    m_materialUniform.SetBindingIndex(GetNextUniformBindingIndex());
+    m_lightingProgram->AddUniformBufferBinding("MaterialInfo", m_materialUniform.GetBindingIndex());
+    m_materialUniform.Bind();
+
     m_shadersLoading = false;
     printf("Shaders loaded.\n");
 }
@@ -168,6 +172,14 @@ void Renderer::Render(const std::shared_ptr<Scene> &scene) {
         .cameraPos = camera->position,
         .viewportSize = glm::vec2(m_viewportWidth, m_viewportHeight)
     });
+    static std::size_t lastMaterialCount = 0;
+    std::size_t materialCount = MeshRegistry::GetMaterials().size();
+    if (lastMaterialCount != materialCount) { // could be made more efficient but meh
+        MaterialUniform materialData;
+        std::copy(MeshRegistry::GetMaterials().begin(), MeshRegistry::GetMaterials().end(), materialData.materials);
+        m_materialUniform.Update(materialData);
+        lastMaterialCount = materialCount;
+    }
 
     // render entities
     glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer.GetFBO());
