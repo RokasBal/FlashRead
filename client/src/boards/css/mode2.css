@@ -46,8 +46,15 @@
 .mode2_lowerUpperDiv {
     display: flex;
     width: 67.5%;
-    justify-content: right;
+    justify-content: space-between;
     align-items: right;
+}
+.mode2_lowerUppedLeftDiv {
+    display: flex;
+    margin-left: 1.5%;
+    /* background-color: green; */
+    justify-content: center;
+    align-items: top;
 }
 .mode2_lowerLowerDiv {
     display: flex;
@@ -74,6 +81,7 @@
     z-index: 8;
 }
 .gameContainer{
+    position: relative;
     display: flex;
     width: 65%;
     justify-content: center;
@@ -81,10 +89,44 @@
     
 }
 
-.gamePage {
+.gameBorder {
+    position: absolute;
     display: flex;
-    background-color: green;
-    border : 3px solid var(--borderColor);
+    align-items: center;
+    justify-content: center;
+    align-content: center;
     height: 100%;
-    aspect-ratio: 2/1;
+    z-index: 20;
+    border : 3px solid var(--borderColor);
+    width: 100%;
+    pointer-events: none;
+}
+
+.gamePage {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    /* background-color: green; */
+    height: 100%;
+    width: 100%;
+}
+
+.gameEnded {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    align-content: center;
+    background-color: var(--backgroundColor);
+    height: 100%;
+    width: 100%;
+    visibility: hidden;
+}
+
+.heart {
+    height: 5vh;
+    image-rendering: pixelated;
 }

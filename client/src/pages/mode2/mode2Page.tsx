@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../boards/css/main.board.css';
 import CustomButton from '../../components/buttons/customButton';
@@ -7,6 +7,7 @@ import Mode2Task from './mode2Task';
 import "../../boards/css/mode2.css";
 import * as apiTask from './api';
 import ChoiceBox from '../../components/choiceBox';
+import fullHeart from '../../images/fullHeart.png';
 
 
 const Mode2Page: React.FC = () => {
@@ -16,8 +17,42 @@ const Mode2Page: React.FC = () => {
     const [mode2Theme, setMode2Theme] = React.useState<string>("Any");
     const [mode2Difficulty, setMode2Difficulty] = React.useState<string>("Any");
     const [gameStarted, setGameStarted] = React.useState<boolean>(false);
+    const [gameEnded, setGameEnded] = React.useState<boolean>(false);
     const [textArray, setTextArray] = React.useState<string[]>([]);
     const [fillerArray, setFillerArray] = React.useState<string[]>([]);
+    const [health, setHealth] = React.useState<number>(5);
+
+    useEffect(() => {
+        if (health <= 0) {
+            setGameStarted(false);
+            setGameEnded(true);
+            const button = document.getElementById("MainBoard_restartButton");
+            if (button) {
+                button.innerText = "Start";
+            }
+        }
+    }, [health]);
+    
+    useEffect(() => {
+        if (gameEnded) {
+            const gameEndedDiv = document.getElementById("gameEndedDiv");
+            if (gameEndedDiv) {
+                gameEndedDiv.style.visibility = "visible";
+            }
+        } else {
+            const gameEndedDiv = document.getElementById("gameEndedDiv");
+            if (gameEndedDiv) {
+                gameEndedDiv.style.visibility = "hidden";
+            }
+        }
+    }, [gameEnded]);
+
+    const hearts = Array.from({length: health}, (_, i) => (
+        <img src={fullHeart}
+        key={i} 
+        className="heart"
+        />
+    ));
 
     return (
         <div className='Mode2_content'>
@@ -33,21 +68,40 @@ const Mode2Page: React.FC = () => {
                     <p className="pointsText" id="combo">{combo}</p>
                 </div>
                 <div className="gameContainer">
+                    <div className="gameBorder"></div>
                     <div className="gamePage" id="mainGameMode2">
-                        <Mode2Task wordArray = {textArray} fillerArray = {fillerArray} gameStarted={gameStarted} setPoints={setPoints} setCombo={setCombo} difficulty={mode2Difficulty} />
+                        <Mode2Task wordArray = {textArray} fillerArray = {fillerArray} gameStarted={gameStarted} setPoints={setPoints} setCombo={setCombo} setHealth={setHealth} difficulty={mode2Difficulty} />
+                    </div>
+                    <div className="gameEnded" id="gameEndedDiv">
+                        <p className="pointsText">Game Over</p>
                     </div>
                 </div>
             </div>
             <div className="mode2_lowerDiv" id="buttonDiv">
                 <div className="mode2_lowerUpperDiv">
+                    <div className="mode2_lowerUppedLeftDiv">
+                        {hearts}
+                    </div>
                     <CustomButton label="Start" className="wideButton" id="MainBoard_restartButton" onClick={() => {
-                        apiTask.requestTask2Data({taskId: 3, theme: mode2Theme }).then((data => {
-                            setTextArray(data.wordArray);
-                            setGameStarted(true); 
-                        }))
-                        apiTask.requestTask2Data({taskId: 3, theme: "Fillers" }).then((data => {
-                            setFillerArray(data.wordArray);
-                        }))
+                        const button = document.getElementById("MainBoard_restartButton");
+                        if (gameStarted === false) {
+                            apiTask.requestTask2Data({taskId: 3, theme: "Fillers" }).then((data => {
+                                setFillerArray(data.wordArray);
+                            }))
+                            apiTask.requestTask2Data({taskId: 3, theme: mode2Theme }).then((data => {
+                                setTextArray(data.wordArray);
+                                setGameStarted(true); 
+                                setGameEnded(false);
+                            }))
+                            if (button) {
+                                button.innerText = "Stop";
+                            }
+                        } else {
+                            if (button) {
+                                button.innerText = "Start";
+                            }
+                            setGameStarted(false);
+                        }
                     }}/>
                 </div>
                 <div className="mode2_lowerLowerDiv">
