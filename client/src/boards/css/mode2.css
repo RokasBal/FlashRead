@@ -52,7 +52,6 @@
 .mode2_lowerUppedLeftDiv {
     display: flex;
     margin-left: 1.5%;
-    /* background-color: green; */
     justify-content: center;
     align-items: top;
 }
@@ -92,9 +91,8 @@
 .gameBorder {
     position: absolute;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    align-content: center;
+    align-items: end;
+    justify-self: start;
     height: 100%;
     z-index: 20;
     border : 3px solid var(--borderColor);
@@ -108,7 +106,6 @@
     align-items: center;
     justify-content: center;
     align-content: center;
-    /* background-color: green; */
     height: 100%;
     width: 100%;
 }
@@ -129,4 +126,51 @@
 .heart {
     height: 5vh;
     image-rendering: pixelated;
+}
+
+.endContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.endedUpper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex: 3;
+}
+.endedMiddle {
+    gap: 1vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    width: 100%;
+    padding-left: 2vw;
+    flex: 4;
+}
+.endedLower {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.overText {
+    font-size: 5vw;
+    font-weight: bold;
+    color: var(--textColor);
+    font-family: var(--fontStyle);
+}
+.stats {
+    display: flex;
+    gap: 0.5vw;
 }

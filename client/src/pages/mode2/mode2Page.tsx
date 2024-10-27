@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../boards/css/main.board.css';
 import CustomButton from '../../components/buttons/customButton';
@@ -8,6 +8,7 @@ import "../../boards/css/mode2.css";
 import * as apiTask from './api';
 import ChoiceBox from '../../components/choiceBox';
 import fullHeart from '../../images/fullHeart.png';
+import TimerMode2, { TimerHandle } from '../../components/timerMode2';
 
 
 const Mode2Page: React.FC = () => {
@@ -22,10 +23,34 @@ const Mode2Page: React.FC = () => {
     const [fillerArray, setFillerArray] = React.useState<string[]>([]);
     const [health, setHealth] = React.useState<number>(5);
 
+    const [maxCombo, setMaxCombo] = React.useState<number>(0);
+    const [correctWords, setCorrectWords] = React.useState<number>(0);
+    const [maxPoints, setMaxPoints] = React.useState<number>(0);
+    const [timeAlive, setTimeAlive] = React.useState('00:00');
+
+    const timerRef = useRef<TimerHandle>(null);
+
+    const handleStop = () => {
+        timerRef.current?.stop();
+    };
+    const handleTimeUpdate = (time: string) => {
+        setTimeAlive(time);
+    };
+
+    useEffect(() => {
+        if (maxCombo < combo) {
+            setMaxCombo(combo);
+        }
+        if (points > maxPoints) {
+            setMaxPoints(points);
+        }   
+    }, [combo, points]);
+
     useEffect(() => {
         if (health <= 0) {
             setGameStarted(false);
             setGameEnded(true);
+            handleStop();
             const button = document.getElementById("MainBoard_restartButton");
             if (button) {
                 button.innerText = "Start";
@@ -68,12 +93,39 @@ const Mode2Page: React.FC = () => {
                     <p className="pointsText" id="combo">{combo}</p>
                 </div>
                 <div className="gameContainer">
-                    <div className="gameBorder"></div>
+                    <div className="gameBorder">
+                        {gameStarted ? <TimerMode2 ref={timerRef} onTimeUpdate={handleTimeUpdate} /> : null}
+                    </div>
                     <div className="gamePage" id="mainGameMode2">
-                        <Mode2Task wordArray = {textArray} fillerArray = {fillerArray} gameStarted={gameStarted} setPoints={setPoints} setCombo={setCombo} setHealth={setHealth} difficulty={mode2Difficulty} />
+                        <Mode2Task wordArray = {textArray} fillerArray = {fillerArray} gameStarted={gameStarted} setPoints={setPoints} setCombo={setCombo} setHealth={setHealth} setCorrectWords={setCorrectWords} difficulty={mode2Difficulty} />
                     </div>
                     <div className="gameEnded" id="gameEndedDiv">
-                        <p className="pointsText">Game Over</p>
+                        <div className="endContainer">
+                            <div className="endedUpper">
+                                <p className="overText">Game Over</p>
+                            </div>
+                            <div className="endedMiddle">
+                                <div className="stats">
+                                    <p className="pointsText">Max Combo: </p>
+                                    <p className="pointsText">{maxCombo}</p>
+                                </div>
+                                <div className="stats">
+                                    <p className="pointsText">Correct Words Collected: </p>
+                                    <p className="pointsText">{correctWords}</p>
+                                </div>
+                                <div className="stats">
+                                    <p className="pointsText">Max Points: </p>
+                                    <p className="pointsText">{maxPoints}</p>
+                                </div>
+                                <div className="stats">
+                                    <p className="pointsText">Time Alive: </p>
+                                    <p className="pointsText">{timeAlive}</p>
+                                </div>
+                            </div>
+                            <div className="endedLower">
+
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,7 +146,8 @@ const Mode2Page: React.FC = () => {
                                 setGameEnded(false);
                             }))
                             if (button) {
-                                button.innerText = "Stop";
+                                button.innerText = "Pause";
+                                handleStop();
                             }
                         } else {
                             if (button) {
