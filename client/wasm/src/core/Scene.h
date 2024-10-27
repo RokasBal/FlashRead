@@ -25,7 +25,8 @@ public:
     const PhysicsWorld& GetPhysicsWorld() const { return m_physicsWorld; }
 
     entt::registry registry;
-    glm::vec3 sunPosition{0, 100, 0};
+    glm::vec3 sunlightDir{glm::normalize(glm::vec3{1, 1, 1})};
+    
 protected:
     std::shared_ptr<Camera> m_camera;
     PhysicsWorld m_physicsWorld;

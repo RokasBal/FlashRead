@@ -13,6 +13,7 @@
 #include "../meshes/openBook.h"
 #include "../meshes/pencil.h"
 #include "../meshes/table.h"
+#include "../meshes/globe.h"
 
 #define LOAD_MESH(name) do { \
     Mesh mesh = MeshRegistry::Create(#name); \
@@ -23,7 +24,6 @@
 TestScene::TestScene()
     : m_player(m_physicsWorld, {0, 5, 0}) {
     SetCamera(m_player.GetCamera());
-    sunPosition = glm::vec3{1000, 3500, 800} * 1000.f;
 
     LOAD_MESH(candle);
     LOAD_MESH(chair);
@@ -34,6 +34,7 @@ TestScene::TestScene()
     LOAD_MESH(openBook);
     LOAD_MESH(pencil);
     LOAD_MESH(table);
+    LOAD_MESH(globe);
 
 // #ifndef SHADER_HOT_RELOAD
 //     m_sceneBuilder.Load(testscene_stateCount, testscene_states);

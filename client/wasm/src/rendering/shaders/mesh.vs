@@ -5,13 +5,13 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in uint materialId;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraUniform {
     mat4 projxview;
     vec2 nearFarPlane;
 };
 
-layout(std140) uniform ModelMatrices {
-    mat4 model[256];
+layout(std140) uniform ModelMatricesUniform {
+    mat4 model[<<MODELS_PER_UBO>>];
 };
 
 out vec3 u_fragPos;
