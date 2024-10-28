@@ -190,7 +190,7 @@
 .popupTitle {
     font-family: var(--fontStyle);
     font-weight: bold;
-    font-size: 1.5vh;
+    font-size: 1.7vh;
     color: var(--textColor);
 }
 
@@ -247,7 +247,7 @@ input[type="file"] {
     border: 0.4vh solid var(--borderColor);
     background-color: transparent;
     color: var(--textColor);
-    font-size: 3vh;
+    font-size: 2.5vh;
     font-family: var(--fontStyle);   
 }
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import imageCompression from 'browser-image-compression';
 import axios from '../../components/axiosWrapper';
 import '../../boards/css/profile.css';
 import '../../boards/css/buttons.css';
@@ -18,7 +19,7 @@ const ProfilePage: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    const MAX_FILE_SIZE = 3 * 1024 * 1024;
+    const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
     const handleEditClick = () => {
         setIsPopupVisible(true);
@@ -28,7 +29,7 @@ const ProfilePage: React.FC = () => {
         setDetailContent(content);
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             if (!file.type.startsWith('image/')) {
@@ -39,8 +40,20 @@ const ProfilePage: React.FC = () => {
                 alert('File size exceeds the 2MB limit. Please select a smaller file.');
                 return;
             }
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+            try {
+                const options = {
+                    maxSizeMB: 0.2, 
+                    maxWidthOrHeight: 256,
+                    useWebWorker: true,
+                };
+                const compressedFile = await imageCompression(file, options);
+                setSelectedFile(compressedFile);
+                setPreviewUrl(URL.createObjectURL(compressedFile));
+                console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+                console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+            } catch (error) {
+                console.error('Error compressing the image:', error);
+            }
         }
     };
 
