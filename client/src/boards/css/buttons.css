@@ -33,7 +33,8 @@
     border: 4px solid var(--borderColor);
     background-color: transparent;
     color: var(--textColor);
-    font-size: 26px;
+    font-size: 2.5vh;
+    text-wrap: nowrap;
     font-family: var(--fontStyle);   
 }
 

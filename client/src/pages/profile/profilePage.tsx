@@ -17,6 +17,7 @@ const ProfilePage: React.FC = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
+    const [gameHistory, setGameHistory] = useState<any[]>([]);
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
@@ -29,6 +30,20 @@ const ProfilePage: React.FC = () => {
     const handleButtonClick = (content: JSX.Element | string) => {
         setDetailContent(content);
     };
+
+    const fetchGameHistory = async () => {
+        try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            const response = await axios.get('/api/Users/GetUserHistory', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setGameHistory(response.data);
+            // console.log('Game history:', response.data);
+        } catch (err) {
+            console.error('Error fetching game history:', err);
+        }
+    }
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -76,7 +91,7 @@ const ProfilePage: React.FC = () => {
             });
 
             if (response.status === 200) {
-                alert('Profile picture updated successfully.');
+                // alert('Profile picture updated successfully.');
                 setProfilePictureUrl(URL.createObjectURL(selectedFile));
             } else {
                 alert('Failed to update profile picture.');
@@ -122,6 +137,7 @@ const ProfilePage: React.FC = () => {
 
         fetchUsername();
         fetchProfilePicture();
+        fetchGameHistory();
     }, []);
 
     const testData = [
@@ -155,8 +171,10 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div className="gameDetailsContainer">
                         <div className="detailHeader">
-                            <button className="textButton" onClick={() => handleButtonClick(<HistoryTable data={testData} />)}>History</button>
-                            <button className="textButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}>Leaderboards</button>
+                            <CustomButton label="Game history" className="wideButton" id="gameHistoryButton" onClick={() => handleButtonClick(<HistoryTable data={gameHistory} />)}/>
+                            <CustomButton label="Leaderboards" className="wideButton" id="leaderboardsButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}/>
+                            {/* <button className="textButton" onClick={() => handleButtonClick(<HistoryTable data={testData} />)}>History</button> */}
+                            {/* <button className="textButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}>Leaderboards</button> */}
                         </div>
                         <div className="detailContent">
                             {detailContent}

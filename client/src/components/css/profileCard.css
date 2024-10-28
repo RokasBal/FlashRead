@@ -6,7 +6,7 @@
     height: 100%;
     width: 100%;
     gap: 3em;
-    background-color: aquamarine;
+    /* background-color: aquamarine; */
 }
 
 .profileImage {
@@ -15,7 +15,7 @@
     border-radius: 50%;
     border: 1vh solid var(--borderColor);
     object-fit: cover;
-    background-color: crimson;
+    background-color: var(--borderColor);
     position: relative;
     z-index: 1;
 }

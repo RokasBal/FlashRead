@@ -95,11 +95,16 @@ namespace server.Controller {
 
             return Ok("Profile picture updated successfully.");
         }
+        [Authorize]
         [HttpGet("Users/GetUserHistory")]
-        public async Task<IActionResult> GetUserHistory([FromQuery] string email) {
-            var user = await _userHandler.GetUserByEmailAsync(email);
+        public async Task<IActionResult> GetUserHistory() {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail)) {
+                return Unauthorized("Invalid token.");
+            }
+            var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                var history = await _userHandler.GetTaskHistoryByEmail(email);
+                var history = await _userHandler.GetTaskHistoryByEmail(userEmail);
                 return Ok(history);
             }
             return NotFound("User not found.");
