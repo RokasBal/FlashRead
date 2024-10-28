@@ -16,6 +16,7 @@ const ProfilePage: React.FC = () => {
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
@@ -49,8 +50,8 @@ const ProfilePage: React.FC = () => {
                 const compressedFile = await imageCompression(file, options);
                 setSelectedFile(compressedFile);
                 setPreviewUrl(URL.createObjectURL(compressedFile));
-                console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
-                console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+                // console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+                // console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
             } catch (error) {
                 console.error('Error compressing the image:', error);
             }
@@ -60,9 +61,46 @@ const ProfilePage: React.FC = () => {
     const handleUpload = async () => {
         if (!selectedFile) return;
 
-        // TODO: HANDLE FILE UPLOADING
+        try {
+            const formData = new FormData();
+            formData.append('profilePicture', selectedFile);
+
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+            const response = await axios.post('/api/Settings/UpdateProfilePicture', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200) {
+                alert('Profile picture updated successfully.');
+                setProfilePictureUrl(URL.createObjectURL(selectedFile));
+            } else {
+                alert('Failed to update profile picture.');
+            }
+        } catch (error) {
+            console.error('Error uploading the profile picture:', error);
+            alert('Error uploading the profile picture.');
+        }
     };
 
+    const fetchProfilePicture = async () => {
+        try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            const response = await axios.get('/api/Settings/GetProfilePicture', {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob'
+            });
+            const imageUrl = URL.createObjectURL(response.data);
+            setProfilePictureUrl(imageUrl);
+        } catch (err) {
+            console.error('Error fetching profile picture:', err);
+        }
+    };
 
     const fetchUsername = async () => {
         try {
@@ -83,6 +121,7 @@ const ProfilePage: React.FC = () => {
         }
 
         fetchUsername();
+        fetchProfilePicture();
     }, []);
 
     const testData = [
@@ -107,7 +146,7 @@ const ProfilePage: React.FC = () => {
                 <div className="content">
                     <div className="profileDetailsContainer">
                         <div className="profileDetails">
-                            <ProfileCard imageSrc="https://www.shutterstock.com/shutterstock/photos/761854048/display_1500/stock-photo-oragne-fruit-on-wooden-background-orange-761854048.jpg" name={username} onEditClick={handleEditClick}/>
+                            <ProfileCard imageSrc={profilePictureUrl} name={username} onEditClick={handleEditClick}/>
                         </div>    
                         <div className="restOfProfile">
                             <span>friends page?</span>

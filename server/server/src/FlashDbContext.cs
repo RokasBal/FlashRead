@@ -44,6 +44,7 @@ namespace server.src {
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Email).HasColumnName("email");
                 entity.Property(e => e.Password).HasColumnName("password");
+                entity.Property(e => e.ProfilePic).HasColumnName("profile_pic");
                 entity.Property(e => e.HistoryIds).HasColumnName("history_ids");
                 entity.Property(e => e.ContributionsIds).HasColumnName("contributions_ids");
                 entity.Property(e => e.SettingsId).HasColumnName("settings_id");
