@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using server.src;
 using server.UserNamespace;
 using System.Security.Claims;
+using server.src.Task1;
 namespace server.Controller {
     [Route("api")]
 
@@ -21,15 +22,21 @@ namespace server.Controller {
         [HttpPost("GetTaskAnswer")]
         public async Task<ITaskAnswerResponse> PostGetTaskAnswer(TaskAnswerRequest req) {
             int taskId = ITask.GetTaskIdFromSession(req.Session);
-            int score =  0; //TO DOOOOOOOOO NOW FAST
+            int score =  0;
+
 
             ITask task = ITask.GetTaskFromTaskId(taskId, _context);
+            var checkAns = task.CheckAnswer(req);
+            score = checkAns switch {
+                Task1.TaskAnswerResponse task1 => task1.Statistics.Score,
+                _ => throw new Exception("Task not found")
+            };
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail) == false)
             {
                 await _userHandler.SaveTaskResult(userEmail, req.Session, taskId, score, req.SelectedVariants);
             }
-            return task.CheckAnswer(req);
+            return checkAns;
         }
     }
 }
