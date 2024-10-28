@@ -70,6 +70,7 @@ namespace server.src {
                 entity.Property(e => e.SessionId).HasColumnName("session_id");
                 entity.Property(e => e.TaskId).HasColumnName("task_id");
                 entity.Property(e => e.Answers).HasColumnName("answers");
+                entity.Property(e => e.Score).HasColumnName("score");
                 entity.Property(e => e.TimePlayed).HasColumnName("time_played");
             });
             modelBuilder.Entity<DbTask1Contribution>(entity => {

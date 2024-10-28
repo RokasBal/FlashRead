@@ -21,11 +21,13 @@ namespace server.Controller {
         [HttpPost("GetTaskAnswer")]
         public async Task<ITaskAnswerResponse> PostGetTaskAnswer(TaskAnswerRequest req) {
             int taskId = ITask.GetTaskIdFromSession(req.Session);
+            int score =  0; //TO DOOOOOOOOO NOW FAST
+
             ITask task = ITask.GetTaskFromTaskId(taskId, _context);
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail) == false)
             {
-                await _userHandler.SaveTaskResult(userEmail, req.Session, taskId, req.SelectedVariants);
+                await _userHandler.SaveTaskResult(userEmail, req.Session, taskId, score, req.SelectedVariants);
             }
             return task.CheckAnswer(req);
         }

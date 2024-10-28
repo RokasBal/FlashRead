@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../css/tables.css';
+import ChoiceBox from '../choiceBox';
 
 interface TableRow {
     gamemode: string;
@@ -46,7 +47,7 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
-                <span>TODO - add filter dropdowns</span>
+                <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={choice => console.log(choice)} label="Mode"/>
             </div>
             <div className="tableContent">
                 <table className="customTable">

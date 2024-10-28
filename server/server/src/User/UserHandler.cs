@@ -151,8 +151,8 @@ namespace server.UserNamespace {
             }
             return userSettings.Theme;
         }
-        public async Task SaveTaskResult(string email, uint sessionId, int taskId, int[]? selectedVariants = null) {
-            await historyManager.SaveTaskResult(email, sessionId, taskId, selectedVariants);
+        public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
+            await historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
         }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
