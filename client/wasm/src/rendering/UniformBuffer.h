@@ -6,6 +6,7 @@ template <typename T = void>
 class UniformBuffer {
 public:
     UniformBuffer() {
+        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &m_offsetAlignment);
         glGenBuffers(1, &m_ubo);
         glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
         if constexpr (!std::is_void_v<T>) {
@@ -55,6 +56,8 @@ public:
     void Resize(uint32_t size) requires (std::is_void_v<T>) {
         ResizeInternal(size);
     }
+
+    int GetOffsetAlignment() const { return m_offsetAlignment; }
 private:
     void ResizeInternal(uint32_t size) {
         glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
@@ -62,6 +65,7 @@ private:
         m_size = size;
     }
 
+    int m_offsetAlignment = 0;
     GLuint m_ubo = 0;
     GLuint m_bindIndex = 0;
     uint32_t m_size = 0;

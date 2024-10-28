@@ -303,10 +303,14 @@ void Renderer::Render(const std::shared_ptr<Scene> &scene) {
     uint32_t currentUboOffset = 0;
     uint32_t currentBatchSize = 0;
     for (auto& [mesh, models] : meshMatrices) {
-        batchedMatrices.insert(batchedMatrices.end(), models.begin(), models.end());
         uint32_t matricesLeft = models.size();
         while (matricesLeft > 0) {
             const uint32_t matricesInThisBatch = std::min(matricesLeft, m_matricesPerUniformBuffer - currentBatchSize);
+            auto matricesOffset = models.begin() + (models.size() - matricesLeft);
+            if (currentUboOffset >= batchedMatrices.size()) {
+                batchedMatrices.resize(currentUboOffset + m_matricesPerUniformBuffer);
+            }
+            batchedMatrices.insert(batchedMatrices.begin() + currentUboOffset, matricesOffset, matricesOffset + matricesInThisBatch);
             matricesLeft -= matricesInThisBatch;
             currentBatchSize = (currentBatchSize + matricesInThisBatch) % m_matricesPerUniformBuffer;
 
@@ -316,9 +320,15 @@ void Renderer::Render(const std::shared_ptr<Scene> &scene) {
             batchData.instanceCount = matricesInThisBatch;
             batches.push_back(batchData);
 
-            currentUboOffset += matricesInThisBatch; 
+            currentUboOffset += matricesInThisBatch;
+            // fix for alignment
+            int padding = (currentUboOffset * sizeof(glm::mat4)) % m_modelUniform.GetOffsetAlignment();
+            padding = m_modelUniform.GetOffsetAlignment() - padding;
+            currentUboOffset += padding / sizeof(glm::mat4);
+            currentBatchSize += padding / sizeof(glm::mat4);
         }
     }
+
     // resize ubo if needed
     const uint32_t requiredSize = matrixCount * sizeof(glm::mat4) + sizeof(glm::mat4) * m_matricesPerUniformBuffer;
     if (m_modelUniform.GetSize() < requiredSize) {
