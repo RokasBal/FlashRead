@@ -69,8 +69,7 @@ void Player::UpdateInput(float dt) {
 
     float speed = moveSpeed;
     glm::vec3 velocity{0};
-    
-    if (Input::IsHeld(SDL_SCANCODE_LCTRL)) speed *= 3.f;
+    if (Input::IsHeld(SDL_SCANCODE_LSHIFT)) speed *= 3.f;
     
     if (Input::IsHeld(SDL_SCANCODE_W)) velocity += front;
     if (Input::IsHeld(SDL_SCANCODE_S)) velocity -= front;
@@ -81,7 +80,7 @@ void Player::UpdateInput(float dt) {
         velocity = glm::normalize(velocity) * speed * dt;
     }
 
-    if (fly && Input::IsHeld(SDL_SCANCODE_LSHIFT)) velocity -= m_camera->GetUp();
+    if (fly && Input::IsHeld(SDL_SCANCODE_C)) velocity -= m_camera->GetUp();
     if ((fly || (userData->onGround && TimePoint() - m_lastJump > 250ms)) && Input::IsHeld(SDL_SCANCODE_SPACE)) {
         velocity += m_camera->GetUp() * moveSpeed * 10.f;
         m_lastJump.reset();
