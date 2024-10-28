@@ -59,7 +59,7 @@ const ProfilePage: React.FC = () => {
     return (
         <div className="profilePage">
             <div className="pageContainer">
-                <div className="header">
+                <div className="profileHeader">
                     <h1>Profile</h1>
                 </div>
 

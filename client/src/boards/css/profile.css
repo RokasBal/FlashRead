@@ -16,6 +16,17 @@
     height: 100%;
     flex-direction: column;
 }
+.profileHeader {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    width: 100%;
+    flex: 2;
+    color: var(--textColor);
+    font-family: var(--fontStyle);
+    font-weight: bold;
+    font-size: 3.5em;
+  }
 
 .header {
     display: flex;
