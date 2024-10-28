@@ -26,6 +26,7 @@ namespace server.src.Task1 {
                 public required int Correct { get; set; }
                 public required int Total { get; set; }
                 public required int WPM { get; set; }
+                public required int Score { get; set; }
             };
             public required TaskQuestion[] Answers { get; set; }
             public required Task1AnswerStatistics Statistics { get; set; }
@@ -71,13 +72,15 @@ namespace server.src.Task1 {
                     correct++;
                 }
             }
-
+            int score = WPM * correct / 10;
+            
             return new TaskAnswerResponse {
                 Answers = questions,
                 Statistics = new TaskAnswerResponse.Task1AnswerStatistics {
                     Correct = correct,
                     Total = total,
-                    WPM = WPM
+                    WPM = WPM,
+                    Score = score
                 }
             };
         }
