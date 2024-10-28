@@ -12,16 +12,44 @@ import { useAuth } from '../../context/AuthContext';
 const ProfilePage: React.FC = () => {
     const [detailContent, setDetailContent] = useState<JSX.Element | string>('Default Content');
     const [username, setUsername] = useState<string>('Error');
+    const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
+    const MAX_FILE_SIZE = 3 * 1024 * 1024;
+
     const handleEditClick = () => {
-        console.log('Edit button clicked');
+        setIsPopupVisible(true);
     };
 
     const handleButtonClick = (content: JSX.Element | string) => {
         setDetailContent(content);
     };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                alert('File size exceeds the 2MB limit. Please select a smaller file.');
+                return;
+            }
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return;
+
+        // TODO: HANDLE FILE UPLOADING
+    };
+
 
     const fetchUsername = async () => {
         try {
@@ -88,6 +116,34 @@ const ProfilePage: React.FC = () => {
                     <CustomButton label="Return" className="wideButton" id="settingsReturnButton" onClick={() => navigate("/home")}/>
                 </div>
             </div>
+
+            {isPopupVisible && (
+                <div className="popupOverlay">
+                    <div className="popupContent">
+                        <div className="popupHeader">
+                            <h1 className="popupTitle">Change Profile Picture</h1>
+                        </div>
+                        <div className="popupUpload">
+                            {previewUrl && (
+                                <div className="imagePreview">
+                                    <img src={previewUrl} alt="Selected profile" className="styledImage" />
+                                </div>
+                            )}
+                            <label className="customFileUpload">
+                                <input type="file" accept="image/*" onChange={handleFileChange} />
+                                Browse
+                            </label>
+                        </div>
+                        <div className="popupFooter">
+                            {previewUrl && (
+                                <CustomButton label="Confirm" className="wideButton" id="popupConfirmButton" onClick={handleUpload} />
+                            )}
+                            <CustomButton label="Close" className="wideButton" id="popupCloseButton" onClick={() => setIsPopupVisible(false)} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
