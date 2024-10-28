@@ -182,7 +182,7 @@
     align-items: center;
     flex: 1;  
     width: 100%;
-    gap: 5%;
+    gap: 2vh;
     padding: 3vh;
     /* background-color: blueviolet; */
 }
@@ -200,12 +200,13 @@ input[type="file"] {
   
 .customFileUpload {
     color: var(--textColor);
-    border: 3px solid var(--borderColor);
+    border: 0.3vh solid var(--borderColor);
     border-radius: 10px;
     display: flex;
-    padding: 6px 12px;
+    padding: 1vh 2vh;
     cursor: pointer;
     font-family: var(--fontStyle);
+    font-size: 1.75vh;
 }
 
 .imagePreview {
@@ -214,7 +215,7 @@ input[type="file"] {
     justify-content: center;
     margin-top: 10px;
     max-width: 100%;
-    max-height: 200px;
+    max-height: 12vh;
     /* border: 1px solid #ddd; */
     border-radius: 5px;
     margin: 2vh;
@@ -229,4 +230,43 @@ input[type="file"] {
     background-color: var(--borderColor);
     position: relative;
     z-index: 1;
+}
+
+.popupButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 30vw;
+    flex-grow: 1;
+    box-sizing: border-box;
+    outline: none;
+    padding: 1vh 2vh; 
+    border-radius: 12px;
+    border: 0.4vh solid var(--borderColor);
+    background-color: transparent;
+    color: var(--textColor);
+    font-size: 3vh;
+    font-family: var(--fontStyle);   
+}
+
+@media (max-width: 800px) {
+    .popupContent {
+        /* overflow: auto; */
+    }
+
+    .popupFooter {
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 0.5vh;
+    }
+
+    .popupButton {
+        font-size: 1.25vh;
+        max-width: 100%; /* Ensure buttons take full width */
+    }
+
+    .customFileUpload {
+        font-size: 1.25vh;
+    }
 }

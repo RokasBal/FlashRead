@@ -136,9 +136,9 @@ const ProfilePage: React.FC = () => {
                         </div>
                         <div className="popupFooter">
                             {previewUrl && (
-                                <CustomButton label="Confirm" className="wideButton" id="popupConfirmButton" onClick={handleUpload} />
+                                <CustomButton label="Confirm" className="popupButton" id="popupConfirmButton" onClick={handleUpload} />
                             )}
-                            <CustomButton label="Close" className="wideButton" id="popupCloseButton" onClick={() => setIsPopupVisible(false)} />
+                            <CustomButton label="Close" className="popupButton" id="popupCloseButton" onClick={() => setIsPopupVisible(false)} />
                         </div>
                     </div>
                 </div>
