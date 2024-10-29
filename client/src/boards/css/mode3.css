@@ -24,6 +24,7 @@
 .containerLeft {
     display: flex;
     flex: 1;
+    flex-direction: column;
 }
 .containerMiddle {
     display: flex;
@@ -45,6 +46,8 @@
     align-items: center;
 }
 .gameContainer {
+    /* border: 0.2vw solid var(--borderColor);
+    border-radius: 0.5vw; */
     display: flex;
     position: relative;
     left: 0;

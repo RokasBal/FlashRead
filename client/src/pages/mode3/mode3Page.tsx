@@ -4,6 +4,7 @@ import { MainModule } from '../../../wasm/interface/wasmInterface';
 import { loadWasmModule } from './wasmLoader';
 import CustomButton from '../../components/buttons/customButton';
 import "../../boards/css/mode3.css"
+import "../../boards/css/keyboardControls.css"
 
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
@@ -70,7 +71,49 @@ const Mode3Page: React.FC = () => {
         <div className='Mode3_content'>
             <div className="pageContainer">
                 <div className='containerLeft'>
-
+                    <div className="WASD">
+                        <div className="controls">
+                            <div className="topRow">
+                                <div className="key">
+                                    <p>W</p>
+                                </div>
+                            </div>
+                            <div className="bottomRow">
+                                <div className="key">
+                                    <p>A</p>
+                                </div>
+                                <div className="key">
+                                    <p>S</p>
+                                </div>
+                                <div className="key">
+                                    <p>D</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Move</p>
+                        </div>
+                    </div>
+                    <div className="sprint">
+                        <div className="controls">
+                            <div className="longKey">
+                                <p>Shift</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Sprint</p>
+                        </div>
+                    </div>
+                    <div className="fullScreen">
+                        <div className="controls">
+                            <div className="key">
+                                <p>*</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Full Screen</p>
+                        </div>
+                    </div>
                 </div>
                 <div className='containerMiddle'>
                     <div className='middleTop'>
