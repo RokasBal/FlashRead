@@ -139,7 +139,6 @@ const Canvas: React.FC<{
                 // context.fillStyle = 'rgba(255, 255, 255, 0)';
                 context.fillStyle = getCSSVariable('--secondaryColor');
                 context.fillRect(0, 0, canvasSize.x, canvasSize.y);
-                // context.clearRect(0, 0, canvasSize.x, canvasSize.y);
 
                 const lastTime = lastTimeRef?.current ?? 0;
                 const currentTime = performance.now();
