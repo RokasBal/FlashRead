@@ -158,6 +158,43 @@ namespace server.Controller {
             }
             await _userHandler.DeleteUserByEmailAsync(userEmail);
             return Ok("User deleted.");
-        } 
+        }
+        [HttpPost("Users/TotalScoreLeaderboard")]
+        public async Task<IActionResult> GetTotalScoreLeaderBoard([FromQuery] int page) {
+            var users = await _userHandler.GetAllUsersAsync();
+            
+            var updatedUsers = new List<UserScore>();
+            foreach (var user in users) {
+                var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
+                var totalScore = userHistory.Sum(history => history.Score);
+                updatedUsers.Add(new UserScore { Name = user.Name, Score = totalScore });
+            }
+
+            var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
+            var pageSize = 10;
+            var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
+            return Ok(pagedResult);
+        }
+
+        [HttpPost("Users/HighScoreLeaderboard")]
+        public async Task<IActionResult> GetHighScoreLeaderBoard([FromQuery] int page) {
+            var users = await _userHandler.GetAllUsersAsync();
+            
+            var updatedUsers = new List<UserScore>();
+            foreach (var user in users) {
+                var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
+                var highScore = userHistory.Max(history => history.Score);
+                updatedUsers.Add(new UserScore { Name = user.Name, Score = highScore });
+            }
+
+            var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
+            var pageSize = 10;
+            var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
+            return Ok(pagedResult);
+        }
+        public record UserScore {
+            public string? Name { get; set; }
+            public int Score { get; set; }
+        }
     }
 }
