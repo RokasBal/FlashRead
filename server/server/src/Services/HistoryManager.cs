@@ -16,6 +16,7 @@ namespace server.Services {
                 SessionId = sessionId,
                 TaskId = taskId,
                 Answers = selectedVariants ?? Array.Empty<int>(),
+                Score = score,
                 TimePlayed = DateTime.UtcNow
             };
             _context.UserTaskHistories.Add(userTaskHistory);

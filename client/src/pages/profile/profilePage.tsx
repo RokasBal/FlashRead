@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const ProfilePage: React.FC = () => {
     const [detailContent, setDetailContent] = useState<JSX.Element | string>('Default Content');
+    const [detailFilters, setDetailFilters] = useState<JSX.Element | string>('Default Filters');
     const [username, setUsername] = useState<string>('Error');
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -203,6 +204,7 @@ const ProfilePage: React.FC = () => {
                             {/* <button className="textButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}>Leaderboards</button> */}
                         </div>
                         <div className="detailContent">
+
                             {detailContent}
                         </div>
                     </div>
