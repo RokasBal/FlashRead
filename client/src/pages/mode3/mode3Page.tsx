@@ -69,7 +69,7 @@ const Mode3Page: React.FC = () => {
 
     return (
         <div className='Mode3_content'>
-            <div className="pageContainer">
+            <div className="mode3_pageContainer">
                 <div className='containerLeft'>
                     <div className="WASD">
                         <div className="controls">
@@ -115,10 +115,10 @@ const Mode3Page: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                <div className='containerMiddle'>
-                    <div className='middleTop'>
-                        <div className='gameContainer' id='gameSize'>
-                            <div className='game' id='mode3Game'>
+                <div className='mode3_containerMiddle'>
+                    <div className='mode3_middleTop'>
+                        <div className='mode3_gameContainer' id='gameSize'>
+                            <div className='mode3_game' id='mode3Game'>
                                 <canvas
                                     id="canvas"
                                     className=''

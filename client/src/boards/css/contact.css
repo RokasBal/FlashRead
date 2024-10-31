@@ -26,13 +26,33 @@
     font-weight: bold;
     font-size: 3.5em;
   }
-  .content {
+  .contact_left {
+    display: flex;
+    background-color: green;
+    flex: 1;
+    height: 100%;
     align-items: center;
     justify-content: center;
-    gap: 0.5em;
-    color: var(--textColor);
+    /* background-color: var(--backgroundColor); */
+  }
+  .contact_right {
     flex-direction: column;
+    gap: 1vw;
+    display: flex;
+    height: 100%;
+    flex: 1;
+    background-color: black;
+    align-items: center;
+    justify-content: center;
+    /* background-color: var(--backgroundColor); */
+  }
+  .contact_content {
+    align-items: center;
+    justify-content: center;
+    color: var(--textColor);
+    flex-direction: row;
     font-size: 1.25em;;
+    background-color: yellow;
     font-family: var(--fontStyle);
     width: 100%;
     display: flex;
