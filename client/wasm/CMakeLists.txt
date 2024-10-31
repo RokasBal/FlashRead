@@ -38,7 +38,7 @@ add_subdirectory(${DEPS_LOC}/bullet3)
 add_executable(debug ${SRC_FILES})
 set_target_properties(debug PROPERTIES OUTPUT_NAME "wasmInterface")
 target_compile_options(debug PRIVATE ${COMMON_COMP_OPT}
-    -O0
+    -O2
 	-g
 	--tracing
 	-DSHADER_HOT_RELOAD

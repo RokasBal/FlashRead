@@ -13,7 +13,8 @@
 #include "Debug.h"
 
 Renderer::Renderer()
-    : m_viewportWidth{1}, m_viewportHeight{1}, m_gbuffer(m_viewportWidth, m_viewportHeight) {
+    : m_viewportWidth{1}, m_viewportHeight{1}, m_gbuffer(m_viewportWidth, m_viewportHeight),
+      m_csmWidth{1024}, m_csmHeight{1024}, m_csmbuffer(m_csmWidth, m_csmHeight, {100, 500, 1000}) {
     ReloadShaders();
 
     // GL settings
@@ -33,7 +34,7 @@ void Renderer::LoadShaderFromFile(std::string file) {
             auto vert = m_shaderLoadingOutput.front(); m_shaderLoadingOutput.pop_front();
             auto frag = m_shaderLoadingOutput.front(); m_shaderLoadingOutput.pop_front();
             auto prog = m_shaderLoadingPrograms.front(); m_shaderLoadingPrograms.pop_front();
-            *prog = std::make_unique<ShaderProgram>(vert.c_str(), frag.c_str());
+            (*prog)->Load(vert.c_str(), frag.c_str());
         }
         SetupUniforms();
         return;
@@ -75,8 +76,12 @@ void Renderer::LoadShaderFromFile(std::string file) {
 void Renderer::ReloadShaders() {
     m_shadersLoading = true;
     printf("Loading shaders ...\n");
+
     // mesh
     {
+        m_meshProgram = std::make_unique<ShaderProgram>("mesh");
+        m_meshProgram->SetConstant("MODELS_PER_UBO", std::to_string(m_matricesPerUniformBuffer));
+
         #ifdef SHADER_HOT_RELOAD
             m_shaderLoadingPrograms.push_back(&m_meshProgram);
             m_shaderLoadingQueue.push_back("shaders/mesh.vs");
@@ -88,11 +93,24 @@ void Renderer::ReloadShaders() {
             const GLchar fragmentSource[] = {
                 #include "shaders/mesh.fs"
             };
-            m_meshProgram = std::make_unique<ShaderProgram>(vertexSource, fragmentSource);
+            m_meshProgram->Load(vertexSource, fragmentSource);
         #endif
     }
     // lighting
     {
+        m_lightingProgram = std::make_unique<ShaderProgram>("lighting");
+        m_lightingProgram->SetConstant("MATERIALS_PER_UBO", std::to_string(m_materialsPerUniformBuffer));
+        m_lightingProgram->SetConstant("MAX_FRUSTUMS", std::to_string(m_maxCSMFrustums));
+        m_lightingProgram->SetConstant("CASCADE_COUNT", std::to_string(m_csmbuffer.GetFrustumCount()));
+        m_lightingProgram->SetConstant("CASCADE_SPLITS", [&](){
+            std::string str = "";
+            const auto& cascades = m_csmbuffer.GetCascades();
+            for (int i = 0; i < cascades.size(); i++) {
+                str += std::to_string(cascades[i]) + (i == cascades.size() - 1 ? "" : ",");
+            }
+            return str;
+        }());
+
         #ifdef SHADER_HOT_RELOAD
             m_shaderLoadingPrograms.push_back(&m_lightingProgram);
             m_shaderLoadingQueue.push_back("shaders/light.vs");
@@ -104,11 +122,38 @@ void Renderer::ReloadShaders() {
             const GLchar fragmentSource[] = {
                 #include "shaders/light.fs"
             };
-            m_lightingProgram = std::make_unique<ShaderProgram>(vertexSource, fragmentSource);
+            m_lightingProgram->Load(vertexSource, fragmentSource);
         #endif
+    }
+    // csm
+    {
+        m_csmPrograms.resize(m_csmbuffer.GetFrustumCount());
+        for (int i = 0; i < m_csmPrograms.size(); i++) {
+            auto& csmProgram = m_csmPrograms[i];
+            csmProgram = std::make_unique<ShaderProgram>("csm");
+            csmProgram->SetConstant("FRUSTUM_INDEX", std::to_string(i));
+            csmProgram->SetConstant("MODELS_PER_UBO", std::to_string(m_matricesPerUniformBuffer));
+            csmProgram->SetConstant("MAX_FRUSTUMS", std::to_string(m_maxCSMFrustums));
+
+            #ifdef SHADER_HOT_RELOAD
+                m_shaderLoadingPrograms.push_back(&csmProgram);
+                m_shaderLoadingQueue.push_back("shaders/csm.vs");
+                m_shaderLoadingQueue.push_back("shaders/csm.fs");
+            #else        
+                const GLchar vertexSource[] = {
+                    #include "shaders/csm.vs"
+                };
+                const GLchar fragmentSource[] = {
+                    #include "shaders/csm.fs"
+                };
+                csmProgram->Load(vertexSource, fragmentSource);
+            #endif
+        }
     }
     // debug
     {
+        m_debugProgram = std::make_unique<ShaderProgram>("debug");
+
         #ifdef SHADER_HOT_RELOAD
             m_shaderLoadingPrograms.push_back(&m_debugProgram);
             m_shaderLoadingQueue.push_back("shaders/debug.vs");
@@ -120,7 +165,7 @@ void Renderer::ReloadShaders() {
             const GLchar fragmentSource[] = {
                 #include "shaders/debug.fs"
             };
-            m_debugProgram = std::make_unique<ShaderProgram>(vertexSource, fragmentSource);
+            m_debugProgram->Load(vertexSource, fragmentSource);
         #endif
     }
 
@@ -137,16 +182,33 @@ void Renderer::SetupUniforms() {
     m_nextUniformBindingIndex = 0;
 
     m_cameraUniform.SetBindingIndex(GetNextUniformBindingIndex());
-    m_meshProgram->AddUniformBufferBinding("Camera", m_cameraUniform.GetBindingIndex());
-    m_debugProgram->AddUniformBufferBinding("Camera", m_cameraUniform.GetBindingIndex());
     m_cameraUniform.Bind();
-
+    
     m_modelUniform.SetBindingIndex(GetNextUniformBindingIndex());
-    m_meshProgram->AddUniformBufferBinding("ModelMatrices", m_modelUniform.GetBindingIndex());
 
     m_lightingInfoUniform.SetBindingIndex(GetNextUniformBindingIndex());
-    m_lightingProgram->AddUniformBufferBinding("LightingInfo", m_lightingInfoUniform.GetBindingIndex());
     m_lightingInfoUniform.Bind();
+
+    m_materialUniform.SetBindingIndex(GetNextUniformBindingIndex());
+    m_materialUniform.Bind();
+
+    m_csmUniform.SetBindingIndex(GetNextUniformBindingIndex());
+    m_csmUniform.Bind();
+
+
+    m_meshProgram->AddUniformBufferBinding("CameraUniform", m_cameraUniform.GetBindingIndex());
+    m_meshProgram->AddUniformBufferBinding("ModelMatricesUniform", m_modelUniform.GetBindingIndex());
+
+    m_lightingProgram->AddUniformBufferBinding("LightingInfoUniform", m_lightingInfoUniform.GetBindingIndex());
+    m_lightingProgram->AddUniformBufferBinding("CSMUniform", m_csmUniform.GetBindingIndex());
+    m_lightingProgram->AddUniformBufferBinding("MaterialUniform", m_materialUniform.GetBindingIndex());
+
+    for (auto& csmProgram : m_csmPrograms) {
+        csmProgram->AddUniformBufferBinding("CSMUniform", m_csmUniform.GetBindingIndex());
+        csmProgram->AddUniformBufferBinding("ModelMatricesUniform", m_modelUniform.GetBindingIndex());
+    }
+
+    m_debugProgram->AddUniformBufferBinding("CameraUniform", m_cameraUniform.GetBindingIndex());
 
     m_shadersLoading = false;
     printf("Shaders loaded.\n");
@@ -163,98 +225,127 @@ void Renderer::Render(const std::shared_ptr<Scene> &scene) {
         .projxview = camera->GetProjectionMatrix() * camera->GetViewMatrix(),
         .nearFarPlane = {camera->GetNearPlane(), camera->GetFarPlane()}
     });
+
     m_lightingInfoUniform.Update({
-        .lightPos = scene->sunPosition,
+        .sunlightDir = glm::normalize(scene->sunlightDir),
+        .sunlightColor = {1.0, 0.7, 0.8, 3.0},
         .cameraPos = camera->position,
         .viewportSize = glm::vec2(m_viewportWidth, m_viewportHeight)
     });
+    
+    static std::size_t lastMaterialCount = 0;
+    std::size_t materialCount = MeshRegistry::GetMaterials().size();
+    if (lastMaterialCount != materialCount) { // could be made more efficient but meh
+        MaterialUniform materialData;
+        std::copy(MeshRegistry::GetMaterials().begin(), MeshRegistry::GetMaterials().end(), materialData.materials);
+        m_materialUniform.Update(materialData);
+        lastMaterialCount = materialCount;
+    }
 
-    // render entities
-    glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer.GetFBO());
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    {
-        // get renderable meshes and matrices
-        uint32_t matrixCount = 0;
-        std::unordered_map<Mesh, std::vector<glm::mat4>> meshMatrices;
-        for (auto&& [entity, meshComp, transformComp] : scene->registry.view<MeshComponent, TransformComponent>(entt::exclude<RigidBodyComponent>).each()) {
-            // get model matrix
-            glm::mat4 model{1};
-            model = glm::translate(model, transformComp.position);
-            model = glm::rotate(model, glm::radians(transformComp.rotation.z), glm::vec3(0, 0, 1));
-            model = glm::rotate(model, glm::radians(transformComp.rotation.y), glm::vec3(0, 1, 0));
-            model = glm::rotate(model, glm::radians(transformComp.rotation.x), glm::vec3(1, 0, 0));
-            model = glm::translate(model, meshComp.position);
-            model = glm::rotate(model, glm::radians(meshComp.rotation.x), glm::vec3(1, 0, 0));
-            model = glm::rotate(model, glm::radians(meshComp.rotation.y), glm::vec3(0, 1, 0));
-            model = glm::rotate(model, glm::radians(meshComp.rotation.z), glm::vec3(0, 0, 1));
-            model = glm::scale(model, transformComp.scale * meshComp.scale);
+    const auto lightSpaceMatrices = m_csmbuffer.GetLightSpaceMatrices(camera, scene->sunlightDir);
+    CSMUniform csmData;
+    std::copy(lightSpaceMatrices.begin(), lightSpaceMatrices.end(), csmData.lightSpaceMatrices);
+    m_csmUniform.Update(csmData);
+
+    // get renderable meshes and matrices
+    uint32_t matrixCount = 0;
+    std::unordered_map<Mesh, std::vector<glm::mat4>> meshMatrices;
+    for (auto&& [entity, meshComp, transformComp] : scene->registry.view<MeshComponent, TransformComponent>(entt::exclude<RigidBodyComponent>).each()) {
+        // get model matrix
+        glm::mat4 model{1};
+        model = glm::translate(model, transformComp.position);
+        model = glm::rotate(model, glm::radians(transformComp.rotation.z), glm::vec3(0, 0, 1));
+        model = glm::rotate(model, glm::radians(transformComp.rotation.y), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(transformComp.rotation.x), glm::vec3(1, 0, 0));
+        model = glm::translate(model, meshComp.position);
+        model = glm::rotate(model, glm::radians(meshComp.rotation.x), glm::vec3(1, 0, 0));
+        model = glm::rotate(model, glm::radians(meshComp.rotation.y), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(meshComp.rotation.z), glm::vec3(0, 0, 1));
+        model = glm::scale(model, transformComp.scale * meshComp.scale);
 
 
-            // add to map
-            meshMatrices[meshComp.mesh].push_back(model);
-            matrixCount++;
-        }
-        for (auto&& [entity, meshComp, rbComp] : scene->registry.view<MeshComponent, RigidBodyComponent>().each()) {
-            auto body = rbComp.body;
-            // get model matrix
-            glm::mat4 model{1};
-            btTransform transform;
-            if (body && body->getMotionState()) body->getMotionState()->getWorldTransform(transform);
-            else transform = body->getWorldTransform();
-  
-            transform.setOrigin(transform.getOrigin() + btVector3(meshComp.position.x, meshComp.position.y, meshComp.position.z));
-            glm::vec3 euler{};
-            transform.getRotation().getEulerZYX(euler.z, euler.y, euler.x);
-            glm::vec3 objPos = glm::vec3(transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
+        // add to map
+        meshMatrices[meshComp.mesh].push_back(model);
+        matrixCount++;
+    }
+    for (auto&& [entity, meshComp, rbComp] : scene->registry.view<MeshComponent, RigidBodyComponent>().each()) {
+        auto body = rbComp.body;
+        // get model matrix
+        glm::mat4 model{1};
+        btTransform transform;
+        if (body && body->getMotionState()) body->getMotionState()->getWorldTransform(transform);
+        else transform = body->getWorldTransform();
 
-            model = glm::translate(model, objPos - meshComp.position);
-            model = glm::rotate(model, euler.z, glm::vec3(0, 0, 1));
-            model = glm::rotate(model, euler.y, glm::vec3(0, 1, 0));
-            model = glm::rotate(model, euler.x, glm::vec3(1, 0, 0));
-            model = glm::translate(model, meshComp.position);
-            model = glm::rotate(model, glm::radians(meshComp.rotation.x), glm::vec3(1, 0, 0));
-            model = glm::rotate(model, glm::radians(meshComp.rotation.y), glm::vec3(0, 1, 0));
-            model = glm::rotate(model, glm::radians(meshComp.rotation.z), glm::vec3(0, 0, 1));
-            model = glm::scale(model, meshComp.scale);
+        transform.setOrigin(transform.getOrigin() + btVector3(meshComp.position.x, meshComp.position.y, meshComp.position.z));
+        glm::vec3 euler{};
+        transform.getRotation().getEulerZYX(euler.z, euler.y, euler.x);
+        glm::vec3 objPos = glm::vec3(transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
 
-            // add to map
-            meshMatrices[meshComp.mesh].push_back(model);
-            matrixCount++;
-        }
+        model = glm::translate(model, objPos - meshComp.position);
+        model = glm::rotate(model, euler.z, glm::vec3(0, 0, 1));
+        model = glm::rotate(model, euler.y, glm::vec3(0, 1, 0));
+        model = glm::rotate(model, euler.x, glm::vec3(1, 0, 0));
+        model = glm::translate(model, meshComp.position);
+        model = glm::rotate(model, glm::radians(meshComp.rotation.x), glm::vec3(1, 0, 0));
+        model = glm::rotate(model, glm::radians(meshComp.rotation.y), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(meshComp.rotation.z), glm::vec3(0, 0, 1));
+        model = glm::scale(model, meshComp.scale);
 
-        // batch matrices and get render data
-        std::vector<glm::mat4> batchedMatrices; // TODO: possible to avoid copying matrices into this single vector, but more complex
-        batchedMatrices.reserve(matrixCount);
-        std::vector<MeshModelUniform> batches;
-        uint32_t currentUboOffset = 0;
-        uint32_t currentBatchSize = 0;
-        for (auto& [mesh, models] : meshMatrices) {
-            batchedMatrices.insert(batchedMatrices.end(), models.begin(), models.end());
-            uint32_t matricesLeft = models.size();
-            while (matricesLeft > 0) {
-                const uint32_t matricesInThisBatch = std::min(matricesLeft, m_matricesPerUniformBuffer - currentBatchSize);
-                matricesLeft -= matricesInThisBatch;
-                currentBatchSize = (currentBatchSize + matricesInThisBatch) % m_matricesPerUniformBuffer;
+        // add to map
+        meshMatrices[meshComp.mesh].push_back(model);
+        matrixCount++;
+    }
 
-                MeshModelUniform batchData;
-                batchData.mesh = mesh;
-                batchData.instanceOffset = currentUboOffset;
-                batchData.instanceCount = matricesInThisBatch;
-                batches.push_back(batchData);
-
-                currentUboOffset += matricesInThisBatch; 
+    // batch matrices and get render data
+    std::vector<glm::mat4> batchedMatrices; // TODO: possible to avoid copying matrices into this single vector, but more complex
+    batchedMatrices.reserve(matrixCount);
+    std::vector<MeshModelUniform> batches;
+    uint32_t currentUboOffset = 0;
+    uint32_t currentBatchSize = 0;
+    for (auto& [mesh, models] : meshMatrices) {
+        uint32_t matricesLeft = models.size();
+        while (matricesLeft > 0) {
+            const uint32_t matricesInThisBatch = std::min(matricesLeft, m_matricesPerUniformBuffer - currentBatchSize);
+            auto matricesOffset = models.begin() + (models.size() - matricesLeft);
+            if (currentUboOffset >= batchedMatrices.size()) {
+                batchedMatrices.resize(currentUboOffset + m_matricesPerUniformBuffer);
             }
-        }
-        // resize ubo if needed
-        const uint32_t requiredSize = matrixCount * sizeof(glm::mat4) + sizeof(glm::mat4) * m_matricesPerUniformBuffer;
-        if (m_modelUniform.GetSize() < requiredSize) {
-            m_modelUniform.Resize(requiredSize + sizeof(glm::mat4) * m_matricesPerUniformBuffer);
-        }
-        // upload matrices
-        m_modelUniform.Update(0, batchedMatrices.size() * sizeof(glm::mat4), batchedMatrices.data());
+            batchedMatrices.insert(batchedMatrices.begin() + currentUboOffset, matricesOffset, matricesOffset + matricesInThisBatch);
+            matricesLeft -= matricesInThisBatch;
+            currentBatchSize = (currentBatchSize + matricesInThisBatch) % m_matricesPerUniformBuffer;
 
-        // render
-        m_meshProgram->Use();
+            MeshModelUniform batchData;
+            batchData.mesh = mesh;
+            batchData.instanceOffset = currentUboOffset;
+            batchData.instanceCount = matricesInThisBatch;
+            batches.push_back(batchData);
+
+            currentUboOffset += matricesInThisBatch;
+            // fix for alignment
+            int padding = (currentUboOffset * sizeof(glm::mat4)) % m_modelUniform.GetOffsetAlignment();
+            padding = m_modelUniform.GetOffsetAlignment() - padding;
+            currentUboOffset += padding / sizeof(glm::mat4);
+            currentBatchSize += padding / sizeof(glm::mat4);
+        }
+    }
+
+    // resize ubo if needed
+    const uint32_t requiredSize = matrixCount * sizeof(glm::mat4) + sizeof(glm::mat4) * m_matricesPerUniformBuffer;
+    if (m_modelUniform.GetSize() < requiredSize) {
+        m_modelUniform.Resize(requiredSize + sizeof(glm::mat4) * m_matricesPerUniformBuffer);
+    }
+    // upload matrices
+    m_modelUniform.Update(0, batchedMatrices.size() * sizeof(glm::mat4), batchedMatrices.data());
+
+    // csm
+    glViewport(0, 0, m_csmWidth, m_csmHeight);
+    glCullFace(GL_FRONT);
+    for (int i = 0; i < m_csmbuffer.GetFBOs().size(); i++) {
+        const auto& csmProgram = m_csmPrograms[i];
+        csmProgram->Use();
+        const GLuint fbo = m_csmbuffer.GetFBOs()[i];
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glClear(GL_DEPTH_BUFFER_BIT);
         uint32_t currentVao = 0;
         for (auto& batch : batches) {
             auto vao = batch.mesh->GetVAO();
@@ -266,20 +357,41 @@ void Renderer::Render(const std::shared_ptr<Scene> &scene) {
             glDrawArraysInstanced(GL_TRIANGLES, 0, batch.mesh->GetDrawCount(), batch.instanceCount);
         }
     }
-    // debug
+
+    glViewport(0, 0, m_viewportWidth, m_viewportHeight);
+    glCullFace(GL_BACK);
+
+    // world
+    glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer.GetFBO());
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_meshProgram->Use();
+    uint32_t currentVao = 0;
+    for (auto& batch : batches) {
+        auto vao = batch.mesh->GetVAO();
+        if (currentVao != vao) {
+            glBindVertexArray(vao);
+            currentVao = vao;
+        }
+        m_modelUniform.Bind(batch.instanceOffset * sizeof(glm::mat4), m_matricesPerUniformBuffer * sizeof(glm::mat4));
+        glDrawArraysInstanced(GL_TRIANGLES, 0, batch.mesh->GetDrawCount(), batch.instanceCount);
+    }
+
+    // debug draw
     if (DebugDraw::IsEnabled()) {
         m_debugProgram->Use();
+        DebugDraw::GetDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawContactPoints);
         scene->GetPhysicsWorld().dynamicsWorld->setDebugDrawer(DebugDraw::GetDrawer());
         scene->GetPhysicsWorld().dynamicsWorld->debugDrawWorld();
         DebugDraw::Draw();
     }
 
-    // lighting (final)
+    // lighting
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     m_lightingProgram->Use();
-    m_lightingProgram->SetTexture("tPosition", 0, m_gbuffer.GetPositionTexture());
-    m_lightingProgram->SetTexture("tColor", 1, m_gbuffer.GetColorTexture());
-    m_lightingProgram->SetTexture("tNormal", 2, m_gbuffer.GetNormalTexture());
+    m_lightingProgram->SetTexture("tPosition", GL_TEXTURE_2D, 0, m_gbuffer.GetPositionTexture());
+    m_lightingProgram->SetTexture("tColor", GL_TEXTURE_2D, 1, m_gbuffer.GetColorTexture());
+    m_lightingProgram->SetTexture("tNormal", GL_TEXTURE_2D, 2, m_gbuffer.GetNormalTexture());
+    m_lightingProgram->SetTexture("tShadow", GL_TEXTURE_2D_ARRAY, 3, m_csmbuffer.GetDepthTextureArray());
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // imgui
@@ -290,6 +402,5 @@ void Renderer::SetViewportSize(int32_t width, int32_t height) {
     if (m_viewportWidth == width && m_viewportHeight == height) return;
     m_viewportWidth = width;
     m_viewportHeight = height;
-    glViewport(0, 0, width, height);
     m_gbuffer.Resize(width, height);
 }

@@ -2,12 +2,14 @@
 
 #include <entt/entt.hpp>
 #include <vector>
+#include <set>
 #include <string>
 #include <string_view>
 #include <glm/glm.hpp>
 #include <stdint.h>
 
 #include "../core/PhysicsWorld.h"
+#include "Timer.h"
 
 class SceneBuilder {
 public:
@@ -30,6 +32,7 @@ public:
         
         int selectedCollider = -1;
         float mass = 0;
+        float friction = 0.5f;
         glm::vec3 boxColliderSize{1, 1, 1};
         float sphereColliderRadius = 1;
         float capsuleColliderRadius = 1;
@@ -38,18 +41,21 @@ public:
     void Load(uint32_t stateCount, const State* states, bool saveable = false);
 
 private:
+    void Blink(int32_t entityId, bool clearOthers = false);
     void Load();
     void Save();
     void Reset();
-    void RecreateEntity(bool useMass = false);
+    void RecreateEntity(int32_t entityId, bool useMass = false, bool invisible = false);
     bool m_playing = false;
     entt::registry& m_registry;
     PhysicsWorld& m_physicsWorld;
-    uint32_t m_selectedEntity = -1;
+    std::set<int32_t> m_selectedEntities;
     std::string m_saveName;
-    uint32_t m_stateVersion = 1;
+    uint32_t m_stateVersion = 2;
     std::vector<std::string> m_models;
     std::vector<std::string> m_colliders;
+    float m_dragSpeed = 0.01f;
 
     std::vector<std::pair<entt::entity, State>> m_savedStates;
+    std::vector<std::pair<int32_t, TimePoint>> m_blinks;
 };

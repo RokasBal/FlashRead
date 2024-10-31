@@ -7,21 +7,28 @@
 
 class ShaderProgram {
 public:
-    ShaderProgram(const GLchar* vertexSource, const GLchar* fragmentSource);
+    ShaderProgram(std::string_view shaderName);
     ~ShaderProgram();
     ShaderProgram(const ShaderProgram&) = delete;
     ShaderProgram& operator=(const ShaderProgram&) = delete;
     ShaderProgram(ShaderProgram&&) = delete;
     ShaderProgram& operator=(ShaderProgram&&) = delete;
 
+    void SetConstant(std::string_view name, std::string_view value);
+    void Load(const GLchar* vertexSource, const GLchar* fragmentSource);
+
     void Use();
     GLuint GetId() const { return m_program; }
 
     void AddUniformBufferBinding(std::string_view name, GLuint bindingIndex);
 
-    void SetTexture(std::string_view name, GLuint index, GLuint texture);
+    void SetTexture(std::string_view name, GLenum target, GLuint index, GLuint texture);
 
 private:
-    GLuint m_program;
+    void CheckCompileErrors(const unsigned int shader, const int type);
+    void CreateShader(GLuint program, const GLchar *source, GLenum type);
+    GLuint m_program{0};
+    std::string m_shaderName;
     std::unordered_map<std::string, GLuint> m_uniformLocations;
+    std::unordered_map<std::string, std::string> m_shaderConstans;
 };

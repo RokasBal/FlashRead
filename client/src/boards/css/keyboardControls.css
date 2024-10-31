@@ -1,0 +1,72 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* background-color: red; */
+  flex: 3;
+}
+.controlsText {
+  display: flex;
+  flex: 2;
+  justify-content: center;
+  align-items: center;
+  color: var(--textColor);
+  font-family: var(--fontStyle);
+  font-weight: bold;
+  font-size: 1vw;
+  /* background-color: teal; */
+  padding-right: 5%;
+}
+
+.key, .longKey {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--secondaryColor);
+  color: var(--textColor);
+  font-size: 1vw;
+  font-family: var(--fontStyle);
+  border: 0.2vw solid var(--borderColor);
+  border-radius: 0.5vw;
+}
+
+.key {
+  height: 100%;
+  aspect-ratio: 1/1;
+}
+
+.longKey {
+  height: 100%;
+  aspect-ratio: 3/1;
+}
+
+.WASD, .sprint, .fullScreen {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  padding-left: 5%;
+  padding-top: 5%;
+  gap: 5%;
+}
+.fullScreen .controlsText {
+  flex: 4;
+}
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 5%;
+  margin-bottom: 2.5%;
+}
+.bottomRow {
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 2.5%;
+  display: flex;
+  flex-direction: row;
+  gap: 5%;
+}
+
