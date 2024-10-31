@@ -23,6 +23,17 @@ const ProfilePage: React.FC = () => {
 
     const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
+    const taskIdToGameMode: { [key: number]: string } = {
+        1: "Q&A",
+        2: "Catch the Word"
+    };
+    
+    interface GameHistoryItem {
+        taskId: number;
+        score: number;
+        timePlayed: string;
+    }
+    
     const handleEditClick = () => {
         setIsPopupVisible(true);
     };
@@ -38,12 +49,25 @@ const ProfilePage: React.FC = () => {
             const response = await axios.get('/api/Users/GetUserHistory', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setGameHistory(response.data);
-            // console.log('Game history:', response.data);
+    
+            const transformedData = response.data.map((item: GameHistoryItem) => {
+                const date = new Date(item.timePlayed);
+                const formattedDate = date.toLocaleDateString('en-CA');
+                const formattedTime = date.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+                return {
+                    gamemode: taskIdToGameMode[item.taskId] || "Unknown",
+                    score: item.score,
+                    date: `${formattedDate}, ${formattedTime}`
+                };
+            });
+    
+            setGameHistory(transformedData);
+            console.log('Game history:', transformedData);
         } catch (err) {
             console.error('Error fetching game history:', err);
         }
-    }
+    };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -100,6 +124,8 @@ const ProfilePage: React.FC = () => {
             console.error('Error uploading the profile picture:', error);
             alert('Error uploading the profile picture.');
         }
+
+        setIsPopupVisible(false);
     };
 
     const fetchProfilePicture = async () => {
@@ -165,8 +191,8 @@ const ProfilePage: React.FC = () => {
                             <ProfileCard imageSrc={profilePictureUrl} name={username} onEditClick={handleEditClick}/>
                         </div>    
                         <div className="restOfProfile">
-                            <span>friends page?</span>
-                            <span>account information?</span>
+                            {/* <span>friends page?</span>
+                            <span>account information?</span> */}
                         </div>
                     </div>
                     <div className="gameDetailsContainer">
