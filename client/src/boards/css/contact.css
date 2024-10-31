@@ -28,12 +28,35 @@
   }
   .contact_left {
     display: flex;
-    background-color: green;
     flex: 1;
     height: 100%;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* background-color: var(--backgroundColor); */
+  }
+  .contact_info {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+  }
+  .upperText {
+    font-family: var(--fontStyle);
+    color: var(--textColor);
+    font-size: 3vw;
+    font-weight: bold;
+    margin-bottom: 5%;
+  }
+  .contactText {
+    font-family: var(--fontStyle);
+    color: var(--textColor);
+    font-size: 1.25vw;
+    margin-left: 5%;
+  }
+  .biggerText {
+    font-weight: bold;
+    font-family: var(--fontStyle);
+    color: var(--textColor);
+    font-size: 1.5vw;
   }
   .contact_right {
     flex-direction: column;
@@ -41,10 +64,8 @@
     display: flex;
     height: 100%;
     flex: 1;
-    background-color: black;
     align-items: center;
     justify-content: center;
-    /* background-color: var(--backgroundColor); */
   }
   .contact_content {
     align-items: center;
@@ -52,9 +73,8 @@
     color: var(--textColor);
     flex-direction: row;
     font-size: 1.25em;;
-    background-color: yellow;
     font-family: var(--fontStyle);
-    width: 100%;
+    width: 80%;
     display: flex;
     flex: 8;    
   }

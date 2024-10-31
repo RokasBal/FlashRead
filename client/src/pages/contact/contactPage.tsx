@@ -3,7 +3,7 @@ import '../../boards/css/contact.css';
 
 import CustomButton from "../../components/buttons/customButton.tsx";
 import { useNavigate } from 'react-router-dom';
-import { TextField } from '@mui/material';
+import { TextField, Box } from '@mui/material';
 
 
 const AboutPage: React.FC = () => {
@@ -18,44 +18,137 @@ const AboutPage: React.FC = () => {
 
                 <div className="contact_content">
                     <div className="contact_left">
-
+                        <p className='upperText'>Contact Us</p>
+                        <div className="contact_info">
+                            <p className='biggerText'>GitHub </p>
+                            <a className='contactText' href="https://github.com/JuliusJauga">Julius</a>
+                            <a className='contactText' href="https://github.com/RokasBal">Rokas</a>
+                            <a className='contactText' href="https://github.com/tikis23">Edvinas</a>
+                            <a className='contactText' href="https://github.com/AurelijusLuksas">Aurelijus</a>
+                        </div>
+                        <div className="contact_info">
+                            <p className='biggerText'>Chart to us </p>
+                            <p className='contactText' >contact@flashread.com</p>
+                        </div>
                     </div>
                     <div className="contact_right">
-                        <p>Get in Touch</p>
-                        <TextField 
-                        variant='outlined'
-                        label="Username"
-                        value="Name"
-                        sx={{
-                            '& .MuiFormLabel-root': {
-                                color: 'var(--textColor)', 
-                                fontFamily: 'var(--fontStyle)',
-                            },
-                            '& .MuiFormLabel-root.Mui-focused': {
-                                color: '#1976d2',
-                            },
-                            '& .MuiInputBase-input': {
-                                fontFamily: 'var(--fontStyle)',
-                                color: 'var(--textColor)',
-                            },
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderWidth: '3px',
-                                    borderColor: 'var(--borderColor)', // Default border color
+                        <p className='upperText'>Get In Touch</p>
+
+                        <Box 
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                width: '50%',
+                                gap: '1vw',
+                            }}
+                        >
+                            
+                            <TextField 
+                            variant='outlined'
+                            label="Name"
+                            fullWidth
+                            sx={{
+                                '& .MuiFormLabel-root': {
+                                    color: 'var(--textColor)', 
+                                    fontFamily: 'var(--fontStyle)',
                                 },
-                                '&:hover fieldset': {
-                                    borderWidth: '3px',
-                                    borderColor: 'var(--borderColor)', // Border color on hover
+                                '& .MuiFormLabel-root.Mui-focused': {
+                                    color: '#1976d2',
                                 },
-                                '&.Mui-focused fieldset': {
-                                    borderWidth: '3px',
-                                    borderColor: '#1976d2', // Border color when focused
+                                '& .MuiInputBase-input': {
+                                    fontFamily: 'var(--fontStyle)',
+                                    color: 'var(--textColor)',
                                 },
-                        
-                                width: '100%',
-                            },
-                        }}
-                    />
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderWidth: '3px',
+                                        borderColor: 'var(--borderColor)', // Default border color
+                                    },
+                                    '&:hover fieldset': {
+                                        borderWidth: '3px',
+                                        borderColor: 'var(--borderColor)', // Border color on hover
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderWidth: '3px',
+                                        borderColor: '#1976d2', // Border color when focused
+                                    },
+                            
+                                    width: '100%',
+                                },
+                            }}
+                            />
+
+                            <TextField 
+                                variant='outlined'
+                                label="Email"
+                                fullWidth
+                                sx={{
+                                    '& .MuiFormLabel-root': {
+                                        color: 'var(--textColor)', 
+                                        fontFamily: 'var(--fontStyle)',
+                                    },
+                                    '& .MuiFormLabel-root.Mui-focused': {
+                                        color: '#1976d2',
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        fontFamily: 'var(--fontStyle)',
+                                        color: 'var(--textColor)',
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderWidth: '3px',
+                                            borderColor: 'var(--borderColor)', // Default border color
+                                        },
+                                        '&:hover fieldset': {
+                                            borderWidth: '3px',
+                                            borderColor: 'var(--borderColor)', // Border color on hover
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: '3px',
+                                            borderColor: '#1976d2', // Border color when focused
+                                        },
+                                
+                                        width: '100%',
+                                    },
+                                }}
+                            />
+                            <TextField 
+                                variant='outlined'
+                                label="Message"
+                                multiline
+                                fullWidth
+                                rows={8}
+                                sx={{
+                                    '& .MuiFormLabel-root': {
+                                        color: 'var(--textColor)', 
+                                        fontFamily: 'var(--fontStyle)',
+                                    },
+                                    '& .MuiFormLabel-root.Mui-focused': {
+                                        color: '#1976d2',
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        fontFamily: 'var(--fontStyle)',
+                                        color: 'var(--textColor)',
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderWidth: '3px',
+                                            borderColor: 'var(--borderColor)', // Default border color
+                                        },
+                                        '&:hover fieldset': {
+                                            borderWidth: '3px',
+                                            borderColor: 'var(--borderColor)', // Border color on hover
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: '3px',
+                                            borderColor: '#1976d2', // Border color when focused
+                                        },
+                                        width: '100%',  
+                                    },
+                                }}
+                            />
+                        </Box>    
 
                     </div>
                 </div>
