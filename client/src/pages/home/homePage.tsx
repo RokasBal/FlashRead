@@ -39,6 +39,9 @@ const HomePage: React.FC = () => {
                 }
                 else if (item === "Settings") {
                     navigate("/settings");
+                } 
+                else if (item === "Profile") {
+                    navigate("/profile");
                 }
                 } } />
             </div>

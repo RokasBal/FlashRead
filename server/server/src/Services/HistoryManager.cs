@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace server.Services {
     public class HistoryManager(FlashDbContext _context)
     {
-        public async Task SaveTaskResult(string email, uint sessionId, int taskId, int[]? selectedVariants = null) {
+        public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (dbUser == null)
             {

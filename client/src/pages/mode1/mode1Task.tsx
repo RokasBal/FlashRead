@@ -19,7 +19,8 @@ type Task1AnswerRequest = {
 type Task1AnswerStatistics = {
   correct: number;
   total: number;
-  wpm : number;
+  wpm: number;
+  score: number;
 };
 type Task1AnswerResponse = {
   answers: question[];

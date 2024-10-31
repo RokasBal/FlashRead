@@ -44,6 +44,7 @@ namespace server.src {
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Email).HasColumnName("email");
                 entity.Property(e => e.Password).HasColumnName("password");
+                entity.Property(e => e.ProfilePic).HasColumnName("profile_pic");
                 entity.Property(e => e.HistoryIds).HasColumnName("history_ids");
                 entity.Property(e => e.ContributionsIds).HasColumnName("contributions_ids");
                 entity.Property(e => e.SettingsId).HasColumnName("settings_id");
@@ -70,6 +71,7 @@ namespace server.src {
                 entity.Property(e => e.SessionId).HasColumnName("session_id");
                 entity.Property(e => e.TaskId).HasColumnName("task_id");
                 entity.Property(e => e.Answers).HasColumnName("answers");
+                entity.Property(e => e.Score).HasColumnName("score");
                 entity.Property(e => e.TimePlayed).HasColumnName("time_played");
             });
             modelBuilder.Entity<DbTask1Contribution>(entity => {

@@ -87,6 +87,10 @@ const Mode1Page: React.FC = () => {
                             <span className="mode1_Text">Words per minute:  </span>
                             <span className="mode1_Text">{mode1Data?.statistics?.wpm}</span>                            
                         </div>
+                        <div className="correctAnswersDisplayDiv">
+                            <span className="mode1_Text">Score: </span>
+                            <span className="mode1_Text">{mode1Data?.statistics?.score}</span>
+                        </div>
                     </div>
                 </div>
                 <div className="mode1_start_options">
