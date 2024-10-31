@@ -5,8 +5,8 @@
 void Camera::Update(int32_t viewportWidth, int32_t viewportHeight) {
     if (viewportWidth == 0 || viewportHeight == 0) return;
 
-    const float aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
-    m_projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, m_near, m_far);
+    m_aspectRatio = static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight);
+    m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_aspectRatio, m_near, m_far);
     m_viewMatrix = glm::lookAt(position, position + m_front, m_up);
     // m_viewMatrix = glm::lookAt(position, {0, 0, 0}, m_up);
 }

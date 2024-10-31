@@ -5,13 +5,14 @@ layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gColor;
 layout (location = 2) out vec4 gNormal;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraUniform {
     mat4 projxview;
     vec2 nearFarPlane;
 };
 
 in vec3 u_fragPos;
 in vec3 u_normal;
+flat in uint u_materialId;
 
 float linearDepth(float depth) {
     float near = nearFarPlane.x;
@@ -22,7 +23,7 @@ float linearDepth(float depth) {
 
 void main() {
     gPosition = vec4(u_fragPos, linearDepth(gl_FragCoord.z));
-    gColor = vec4(0.9, 0.8, 0.7, 1.0);
+    gColor = vec4(0.9, 0.8, 0.7, float(u_materialId));
     gNormal = vec4(normalize(u_normal), 1.0);
 }
 )"

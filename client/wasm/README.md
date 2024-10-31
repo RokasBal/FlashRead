@@ -10,7 +10,7 @@ make
 ```
 # To create wasm module and bindings:
 `TARGET` = `debug` or `prod`.  
-`debug` allows shader hot reloading. Needs `shader_provider.py` to be running.
+`debug` allows shader hot reloading, saving scenes. Needs `debug_api.py` to be running.
 ```
 mkdir build
 cd build
