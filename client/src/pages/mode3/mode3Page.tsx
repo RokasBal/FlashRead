@@ -30,7 +30,7 @@ const Mode3Page: React.FC = () => {
             module.start();
         } catch (error) {}
     }, [module]);
-
+    
     useEffect(() => {
         const handleResize = () => {
             const gamePageElement = document.getElementById('mode3Game');
@@ -50,9 +50,18 @@ const Mode3Page: React.FC = () => {
         window.addEventListener('keydown', handleKeyDown);
         handleResize();
 
+        document.addEventListener('fullscreenchange', handleResize);
+        document.addEventListener('mozfullscreenchange', handleResize);
+        document.addEventListener('webkitfullscreenchange', handleResize);
+        document.addEventListener('msfullscreenchange', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('fullscreenchange', handleResize);
+            document.removeEventListener('mozfullscreenchange', handleResize);
+            document.removeEventListener('webkitfullscreenchange', handleResize);
+            document.removeEventListener('msfullscreenchange', handleResize);
         };
     }, []);
 
