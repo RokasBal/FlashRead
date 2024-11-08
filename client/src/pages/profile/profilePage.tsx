@@ -11,14 +11,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const ProfilePage: React.FC = () => {
-    const [detailContent, setDetailContent] = useState<JSX.Element | string>('Default Content');
+    const [gameHistory, setGameHistory] = useState<any[]>([]);
+    const [detailContent, setDetailContent] = useState<JSX.Element | string>();
     const [detailFilters, setDetailFilters] = useState<JSX.Element | string>('Default Filters');
     const [username, setUsername] = useState<string>('Error');
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
-    const [gameHistory, setGameHistory] = useState<any[]>([]);
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
@@ -167,17 +167,28 @@ const ProfilePage: React.FC = () => {
         fetchGameHistory();
     }, []);
 
-    const testData = [
-        { gamemode: 'Mode 1', score: 100, date: '2023-01-01' },
-        { gamemode: 'Mode 2', score: 200, date: '2023-01-02' },
-        { gamemode: 'Mode 3', score: 300, date: '2023-01-03' },
-    ];
+    useEffect(() => {
+        const updateDetailContent = async () => {
+            if (gameHistory.length > 0) {
+                // Wait until gameHistory is fetched
+                setDetailContent(<HistoryTable data={gameHistory} />);
+            }
+        };
 
-    const leaderboardData = [
-        { player: 'AAAA', score: 123123, date: '2023-01-01' },
-        { player: 'BBBB', score: 5, date: '2023-01-02' },
-        { player: 'CC', score: 9000, date: '2023-01-03' },
-    ];
+        updateDetailContent();
+    }, [gameHistory]);
+
+    // const testData = [
+    //     { gamemode: 'Mode 1', score: 100, date: '2023-01-01' },
+    //     { gamemode: 'Mode 2', score: 200, date: '2023-01-02' },
+    //     { gamemode: 'Mode 3', score: 300, date: '2023-01-03' },
+    // ];
+
+    // const leaderboardData = [
+    //     { player: 'AAAA', score: 123123, date: '2023-01-01' },
+    //     { player: 'BBBB', score: 5, date: '2023-01-02' },
+    //     { player: 'CC', score: 9000, date: '2023-01-03' },
+    // ];
 
     return (
         <div className="profilePage">
@@ -199,12 +210,11 @@ const ProfilePage: React.FC = () => {
                     <div className="gameDetailsContainer">
                         <div className="detailHeader">
                             <CustomButton label="Game history" className="wideButton" id="gameHistoryButton" onClick={() => handleButtonClick(<HistoryTable data={gameHistory} />)}/>
-                            <CustomButton label="Leaderboards" className="wideButton" id="leaderboardsButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}/>
+                            <CustomButton label="Leaderboards" className="wideButton" id="leaderboardsButton" onClick={() => handleButtonClick(<LeaderboardTable data={gameHistory} />)}/>
                             {/* <button className="textButton" onClick={() => handleButtonClick(<HistoryTable data={testData} />)}>History</button> */}
                             {/* <button className="textButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}>Leaderboards</button> */}
                         </div>
                         <div className="detailContent">
-
                             {detailContent}
                         </div>
                     </div>

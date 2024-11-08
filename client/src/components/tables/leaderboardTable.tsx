@@ -13,7 +13,7 @@ interface CustomTableProps {
 const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
     const [mode, setMode] = useState<string>('Q&A');
-    const [type, setType] = useState<string>('High score');
+    const [type, setType] = useState<string>('All time score'); // Set default type to "All time score"
     const [leaderboardData, setLeaderboadData] = useState<TableRow[]>([]);
     const [page, setPage] = useState<number>(1);
     const [isNextPageBlank, setIsNextPageBlank] = useState<boolean>(false);
@@ -53,10 +53,10 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
     };
 
     const fetchAllLeaderboard = async (pageNumber: number) => {
-        console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
+        // console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
         try {
             const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-            console.log("API Response:", response.data);
+            // console.log("API Response:", response.data);
             const transformedData = response.data.map((item: GameHistoryItem) => {
                 return {
                     username: item.name, // Map 'name' to 'username'
@@ -64,13 +64,12 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
                 };
             });
             setLeaderboadData(transformedData);
-            console.log("Transformed Data:", transformedData);
+            // console.log("Transformed Data:", transformedData);
         } catch (error) {
             console.error("Error fetching leaderboard data:", error);
         }
     };
 
-    // TODO - replace with API call to check page count?
     const checkNextPage = async (pageNumber: number) => {
         try {
             const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
@@ -85,13 +84,15 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
         const nextPageBlank = await checkNextPage(pageNumber + 1);
         setIsNextPageBlank(nextPageBlank);
         setPage(pageNumber);
-        // fetchAllLeaderboard(pageNumber);
+        fetchAllLeaderboard(pageNumber);
     }
 
     const handleTypeChoice = (choice: string) => {
-        setType(choice);
-        setPage(1);
-        fetchAllLeaderboard(1);
+        if (choice !== type) {
+            setType(choice);
+            setPage(1);
+            fetchAllLeaderboard(1);
+        }
     };
 
     useEffect(() => {
@@ -102,8 +103,10 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
-                <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={(choice: string) => console.log(choice)} label="Mode"/>
-                <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type"/>
+                {type !== "All time score" && (
+                    <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode"/>
+                )}
+                <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue="All time score" />
             </div>
             <TableContent data={sortedData} sortConfig={sortConfig} handleSort={handleSort} />
             <div className="paginationControls">
