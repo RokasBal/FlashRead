@@ -33,122 +33,130 @@ const AboutPage: React.FC = () => {
                     </div>
                     <div className="contact_right">
                         <p className='upperText'>Get In Touch</p>
-
-                        <Box 
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                width: '50%',
-                                gap: '1vw',
-                            }}
-                        >
-                            
-                            <TextField 
-                            variant='outlined'
-                            label="Name"
-                            fullWidth
-                            sx={{
-                                '& .MuiFormLabel-root': {
-                                    color: 'var(--textColor)', 
-                                    fontFamily: 'var(--fontStyle)',
-                                },
-                                '& .MuiFormLabel-root.Mui-focused': {
-                                    color: '#1976d2',
-                                },
-                                '& .MuiInputBase-input': {
-                                    fontFamily: 'var(--fontStyle)',
-                                    color: 'var(--textColor)',
-                                },
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        borderWidth: '3px',
-                                        borderColor: 'var(--borderColor)', // Default border color
-                                    },
-                                    '&:hover fieldset': {
-                                        borderWidth: '3px',
-                                        borderColor: 'var(--borderColor)', // Border color on hover
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderWidth: '3px',
-                                        borderColor: '#1976d2', // Border color when focused
-                                    },
-                            
-                                    width: '100%',
-                                },
-                            }}
-                            />
-
-                            <TextField 
-                                variant='outlined'
-                                label="Email"
-                                fullWidth
+                        
+                        <form className='formStyle' action="https://api.web3forms.com/submit" method="POST">
+                            <Box 
                                 sx={{
-                                    '& .MuiFormLabel-root': {
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '50%',
+                                    gap: '1vw',
+                                    }}
+                                    >
+                                    <input type="hidden" name="access_key" value="e358435b-1b4b-44c5-9652-e7ceda54d5d6"></input>
+                                    <TextField 
+                                    variant='outlined'
+                                    label="Name"
+                                    type='name'
+                                    name='name'
+                                    fullWidth
+                                    sx={{
+                                        '& .MuiFormLabel-root': {
                                         color: 'var(--textColor)', 
                                         fontFamily: 'var(--fontStyle)',
-                                    },
-                                    '& .MuiFormLabel-root.Mui-focused': {
-                                        color: '#1976d2',
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        fontFamily: 'var(--fontStyle)',
-                                        color: 'var(--textColor)',
-                                    },
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderWidth: '3px',
-                                            borderColor: 'var(--borderColor)', // Default border color
                                         },
-                                        '&:hover fieldset': {
-                                            borderWidth: '3px',
+                                        '& .MuiFormLabel-root.Mui-focused': {
+                                            color: '#1976d2',
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                fontFamily: 'var(--fontStyle)',
+                                                color: 'var(--textColor)',
+                                                },
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderWidth: '3px',
+                                                        borderColor: 'var(--borderColor)', // Default border color
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderWidth: '3px',
                                             borderColor: 'var(--borderColor)', // Border color on hover
                                         },
                                         '&.Mui-focused fieldset': {
                                             borderWidth: '3px',
                                             borderColor: '#1976d2', // Border color when focused
+                                            },
+                                            
+                                            width: '100%',
+                                            },
+                                            }}
+                                            />
+                                            
+                                            <TextField 
+                                            variant='outlined'
+                                            label="Email"
+                                            type='email'
+                                            name='email'
+                                            fullWidth
+                                            sx={{
+                                                '& .MuiFormLabel-root': {
+                                                    color: 'var(--textColor)', 
+                                            fontFamily: 'var(--fontStyle)',
                                         },
-                                
-                                        width: '100%',
-                                    },
-                                }}
-                            />
-                            <TextField 
-                                variant='outlined'
-                                label="Message"
-                                multiline
-                                fullWidth
-                                rows={8}
-                                sx={{
-                                    '& .MuiFormLabel-root': {
-                                        color: 'var(--textColor)', 
-                                        fontFamily: 'var(--fontStyle)',
-                                    },
-                                    '& .MuiFormLabel-root.Mui-focused': {
-                                        color: '#1976d2',
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        fontFamily: 'var(--fontStyle)',
-                                        color: 'var(--textColor)',
-                                    },
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderWidth: '3px',
-                                            borderColor: 'var(--borderColor)', // Default border color
+                                        '& .MuiFormLabel-root.Mui-focused': {
+                                            color: '#1976d2',
                                         },
-                                        '&:hover fieldset': {
-                                            borderWidth: '3px',
-                                            borderColor: 'var(--borderColor)', // Border color on hover
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderWidth: '3px',
-                                            borderColor: '#1976d2', // Border color when focused
-                                        },
-                                        width: '100%',  
-                                    },
-                                }}
-                            />
-                        </Box>    
+                                        '& .MuiInputBase-input': {
+                                            fontFamily: 'var(--fontStyle)',
+                                            color: 'var(--textColor)',
+                                            },
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderWidth: '3px',
+                                                    borderColor: 'var(--borderColor)', // Default border color
+                                                    },
+                                                    '&:hover fieldset': {
+                                                borderWidth: '3px',
+                                                borderColor: 'var(--borderColor)', // Border color on hover
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderWidth: '3px',
+                                                    borderColor: '#1976d2', // Border color when focused
+                                                    },
+                                                    
+                                                    width: '100%',
+                                                    },
+                                                    }}
+                                                    />
+                                                    <TextField 
+                                                    variant='outlined'
+                                                    label="Message"
+                                                    multiline
+                                                    name='message'
+                                                    fullWidth
+                                                    rows={8}
+                                                    sx={{
+                                                        '& .MuiFormLabel-root': {
+                                                            color: 'var(--textColor)', 
+                                                            fontFamily: 'var(--fontStyle)',
+                                                            },
+                                                            '& .MuiFormLabel-root.Mui-focused': {
+                                                                color: '#1976d2',
+                                                                },
+                                                                '& .MuiInputBase-input': {
+                                            fontFamily: 'var(--fontStyle)',
+                                            color: 'var(--textColor)',
+                                            },
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderWidth: '3px',
+                                                borderColor: 'var(--borderColor)', // Default border color
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderWidth: '3px',
+                                                    borderColor: 'var(--borderColor)', // Border color on hover
+                                                    },
+                                                    '&.Mui-focused fieldset': {
+                                                        borderWidth: '3px',
+                                                        borderColor: '#1976d2', // Border color when focused
+                                                        },
+                                                        width: '100%',  
+                                                        },
+                                                        }}
+                                                        />
+                                <CustomButton label="Submit" className="wideButton" id="contactSubmit" onClick={() => {}}/>
+                            </Box>    
+                        </form>
 
                     </div>
                 </div>

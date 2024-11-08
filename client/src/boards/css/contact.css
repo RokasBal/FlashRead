@@ -46,6 +46,12 @@
     font-weight: bold;
     margin-bottom: 5%;
   }
+  .formStyle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
   .contactText {
     font-family: var(--fontStyle);
     color: var(--textColor);
