@@ -34,7 +34,11 @@ namespace server.Controller {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail) == false)
             {
+                System.Console.WriteLine("Saving task result");
                 await _userHandler.SaveTaskResult(userEmail, req.Session, taskId, score, req.SelectedVariants);
+            }
+            else {
+                System.Console.WriteLine("User not found");
             }
             return checkAns;
         }

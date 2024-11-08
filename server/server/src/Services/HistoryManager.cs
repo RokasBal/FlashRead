@@ -22,6 +22,7 @@ namespace server.Services {
             _context.UserTaskHistories.Add(userTaskHistory);
             dbUser.HistoryIds = dbUser.HistoryIds.Append(userTaskHistory.Id).ToArray();
             _context.Users.Update(dbUser);
+            System.Console.WriteLine(score);
             await _context.SaveChangesAsync();
         }
     }
