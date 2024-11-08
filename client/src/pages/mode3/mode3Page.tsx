@@ -6,10 +6,49 @@ import CustomButton from '../../components/buttons/customButton';
 import "../../boards/css/mode3.css"
 import "../../boards/css/keyboardControls.css"
 
+function useOnScreen(ref: React.RefObject<HTMLElement>) {
+    const [isOnScreen, setIsOnScreen] = useState(false);
+    const [isTabVisible, setIsTabVisible] = useState(!document.hidden);
+    const [isWindowFocused, setIsWindowFocused] = useState(true);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            setIsTabVisible(!document.hidden);
+        };
+        const handleFocus = () => setIsWindowFocused(true);
+        const handleBlur = () => setIsWindowFocused(false);
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleFocus);
+        window.addEventListener('blur', handleBlur);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('blur', handleBlur);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!ref.current) return;
+
+        const observer = new IntersectionObserver(([entry]) => setIsOnScreen(entry.isIntersecting));
+        observer.observe(ref.current);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [ref]);
+
+    return isOnScreen && isTabVisible && isWindowFocused;
+}
+
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
     const [canvasSize, setCanvasSize] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const moduleRef = useRef<MainModule | undefined>(undefined);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasOnScreen = useOnScreen(canvasRef);
+    const moduleRef = useRef<MainModule>();
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
@@ -26,14 +65,19 @@ const Mode3Page: React.FC = () => {
             } catch (error) {}
         });
         return () => {
-            if (moduleRef.current) {
-                moduleRef.current?.stop();
-                (moduleRef.current as any)['canvas'] = undefined;
-                moduleRef.current = undefined;
-            }
+            moduleRef.current?.stop();
+            (moduleRef.current as any)['canvas'] = undefined;
+            moduleRef.current = undefined;
             console.log("Unloaded mode3 wasm module.");
         };
     }, []);
+
+    useEffect(() => {
+        // needs try-catch because throws to change emscripten main loop
+        try {
+            moduleRef.current?.setHidden(!canvasOnScreen);
+        } catch (error) {}
+    }, [canvasOnScreen]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -134,7 +178,7 @@ const Mode3Page: React.FC = () => {
                             <div className='game' id='mode3Game'>
                                 <canvas
                                     id="canvas"
-                                    className=''
+                                    ref={canvasRef}
                                     width={canvasSize.x}
                                     height={canvasSize.y}
                                     onFocus={() => moduleRef.current?.setFocused(true)}

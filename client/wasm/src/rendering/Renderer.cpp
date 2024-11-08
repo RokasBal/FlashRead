@@ -214,9 +214,12 @@ void Renderer::SetupUniforms() {
     printf("Shaders loaded.\n");
 }
 
-void Renderer::Render(const std::shared_ptr<Scene> &scene) {
+void Renderer::Render(bool isHidden, const std::shared_ptr<Scene> &scene) {
     ImGui::Render();
-    if (m_shadersLoading) return;
+    if (isHidden || m_shadersLoading || !scene) {
+        DebugDraw::Clear();
+        return;
+    }
 
     // update uniforms
     auto& camera = scene->GetCamera();

@@ -20,7 +20,7 @@ public:
     Renderer(Renderer&&) = delete;
     Renderer& operator=(Renderer&&) = delete;
 
-    void Render(const std::shared_ptr<Scene>& scene);
+    void Render(bool isHidden, const std::shared_ptr<Scene>& scene);
 
     void SetViewportSize(int32_t width, int32_t height);
 
