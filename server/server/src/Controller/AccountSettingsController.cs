@@ -123,7 +123,7 @@ namespace server.Controller {
             if (settingsId == null) {
                 return NotFound("Settings not found for update.");
             }
-            await _settings.UpdateSelectedTheme(settingsId, font);
+            await _settings.UpdateSelectedFont(settingsId, font);
             return Ok("Font updated successfully.");
         }
     }
