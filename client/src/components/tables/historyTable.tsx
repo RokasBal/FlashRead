@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import '../css/tables.css';
 import ChoiceBox from '../choiceBox';
-
-interface TableRow {
-    gamemode: string;
-    score: number;
-    date: string;
-}
+import TableContent from './tableComponent';
+import { TableRow } from './types';
 
 interface CustomTableProps {
     data: TableRow[];
@@ -15,7 +11,6 @@ interface CustomTableProps {
 const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
 
-    // Sort the data based on the current sorting configuration
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
             return [...data].sort((a, b) => {
@@ -36,10 +31,8 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
     const handleSort = (key: keyof TableRow) => {
         setSortConfig((prevConfig) => {
             if (prevConfig && prevConfig.key === key) {
-                // Toggle the sort direction if the same column is clicked
                 return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
             }
-            // Set to ascending by default if a new column is clicked
             return { key, direction: 'asc' };
         });
     };
@@ -49,40 +42,7 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
             <div className="tableFilter">
                 <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={choice => console.log(choice)} label="Mode"/>
             </div>
-            <div className="tableContent">
-                <table className="customTable">
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort('gamemode')}>
-                                Gamemode {sortConfig?.key === 'gamemode' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
-                            </th>
-                            <th onClick={() => handleSort('score')}>
-                                Score {sortConfig?.key === 'score' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
-                            </th>
-                            <th onClick={() => handleSort('date')}>
-                                Date {sortConfig?.key === 'date' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortedData.map((row, index) => (
-                            <tr key={index}>
-                                <td>{row.gamemode}</td>
-                                <td>{row.score}</td>
-                                <td>{row.date}</td>
-                            </tr>
-                        ))}
-                        {/* Add empty rows to fill the space */}
-                        {Array.from({ length: Math.max(0, 10 - data.length) }).map((_, index) => (
-                            <tr key={`empty-${index}`}>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <TableContent data={sortedData} sortConfig={sortConfig} handleSort={handleSort} />
         </div>
     );
 };
