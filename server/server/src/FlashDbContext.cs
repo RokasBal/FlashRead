@@ -18,6 +18,7 @@ namespace server.src {
         public DbSet<DbSettingsFont> SettingsFonts { get; set; }
         public DbSet<DbUserSessions> UserSessions { get; set; }
         public DbSet<DbUserSingleSession> UserSingleSessions { get; set; }
+        public DbSet<DbTask1Stats> Task1Stats { get; set; }
         public FlashDbContext(DbContextOptions<FlashDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
@@ -50,6 +51,17 @@ namespace server.src {
                 entity.Property(e => e.SettingsId).HasColumnName("settings_id");
                 entity.Property(e => e.JoinedAt).HasColumnName("joined_at");
                 entity.Property(e => e.SessionsId).HasColumnName("sessions_id");
+                entity.Property(e => e.Task1StatsId).HasColumnName("task1_stats_id");
+            });
+            modelBuilder.Entity<DbTask1Stats>(entity => {
+                entity.ToTable("stats", "users");
+                entity.HasKey(e => e.Id).HasName("stats_pkey");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.TotalScore).HasColumnName("total_score");
+                entity.Property(e => e.HighScore).HasColumnName("high_score");
+                entity.Property(e => e.HighestWpm).HasColumnName("highest_wpm");
+                entity.Property(e => e.TotalGames).HasColumnName("total_games");
+                entity.Property(e => e.TotalCorrectAnswers).HasColumnName("total_correct_answers");
             });
             modelBuilder.Entity<DbUserSessions>(entity => {
                 entity.ToTable("user_sessions", "users");

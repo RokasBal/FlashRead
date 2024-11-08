@@ -9,7 +9,7 @@ namespace server.UserNamespace {
         public string SettingsId { get; set; } = null!;
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
         public string SessionsId { get; set; } = null!;
-
+        public string Task1StatsId { get; set; } = null!;
         public static explicit operator User(DbUser dbUser)
         {
             return new User(dbUser.Email, dbUser.Password, dbUser.Name);
