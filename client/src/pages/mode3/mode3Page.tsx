@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainModule } from '../../../wasm/interface/wasmInterface';
 import { loadWasmModule } from './wasmLoader';
@@ -9,28 +9,32 @@ import "../../boards/css/keyboardControls.css"
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
     const [canvasSize, setCanvasSize] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const [module, setModule] = useState<MainModule | undefined>(undefined);
+    const moduleRef = useRef<MainModule | undefined>(undefined);
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
         loadWasmModule().then((val) => {
-            setModule(val);
+            moduleRef.current = val;
             console.log("Mode3 wasm module loaded.");
+
+            // cast to any to avoid TypeScript error, canvas is not generated in the type definition
+            (moduleRef.current as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
+
+            // try-catch is a must because emscripten_set_main_loop() throws to exit the function
+            try {
+                moduleRef.current?.start();
+            } catch (error) {}
         });
+        return () => {
+            if (moduleRef.current) {
+                moduleRef.current?.stop();
+                (moduleRef.current as any)['canvas'] = undefined;
+                moduleRef.current = undefined;
+            }
+            console.log("Unloaded mode3 wasm module.");
+        };
     }, []);
 
-    useEffect(() => {
-        if (module === undefined) return;
-        
-        // cast to any to avoid TypeScript error, canvas is not generated in the type definition
-        (module as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
-
-        // try-catch is a must because emscripten_set_main_loop() throws to exit the function
-        try {
-            module.start();
-        } catch (error) {}
-    }, [module]);
-    
     useEffect(() => {
         const handleResize = () => {
             const gamePageElement = document.getElementById('mode3Game');
@@ -133,8 +137,8 @@ const Mode3Page: React.FC = () => {
                                     className=''
                                     width={canvasSize.x}
                                     height={canvasSize.y}
-                                    onFocus={() => module?.setFocused(true)}
-                                    onBlur={() => module?.setFocused(false)}
+                                    onFocus={() => moduleRef.current?.setFocused(true)}
+                                    onBlur={() => moduleRef.current?.setFocused(false)}
                                     tabIndex={-1}
                                 />
                             </div>
