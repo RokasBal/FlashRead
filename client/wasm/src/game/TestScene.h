@@ -6,7 +6,7 @@
 class TestScene : public Scene {
 public:
     TestScene();
-    ~TestScene() = default;
+    ~TestScene() override = default;
 
     void Update(TimeDuration dt) override;
 

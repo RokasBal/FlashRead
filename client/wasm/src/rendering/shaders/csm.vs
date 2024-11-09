@@ -14,6 +14,12 @@ layout(std140) uniform ModelMatricesUniform {
 };
 
 void main() {
-    gl_Position = lightSpaceMatrices[<<FRUSTUM_INDEX>>] * model[gl_InstanceID] * vec4(position, 1.0);
+    mat4 currentModel = model[gl_InstanceID];
+    // revert highlight color
+    currentModel[0][3] = 0.0;
+    currentModel[1][3] = 0.0;
+    currentModel[2][3] = 0.0;
+
+    gl_Position = lightSpaceMatrices[<<FRUSTUM_INDEX>>] * currentModel * vec4(position, 1.0);
 }
 )"

@@ -1,6 +1,7 @@
 # Some controls:
-P - reload shaders
-O - show collision shapes
+CTRL + P - reload shaders
+CTRL + O - show collision shapes
+CTRL + I - show wireframe
 L - exit editor, start game
 
 
@@ -9,11 +10,10 @@ L - exit editor, start game
 make
 ```
 # To create wasm module and bindings:
-`TARGET` = `debug` or `prod`.  
-`debug` allows shader hot reloading, saving scenes. Needs `debug_api.py` to be running.
+`Debug` allows shader hot reloading, saving scenes. Needs `debug_api.py` to be running.
 ```
 mkdir build
 cd build
-emcmake cmake ..
-cmake --build . --target TARGET
+emcmake cmake -DCMAKE_BUILD_TYPE=Debug|Release ..
+cmake --build .
 ```

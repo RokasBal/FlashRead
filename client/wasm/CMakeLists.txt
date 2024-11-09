@@ -30,48 +30,64 @@ set(COMMON_LINK_OPT
     -sFILESYSTEM=0
 )
 
+# for visual studio
+# set(CMAKE_CXX_STANDARD 23)
+# include_directories(${EMSCRIPTEN_ROOT_PATH}/system/include)
+
+# app
+add_executable(wasmgame ${SRC_FILES})
+set_target_properties(wasmgame PROPERTIES OUTPUT_NAME "wasmInterface")
 
 # deps
+set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "Build Bullet2 demos")
+set(BUILD_EXTRAS OFF CACHE BOOL "Build Bullet Extras")
+set(BUILD_UNIT_TESTS OFF CACHE BOOL "Build Bullet Unit Tests")
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "Build Bullet CPU Demos")
+set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "Build OpenGL3 Demos")
+set(BUILD_ROBOTICS OFF CACHE BOOL "Build Bullet Robotics")
 add_subdirectory(${DEPS_LOC}/bullet3)
+target_include_directories(wasmgame PRIVATE ${DEPS_LOC}/bullet3/src)
 
-# DEBUG
-add_executable(debug ${SRC_FILES})
-set_target_properties(debug PROPERTIES OUTPUT_NAME "wasmInterface")
-target_compile_options(debug PRIVATE ${COMMON_COMP_OPT}
-    -O2
-    --profiling
-	-DSHADER_HOT_RELOAD
-)
-target_link_options(debug PRIVATE ${COMMON_LINK_OPT}
-    -O2
-    -sFETCH
-    -sASSERTIONS
-    --profiling-funcs
+target_include_directories(wasmgame PRIVATE ${DEPS_LOC}/glm/include)
+target_include_directories(wasmgame PRIVATE ${DEPS_LOC}/entt/include)
+target_link_libraries(wasmgame PRIVATE BulletDynamics BulletCollision LinearMath)
+
+file(GLOB_RECURSE DEPS_FILES_FOR_WARNING_DISABLE CONFIGURE_DEPENDS "${DEPS_LOC}/*" "${SOURCE_LOC}/vendor/*")
+set_source_files_properties(
+  ${DEPS_FILES_FOR_WARNING_DISABLE}
+  PROPERTIES
+  COMPILE_FLAGS "..."
 )
 
-target_include_directories(debug PRIVATE ${DEPS_LOC}/glm/include)
-target_include_directories(debug PRIVATE ${DEPS_LOC}/entt/include)
-target_include_directories(debug PRIVATE ${DEPS_LOC}/bullet3/src)
-target_link_libraries(debug PRIVATE BulletDynamics BulletCollision LinearMath)
-
-# PROD
-add_executable(prod ${SRC_FILES})
-set_target_properties(prod PROPERTIES OUTPUT_NAME "wasmInterface")
-target_compile_options(prod PRIVATE ${COMMON_COMP_OPT}
-    -O3
-    -flto=full
-    -fno-exceptions
-    # Cant get no-rtti to work with embind
-    # -fno-rtti
-    # -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
-)
-target_link_options(prod PRIVATE ${COMMON_LINK_OPT}
-    -O3
-    -flto=full
-    --closure 1
-)
-
-target_include_directories(prod PRIVATE ${DEPS_LOC}/glm/include)
-target_include_directories(prod PRIVATE ${DEPS_LOC}/entt/include)
-target_include_directories(prod PRIVATE ${DEPS_LOC}/bullet3/src)
-target_link_libraries(prod PRIVATE BulletDynamics BulletCollision LinearMath)
+# flags
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Configuring for Debug build")
+    target_compile_options(wasmgame PRIVATE ${COMMON_COMP_OPT}
+        -O2
+        --profiling
+        -DSHADER_HOT_RELOAD
+    )
+    target_link_options(wasmgame PRIVATE ${COMMON_LINK_OPT}
+        -O2
+        -sFETCH
+        -sASSERTIONS
+        --profiling-funcs
+    )
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Configuring for Release build")
+    target_compile_options(wasmgame PRIVATE ${COMMON_COMP_OPT}
+        -O3
+        -flto=full
+        -fno-exceptions
+        # Cant get no-rtti to work with embind
+        # -fno-rtti
+        # -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
+    )
+    target_link_options(wasmgame PRIVATE ${COMMON_LINK_OPT}
+        -O3
+        -flto=full
+        --closure 1
+    )
+else ()
+    message(FATAL_ERROR "Unknown build type. Should be either Debug or Release")
+endif ()

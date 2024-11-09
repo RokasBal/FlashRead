@@ -31,6 +31,7 @@ public:
         glm::vec3 modelScale{1, 1, 1};
         
         std::string tag;
+        uint32_t flags = 0;
 
         int selectedCollider = -1;
         float mass = 0;
@@ -53,7 +54,7 @@ private:
     PhysicsWorld& m_physicsWorld;
     std::set<int32_t> m_selectedEntities;
     std::string m_saveName;
-    uint32_t m_stateVersion = 3;
+    uint32_t m_stateVersion = 4;
     std::vector<std::string> m_models;
     std::vector<std::string> m_colliders;
     float m_dragSpeed = 0.01f;

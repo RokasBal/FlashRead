@@ -35,7 +35,7 @@ void SceneBuilder::Play() {
 }
 
 void SceneBuilder::RecreateEntity(int32_t entityId, bool useMass, bool invisible) {
-    float globalScale = invisible ? 0 : 1;
+    const float globalScale = invisible ? 0 : 1;
     if (entityId == -1) return;
     entt::entity& entity = m_savedStates[entityId].first;
     State& state = m_savedStates[entityId].second;
@@ -58,7 +58,7 @@ void SceneBuilder::RecreateEntity(int32_t entityId, bool useMass, bool invisible
         }
     }
     if (state.selectedCollider != -1) {
-        float mass = useMass ? state.mass : 0;
+        const float mass = useMass ? state.mass : 0;
 
         std::shared_ptr<btCollisionShape> col;
         if (m_colliders[state.selectedCollider] == "Box") {
@@ -68,7 +68,7 @@ void SceneBuilder::RecreateEntity(int32_t entityId, bool useMass, bool invisible
         } else if (m_colliders[state.selectedCollider] == "Capsule") {
             col = m_physicsWorld.GetCapsuleCollider(globalScale * state.capsuleColliderRadius * glm::length(state.scale), state.capsuleColliderHeight * glm::length(state.scale));
         }
-        auto rb = m_physicsWorld.CreateRigidBody(col, mass, state.position, state.rotation);
+        const auto rb = m_physicsWorld.CreateRigidBody(entity, col, mass, state.position, state.rotation);
         m_registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent{rb});
         rb->setFriction(state.friction);
     }
@@ -333,9 +333,11 @@ void SceneBuilder::Update() {
 }
 
 void SceneBuilder::Reset() {
+	for (auto&& [entity, state] : m_savedStates) {
+		m_registry.destroy(entity);
+	}
     m_selectedEntities.clear();
     m_savedStates.clear();
-    m_registry.clear();
 }
 
 void SceneBuilder::Load() {
@@ -406,6 +408,10 @@ void SceneBuilder::Load() {
                 std::getline(line, state.tag, '"');
                 line.ignore();
 
+                // flag
+				line >> state.flags;
+				line.ignore();
+
                 // collider
                 line >> state.selectedCollider;
                 line.ignore();
@@ -471,7 +477,7 @@ void SceneBuilder::Save() {
             const State& state = pair.second;
             saveData += std::format("   {{{},{},{},", vec3str(state.position), vec3str(state.rotation), vec3str(state.scale));
             saveData += std::format("{},{},{},{},", state.selectedModel, vec3str(state.modelOffset), vec3str(state.modelRotation), vec3str(state.modelScale));
-            saveData += std::format("\"{}\",", state.tag);
+            saveData += std::format("\"{}\",{},", state.tag, state.flags);
             saveData += std::format("{},{},{},{},", state.selectedCollider, state.mass, state.friction, vec3str(state.boxColliderSize));
             saveData += std::format("{},{},{}}},\n", state.sphereColliderRadius, state.capsuleColliderRadius, state.capsuleColliderHeight);
         }

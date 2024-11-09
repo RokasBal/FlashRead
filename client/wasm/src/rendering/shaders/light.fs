@@ -49,7 +49,9 @@ void main() {
 
     vec4 packedBackgroundMaterial = texture(tColor, uv);
     uint materialId = uint(floor(packedBackgroundMaterial.a + 0.5));
-    vec3 backgroundColor = materials[materialId].diffuse.rgb;
+    vec3 backgroundColor = packedBackgroundMaterial.rgb;
+    // background color is a highlight if there is an object
+    vec3 highlightColor = backgroundColor;
 
     // toon shading
     float lightStrength = getSunlight(position, normal);
@@ -73,7 +75,13 @@ void main() {
     float gamma = 2.2;
     color = pow(color, vec3(1.0 / gamma));
 
-    gColor = vec4(color, 1.0f);
+    gColor = vec4(color + highlightColor, 1.0f);
+
+    // show cursor
+    vec2 cursorLoc = gl_FragCoord.xy - viewportSize * 0.5;
+    float cursorDist = dot(cursorLoc, cursorLoc);
+    if (cursorDist < 2.0) gColor.xyz = vec3(1.0) - gColor.xyz;
+    else if (cursorDist < 3.0) gColor.xyz = vec3(0.0);
 }
 
 float getSunlight(vec3 position, vec3 normal) {

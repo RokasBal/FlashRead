@@ -51,7 +51,7 @@ private:
     constexpr static inline uint32_t m_maxCSMFrustums = 8;
     constexpr static inline uint32_t m_materialsPerUniformBuffer = 1024;
 
-    struct MeshModelUniform {
+    struct MeshBatch {
         Mesh mesh;
         uint32_t instanceOffset;
         uint32_t instanceCount;
@@ -77,7 +77,7 @@ private:
         Material materials[m_materialsPerUniformBuffer];
     };
 
-    UniformBuffer<void> m_modelUniform; // uses dynamic amount of MeshModelUniform
+    UniformBuffer<void> m_modelUniform; // uses dynamic amount of glm::mat4's
     UniformBuffer<CameraUniform> m_cameraUniform;
     UniformBuffer<CSMUniform> m_csmUniform;
     UniformBuffer<LightingInfoUniform> m_lightingInfoUniform;

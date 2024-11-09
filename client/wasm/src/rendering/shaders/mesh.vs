@@ -16,13 +16,21 @@ layout(std140) uniform ModelMatricesUniform {
 
 out vec3 u_fragPos;
 out vec3 u_normal;
+flat out vec3 u_highlightColor;
 flat out uint u_materialId;
 
 void main() {
-    vec4 pos = model[gl_InstanceID] * vec4(position, 1.0);
+    mat4 currentModel = model[gl_InstanceID];
+    // revert highlight color
+    u_highlightColor = vec3(currentModel[0][3], currentModel[1][3], currentModel[2][3]);
+    currentModel[0][3] = 0.0;
+    currentModel[1][3] = 0.0;
+    currentModel[2][3] = 0.0;
+
+    vec4 pos = currentModel * vec4(position, 1.0);
     gl_Position = projxview * pos;
 
-    u_normal = transpose(inverse(mat3(model[gl_InstanceID]))) * normal;
+    u_normal = transpose(inverse(mat3(currentModel))) * normal;
     u_fragPos = pos.xyz;
     u_materialId = materialId;
 }

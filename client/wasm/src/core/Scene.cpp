@@ -7,8 +7,8 @@ Scene::Scene()
     registry.on_destroy<RigidBodyComponent>().connect<&Scene::OnDestroyRigidBody>(*this);
 }
 
-void Scene::OnDestroyRigidBody(entt::registry& registry, entt::entity entity) {
-    auto body = registry.get<RigidBodyComponent>(entity).body;
+void Scene::OnDestroyRigidBody(entt::registry& reg, entt::entity entity) const {
+	const auto body = reg.get<RigidBodyComponent>(entity).body;
     m_physicsWorld.DestroyRigidBody(body);
 }
 
