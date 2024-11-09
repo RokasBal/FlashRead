@@ -84,6 +84,8 @@ void setFocused(bool focused) {
 }
 void setHidden(bool hidden) {
     if (ctx == nullptr) return;
+    if (hidden == isHidden) return;
+
     isHidden = hidden;
 
     if (isHidden) {

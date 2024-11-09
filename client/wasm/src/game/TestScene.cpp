@@ -2,44 +2,19 @@
 
 #include "../io/Input.h"
 #include "../core/Components.h"
-#include "../rendering/Mesh.h"
+#include "ModelInit.h"
 
-#include "../meshes/candle.h"
-#include "../meshes/chair.h"
-#include "../meshes/closedBook.h"
-#include "../meshes/emptyBookshelf.h"
-#include "../meshes/fullBookshelf.h"
-#include "../meshes/lectern.h"
-#include "../meshes/openBook.h"
-#include "../meshes/pencil.h"
-#include "../meshes/table.h"
-#include "../meshes/globe.h"
-
-#define LOAD_MESH(name) do { \
-    Mesh mesh = MeshRegistry::Create(#name); \
-    mesh->Load(name##_vertexCount, name##_vertices, name##_materialCount, name##_materials); \
-    m_sceneBuilder.AddModel(#name); \
-} while(0)
+#include "../scenes/world1.h"
 
 TestScene::TestScene()
     : m_player(m_physicsWorld, {0, 5, 0}) {
     SetCamera(m_player.GetCamera());
 
-    LOAD_MESH(candle);
-    LOAD_MESH(chair);
-    LOAD_MESH(closedBook);
-    LOAD_MESH(emptyBookshelf);
-    LOAD_MESH(fullBookshelf);
-    LOAD_MESH(lectern);
-    LOAD_MESH(openBook);
-    LOAD_MESH(pencil);
-    LOAD_MESH(table);
-    LOAD_MESH(globe);
+    LoadModels(m_sceneBuilder);
 
-// #ifndef SHADER_HOT_RELOAD
-//     m_sceneBuilder.Load(testscene_stateCount, testscene_states);
-// #endif
-
+    #ifndef SHADER_HOT_RELOAD
+        m_sceneBuilder.Load(world1_stateCount, world1_states);
+    #endif
 }
 
 void TestScene::Update(TimeDuration dt) {
@@ -71,22 +46,22 @@ void TestScene::Update(TimeDuration dt) {
 
     // physics
     auto& dynamicsWorld = m_physicsWorld.dynamicsWorld;
-    dynamicsWorld->stepSimulation(dt.fMilli(), 1);
+    dynamicsWorld->stepSimulation(1, 1, dt.fSec() * 2.0); // this makes physics have the same speed at low fps, but makes it unstable
     m_physicsWorld.CheckObjectsTouchingGround();
 
     // camera
     m_player.UpdateCameraAfterPhysics();
 
-    // random stuff
-    // create entity
-    if (Input::IsHeld(SDL_SCANCODE_B)) {
-        auto rabbit = registry.create();
-        // attach mesh
-        Mesh mesh = MeshRegistry::Get("candle");
-        registry.emplace<MeshComponent>(rabbit, MeshComponent{mesh});
-        // attach rigid body
-        const auto& boxCol = m_physicsWorld.GetBoxCollider({2, 2, 2});
-        auto rb = m_physicsWorld.CreateRigidBody(boxCol, 10.f, {0, 1000, 0}, {0, 0, 0});
-        registry.emplace<RigidBodyComponent>(rabbit, RigidBodyComponent{rb});
+    // debug 
+    if (Input::JustPressed(SDL_SCANCODE_T)) {
+        Mesh mesh = MeshRegistry::Get("pencil");
+        auto shape = m_physicsWorld.GetCapsuleCollider(0.5f, 1.0f);
+        for (int i = 0; i < 100; i++) {
+            auto body = m_physicsWorld.CreateRigidBody(shape, 1.0f, m_player.GetCamera()->position + glm::vec3{0, 100, 0}, {0, 0, 0});
+            
+            auto entity = registry.create();
+            registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent{body});
+            registry.emplace<MeshComponent>(entity, MeshComponent{mesh});
+        }
     }
 }

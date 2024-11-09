@@ -30,6 +30,8 @@ public:
         glm::vec3 modelRotation{0, 0, 0};
         glm::vec3 modelScale{1, 1, 1};
         
+        std::string tag;
+
         int selectedCollider = -1;
         float mass = 0;
         float friction = 0.5f;
@@ -51,7 +53,7 @@ private:
     PhysicsWorld& m_physicsWorld;
     std::set<int32_t> m_selectedEntities;
     std::string m_saveName;
-    uint32_t m_stateVersion = 2;
+    uint32_t m_stateVersion = 3;
     std::vector<std::string> m_models;
     std::vector<std::string> m_colliders;
     float m_dragSpeed = 0.01f;

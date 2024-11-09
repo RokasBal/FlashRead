@@ -72,6 +72,10 @@ void SceneBuilder::RecreateEntity(int32_t entityId, bool useMass, bool invisible
         m_registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent{rb});
         rb->setFriction(state.friction);
     }
+
+    if (!state.tag.empty()) {
+        m_registry.emplace<TagComponent>(entity, TagComponent{state.tag});
+    }
 }
 
 void SceneBuilder::Blink(int32_t entityId, bool clearOthers) {
@@ -136,7 +140,7 @@ void SceneBuilder::Update() {
             for (int i = 0; i < m_savedStates.size(); i++) {
                 ImGui::PushID(i);
                 bool isSelected = m_selectedEntities.contains(i);
-                if (ImGui::Selectable(std::format("Entity {}", i).c_str(), isSelected)) {
+                if (ImGui::Selectable(std::format("({}) Entity {}", m_savedStates[i].second.tag, i + 1).c_str(), isSelected)) {
                     if (isSelected) m_selectedEntities.erase(i);
                     else {
                         if (!selectMultiple) m_selectedEntities.clear();
@@ -198,6 +202,22 @@ void SceneBuilder::Update() {
         if (m_selectedEntities.size() > 1) {
             glm::vec3 offset{0};
             glm::vec3 rotate{0};
+            std::string multiTag;
+            bool tagsEqual = true;
+            for (auto i : m_selectedEntities) {
+                if (multiTag.empty()) multiTag = m_savedStates[i].second.tag;
+                else if (m_savedStates[i].second.tag != multiTag) {
+                    tagsEqual = false;
+                    break;
+                }
+            }
+            if (!tagsEqual) multiTag = "";
+
+            if (ImGui::InputText("Tag", &multiTag)) {
+                for (auto i : m_selectedEntities) {
+                    m_savedStates[i].second.tag = multiTag;
+                }
+            }
             ImGui::DragFloat3("Offset", &offset.x, m_dragSpeed);
             ImGui::DragFloat3("Rotate (not correct)", &rotate.x, m_dragSpeed);
             // rotation is not correct probably because some objects models are not centered on all axis
@@ -238,6 +258,7 @@ void SceneBuilder::Update() {
         } else if (m_selectedEntities.size() == 1) {
             int32_t selectedEntity = *m_selectedEntities.begin();
             State& state = m_savedStates[selectedEntity].second;
+            ImGui::InputText("Tag", &state.tag);
             ImGui::DragFloat3("Position", &state.position.x, m_dragSpeed);
             ImGui::DragFloat3("Rotation", &state.rotation.x, m_dragSpeed);
             ImGui::DragFloat3("Scale", &state.scale.x, m_dragSpeed);
@@ -380,6 +401,11 @@ void SceneBuilder::Load() {
                 state.modelScale = readvec3(line);
                 line.ignore();
 
+                // tag
+                line.ignore();
+                std::getline(line, state.tag, '"');
+                line.ignore();
+
                 // collider
                 line >> state.selectedCollider;
                 line.ignore();
@@ -445,6 +471,7 @@ void SceneBuilder::Save() {
             const State& state = pair.second;
             saveData += std::format("   {{{},{},{},", vec3str(state.position), vec3str(state.rotation), vec3str(state.scale));
             saveData += std::format("{},{},{},{},", state.selectedModel, vec3str(state.modelOffset), vec3str(state.modelRotation), vec3str(state.modelScale));
+            saveData += std::format("\"{}\",", state.tag);
             saveData += std::format("{},{},{},{},", state.selectedCollider, state.mass, state.friction, vec3str(state.boxColliderSize));
             saveData += std::format("{},{},{}}},\n", state.sphereColliderRadius, state.capsuleColliderRadius, state.capsuleColliderHeight);
         }

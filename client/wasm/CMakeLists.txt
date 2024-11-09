@@ -39,13 +39,14 @@ add_executable(debug ${SRC_FILES})
 set_target_properties(debug PROPERTIES OUTPUT_NAME "wasmInterface")
 target_compile_options(debug PRIVATE ${COMMON_COMP_OPT}
     -O2
-	-g
-	--tracing
+    --profiling
 	-DSHADER_HOT_RELOAD
 )
 target_link_options(debug PRIVATE ${COMMON_LINK_OPT}
+    -O2
     -sFETCH
-    -sASYNCIFY
+    -sASSERTIONS
+    --profiling-funcs
 )
 
 target_include_directories(debug PRIVATE ${DEPS_LOC}/glm/include)
@@ -57,11 +58,18 @@ target_link_libraries(debug PRIVATE BulletDynamics BulletCollision LinearMath)
 add_executable(prod ${SRC_FILES})
 set_target_properties(prod PROPERTIES OUTPUT_NAME "wasmInterface")
 target_compile_options(prod PRIVATE ${COMMON_COMP_OPT}
--O2
--flto=full
--fno-exceptions
+    -O3
+    -flto=full
+    -fno-exceptions
+    # Cant get no-rtti to work with embind
+    # -fno-rtti
+    # -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
 )
-target_link_options(prod PRIVATE ${COMMON_LINK_OPT})
+target_link_options(prod PRIVATE ${COMMON_LINK_OPT}
+    -O3
+    -flto=full
+    --closure 1
+)
 
 target_include_directories(prod PRIVATE ${DEPS_LOC}/glm/include)
 target_include_directories(prod PRIVATE ${DEPS_LOC}/entt/include)

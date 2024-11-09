@@ -25,6 +25,8 @@ public:
     DebugDraw() = delete;
 
     static void Init();
+    static void Deinit();
+    static void Clear();
     static void Draw();
 
     static void DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color);

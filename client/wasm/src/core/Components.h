@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <btBulletDynamicsCommon.h>
@@ -21,4 +22,8 @@ struct TransformComponent {
 
 struct RigidBodyComponent {
     btRigidBody* body;
+};
+
+struct TagComponent {
+    std::string tag;
 };

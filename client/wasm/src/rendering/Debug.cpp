@@ -35,6 +35,16 @@ void DebugDraw::Init() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert), (void*)offsetof(vert, color));
     glBindVertexArray(0);
 }
+void DebugDraw::Deinit() {
+    if (!m_vao) return;
+    glDeleteVertexArrays(1, &m_vao);
+    glDeleteBuffers(1, &m_vbo);
+    m_vao = 0;
+    m_vbo = 0;
+}
+void DebugDraw::Clear() {
+    m_vertices.clear();
+}
 void DebugDraw::Draw() {
     if (!m_enabled) return;
     if (m_vertices.empty()) return;

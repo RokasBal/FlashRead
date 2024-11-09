@@ -69,7 +69,7 @@ void Player::UpdateInput(float dt) {
 
     float speed = moveSpeed;
     glm::vec3 velocity{0};
-    if (Input::IsHeld(SDL_SCANCODE_LSHIFT)) speed *= 3.f;
+    if (Input::IsHeld(SDL_SCANCODE_LSHIFT)) speed *= 2.f;
     
     if (Input::IsHeld(SDL_SCANCODE_W)) velocity += front;
     if (Input::IsHeld(SDL_SCANCODE_S)) velocity -= front;
@@ -77,12 +77,13 @@ void Player::UpdateInput(float dt) {
     if (Input::IsHeld(SDL_SCANCODE_D)) velocity += glm::cross(front, m_camera->GetUp());
     // normalize velocity to avoid faster diagonal movement
     if (glm::length2(velocity) > 0) {
-        velocity = glm::normalize(velocity) * speed * dt;
+        velocity = glm::normalize(velocity) * speed * glm::sqrt(dt); // not correct but kinda works independently of fps
     }
 
-    if (fly && Input::IsHeld(SDL_SCANCODE_C)) velocity -= m_camera->GetUp();
+    glm::vec3 vertical = m_camera->GetUp() * moveSpeed * 4.f;
+    if (fly && Input::IsHeld(SDL_SCANCODE_C)) velocity -= vertical;
     if ((fly || (userData->onGround && TimePoint() - m_lastJump > 250ms)) && Input::IsHeld(SDL_SCANCODE_SPACE)) {
-        velocity += m_camera->GetUp() * moveSpeed * 10.f;
+        velocity += vertical;
         m_lastJump.reset();
     }
     if (!userData->onGround) {
@@ -91,10 +92,9 @@ void Player::UpdateInput(float dt) {
 
     if (glm::length2(velocity) > 0) {
         if (fly) {
-            m_camera->position += velocity;
+            m_camera->position += velocity * 0.05f;
         } else {
             m_rigidBody->activate(true);
-            velocity *= 35.f;
             float oldY = m_rigidBody->getLinearVelocity().getY();
             velocity.y += oldY;
             m_rigidBody->setLinearVelocity({velocity.x, velocity.y, velocity.z});
