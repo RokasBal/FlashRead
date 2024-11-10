@@ -2,7 +2,7 @@ R"(#version 300 es
 precision mediump float;
 out vec4 gColor;
 
-uniform sampler2D tPosition;
+uniform sampler2D tDepth;
 uniform sampler2D tColor;
 uniform sampler2D tNormal;
 uniform mediump sampler2DArray tShadow;
@@ -11,7 +11,8 @@ layout(std140) uniform LightingInfoUniform {
     vec3 sunlightDir;
     vec4 sunlightColor; // rgb-color, a-intensity
     vec3 cameraPos;
-    vec2 viewportSize;
+    vec4 viewportSize_nearFarPlane;
+    mat4 invProjView;
 };
 layout(std140) uniform CSMUniform {
     mat4 lightSpaceMatrices[<<MAX_FRUSTUMS>>];
@@ -36,14 +37,16 @@ layout(std140) uniform MaterialUniform {
 in vec2 uv;
 
 float getSunlight(vec3 position, vec3 normal);
-float getShadow(vec3 fragPosWorldSpace, vec3 normal, float depth);
-float getOutline(vec3 normal, float depth);
+float getShadow(vec3 fragPosWorldSpace, vec3 normal, float lDepth);
+float getOutline(vec3 normal, float lDepth);
+float linearDepth(float depth);
+vec3 getWorldPos(vec2 uv, float depth);
 
 void main() {
     // init values
-    vec4 packedPosDepth = texture(tPosition, uv);
-    vec3 position = packedPosDepth.xyz;
-    float depth = packedPosDepth.w;
+    float depth = texture(tDepth, uv).r;
+    float lDepth = linearDepth(depth);
+    vec3 position = getWorldPos(uv, depth);
 
     vec3 normal = texture(tNormal, uv).rgb;
 
@@ -59,13 +62,13 @@ void main() {
     vec3 color = materials[materialId].diffuse.rgb * sunlightColor.rgb * lightStrength;
 
     // add shadow
-    float shadow = getShadow(position, normal, depth);
+    float shadow = getShadow(position, normal, lDepth);
     shadow = 1.0 - shadow * 0.8;
     color *= shadow;
 
     // add outline
     vec3 outlineColor = vec3(0);
-    float outline = getOutline(normal, depth);
+    float outline = getOutline(normal, lDepth);
     color = mix(color, outlineColor, outline);
 
     // fill background color
@@ -78,10 +81,22 @@ void main() {
     gColor = vec4(color + highlightColor, 1.0f);
 
     // show cursor
-    vec2 cursorLoc = gl_FragCoord.xy - viewportSize * 0.5;
+    vec2 cursorLoc = gl_FragCoord.xy - viewportSize_nearFarPlane.xy * 0.5;
     float cursorDist = dot(cursorLoc, cursorLoc);
     if (cursorDist < 2.0) gColor.xyz = vec3(1.0) - gColor.xyz;
     else if (cursorDist < 3.0) gColor.xyz = vec3(0.0);
+}
+
+float linearDepth(float depth) {
+    float near = viewportSize_nearFarPlane.z;
+    float far = viewportSize_nearFarPlane.w;
+    float z = depth * 2.0 - 1.0; // back to NDC
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+vec3 getWorldPos(vec2 uv, float depth) {
+    vec4 ndc = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec4 world = invProjView * ndc;
+    return world.xyz / world.w;
 }
 
 float getSunlight(vec3 position, vec3 normal) {
@@ -100,11 +115,11 @@ float getSunlight(vec3 position, vec3 normal) {
     return (ambient + diffuse) * strength;
 }
 
-float getShadow(vec3 fragPosWorldSpace, vec3 normal, float depth) {
+float getShadow(vec3 fragPosWorldSpace, vec3 normal, float lDepth) {
     // select cascade layer
     int layer = cascadeCount - 1;
     for (int i = 0; i < cascadeCount; i++) {
-        if (depth < cascadeSplits[i]) {
+        if (lDepth < cascadeSplits[i]) {
             layer = i;
             break;
         }
@@ -153,17 +168,18 @@ float sobel(mat3 vars) {
     return sqrt(gx * gx + gy * gy);
 }
 
-float getOutline(vec3 normal, float depth) {
-    vec2 stepDist = max(0.5, 2.0 - depth / 40.0) / viewportSize;
+float getOutline(vec3 normal, float lDepth) {
+    vec2 stepDist = max(0.5, 2.0 - lDepth / 40.0) / viewportSize_nearFarPlane.xy;
 
     mat3 sobelPositions;
     mat3 sobelNormals;
     for (int x = 0; x < 3; x++) {
         for (int y = 0; y < 3; y++) {
             vec2 uvNeighbour = uv + vec2(x, y) * stepDist - stepDist;
-            // I dont understand why position buffer works so well here.
+            // I dont understand why position works so well here.
             // Discovered by accident. should have been normal buffer.
-            sobelPositions[x][y] = dot(normal, texture(tPosition, uvNeighbour).xyz);
+            float neighbourDepth = texture(tDepth, uvNeighbour).r;
+            sobelPositions[x][y] = dot(normal, getWorldPos(uvNeighbour, neighbourDepth));
             sobelNormals[x][y] = dot(normal, texture(tNormal, uvNeighbour).xyz);
         }
     }

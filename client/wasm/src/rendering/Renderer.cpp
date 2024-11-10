@@ -233,8 +233,9 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 	// update uniforms
 	auto& camera = scene->GetCamera();
 	camera->Update(m_viewportWidth, m_viewportHeight);
+	const glm::mat4 camProjView = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 	m_cameraUniform.Update({
-		.projxview = camera->GetProjectionMatrix() * camera->GetViewMatrix(),
+		.projxview = camProjView,
 		.nearFarPlane = {camera->GetNearPlane(), camera->GetFarPlane()}
 	});
 
@@ -242,7 +243,8 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 		.sunlightDir = glm::normalize(scene->sunlightDir),
 		.sunlightColor = {1.0, 0.7, 0.8, 3.0},
 		.cameraPos = camera->position,
-		.viewportSize = glm::vec2(m_viewportWidth, m_viewportHeight)
+		.viewportSize_nearFarPlane = {m_viewportWidth, m_viewportHeight, camera->GetNearPlane(), camera->GetFarPlane()},
+		.invProjView = glm::inverse(camProjView)
 	});
 
 	static std::size_t lastMaterialCount = 0;
@@ -420,7 +422,7 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 	// lighting
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_lightingProgram->Use();
-	m_lightingProgram->SetTexture("tPosition", GL_TEXTURE_2D, 0, m_gbuffer.GetPositionTexture());
+	m_lightingProgram->SetTexture("tDepth", GL_TEXTURE_2D, 0, m_gbuffer.GetDepthTexture());
 	m_lightingProgram->SetTexture("tColor", GL_TEXTURE_2D, 1, m_gbuffer.GetColorTexture());
 	m_lightingProgram->SetTexture("tNormal", GL_TEXTURE_2D, 2, m_gbuffer.GetNormalTexture());
 	m_lightingProgram->SetTexture("tShadow", GL_TEXTURE_2D_ARRAY, 3, m_csmbuffer.GetDepthTextureArray());

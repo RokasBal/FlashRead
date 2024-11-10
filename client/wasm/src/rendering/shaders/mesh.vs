@@ -14,7 +14,6 @@ layout(std140) uniform ModelMatricesUniform {
     mat4 model[<<MODELS_PER_UBO>>];
 };
 
-out vec3 u_fragPos;
 out vec3 u_normal;
 flat out vec3 u_highlightColor;
 flat out uint u_materialId;
@@ -27,11 +26,9 @@ void main() {
     currentModel[1][3] = 0.0;
     currentModel[2][3] = 0.0;
 
-    vec4 pos = currentModel * vec4(position, 1.0);
-    gl_Position = projxview * pos;
-
     u_normal = transpose(inverse(mat3(currentModel))) * normal;
-    u_fragPos = pos.xyz;
     u_materialId = materialId;
+
+    gl_Position = projxview * currentModel * vec4(position, 1.0);
 }
 )"

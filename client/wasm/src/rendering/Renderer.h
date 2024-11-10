@@ -70,8 +70,8 @@ private:
         glm::vec4 sunlightColor; // rgb-color, a-intensity
         glm::vec3 cameraPos;
         float p2;
-        glm::vec2 viewportSize;
-        float p3, p4;
+        glm::vec4 viewportSize_nearFarPlane;
+        glm::mat4 invProjView;
     };
     struct MaterialUniform {
         Material materials[m_materialsPerUniformBuffer];

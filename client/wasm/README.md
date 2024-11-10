@@ -2,6 +2,7 @@
 CTRL + P - reload shaders
 CTRL + O - show collision shapes
 CTRL + I - show wireframe
+CTRL + U - show frametime
 L - exit editor, start game
 
 

@@ -47,7 +47,10 @@ void TestScene::Update(TimeDuration dt) {
     // raycast for item picking
 	const glm::vec3 rayFrom = m_player.GetCamera()->position;
 	const glm::vec3 rayTo = rayFrom + m_player.GetCamera()->GetFront() * 50.0f;
-	const auto hits = m_physicsWorld.RaycastWorld(rayFrom, rayTo, true);
+	const auto hits = m_physicsWorld.RaycastWorld(rayFrom, rayTo, true,
+        [](entt::entity entity, const btRigidBody* body, const glm::vec3& hitPos, const glm::vec3& hitNormal) {
+            return body->getMass() != 0.f;
+        });
 	entt::entity firstHitEntity = entt::null;
 	if (!hits.empty()) {
 		const auto& firstHit = hits.front();

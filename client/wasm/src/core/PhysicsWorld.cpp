@@ -1,9 +1,7 @@
 #include "PhysicsWorld.h"
 
-#include "glm/gtx/norm.hpp"
-
 PhysicsWorld::PhysicsWorld() {
-    // collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
+	// collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
 	m_collisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
 
 	// use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
@@ -13,16 +11,16 @@ PhysicsWorld::PhysicsWorld() {
 	m_broadphase = std::make_unique<btDbvtBroadphase>();
 
 	// the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-    m_solver = std::make_unique<btSequentialImpulseConstraintSolver>();
+	m_solver = std::make_unique<btSequentialImpulseConstraintSolver>();
 
-    dynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_dispatcher.get(), m_broadphase.get(),
-																m_solver.get(), m_collisionConfiguration.get());
+	dynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(m_dispatcher.get(), m_broadphase.get(),
+		m_solver.get(), m_collisionConfiguration.get());
 
 	dynamicsWorld->setGravity(btVector3(0, -30, 0));
 }
 
 PhysicsWorld::~PhysicsWorld() {
-    for (int i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+	for (int i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
 		btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
 		btRigidBody* body = btRigidBody::upcast(obj);
 		if (body && body->getMotionState()) {
@@ -99,7 +97,8 @@ std::shared_ptr<btCollisionShape> PhysicsWorld::GetCapsuleCollider(float radius,
 	return ptr;
 }
 
-btRigidBody* PhysicsWorld::CreateRigidBody(entt::entity entity, std::shared_ptr<btCollisionShape> colShape, float mass, const glm::vec3& position, const glm::vec3& rotation) const {
+btRigidBody* PhysicsWorld::CreateRigidBody(entt::entity entity, std::shared_ptr<btCollisionShape> colShape, float mass, const glm::vec3& position,
+	const glm::vec3& rotation) const {
 	btTransform transform;
 	SetTransform(transform, position, rotation);
 
@@ -126,8 +125,8 @@ void PhysicsWorld::DestroyRigidBody(btRigidBody* body) const {
 	dynamicsWorld->removeRigidBody(body);
 	delete body->getMotionState();
 	const auto userData = static_cast<RigidBodyUserData*>(body->getUserPointer());
-    delete userData;
-    delete body;
+	delete userData;
+	delete body;
 }
 std::vector<PhysicsWorld::RaycastData> PhysicsWorld::RaycastWorld(const glm::vec3& from, const glm::vec3& to, bool sortByDist) const {
 	const btVector3 btFrom(from.x, from.y, from.z);
@@ -143,8 +142,8 @@ std::vector<PhysicsWorld::RaycastData> PhysicsWorld::RaycastWorld(const glm::vec
 		if (!userData) continue;
 		const auto& btHitPoint = rayCallback.m_hitPointWorld[i];
 		const auto& btHitNormal = rayCallback.m_hitNormalWorld[i];
-		const glm::vec3 hitPoint{ btHitPoint.getX(), btHitPoint.getY(), btHitPoint.getZ() };
-		const glm::vec3 hitNormal{ btHitNormal.getX(), btHitNormal.getY(), btHitNormal.getZ() };
+		const glm::vec3 hitPoint{btHitPoint.getX(), btHitPoint.getY(), btHitPoint.getZ()};
+		const glm::vec3 hitNormal{btHitNormal.getX(), btHitNormal.getY(), btHitNormal.getZ()};
 		result.emplace_back(userData->entity, hitPoint, hitNormal);
 	}
 	if (sortByDist) {
@@ -165,12 +164,12 @@ void PhysicsWorld::CheckObjectsTouchingGround() const {
 	// get new flags
 	constexpr float threshold = 0.5f;
 	const int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
-    for (int i = 0; i < numManifolds; i++) {
-	    const auto contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-	    const auto objA = contactManifold->getBody0();
-	    const auto objB = contactManifold->getBody1();
+	for (int i = 0; i < numManifolds; i++) {
+		const auto contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+		const auto objA = contactManifold->getBody0();
+		const auto objB = contactManifold->getBody1();
 
-	    const int numContacts = contactManifold->getNumContacts();
+		const int numContacts = contactManifold->getNumContacts();
 		for (int j = 0; j < numContacts; j++) {
 			btManifoldPoint& point = contactManifold->getContactPoint(j);
 			if (point.getDistance() < 0.05f) {
@@ -186,5 +185,5 @@ void PhysicsWorld::CheckObjectsTouchingGround() const {
 				}
 			}
 		}
-    }
+	}
 }
