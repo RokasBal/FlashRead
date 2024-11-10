@@ -24,7 +24,15 @@ public:
 
     void SetViewportSize(int32_t width, int32_t height);
 
-    void ReloadShaders();
+    enum class ShaderType : uint64_t {
+        ALL      = ~0U,
+	    DEBUG    = 1U << 0,
+		MESH     = 1U << 1,
+		LIGHTING = 1U << 2,
+		CSM      = 1U << 3
+    };
+
+    void ReloadShaders(ShaderType shaders = ShaderType::ALL);
 private:
     void LoadShaderFromFile(std::string file);
     void SetupUniforms();

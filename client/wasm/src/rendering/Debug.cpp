@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 
+#include "Highlights.h"
+
 GLDebugDrawer::GLDebugDrawer() : m_debugMode(0) {}
 
 GLDebugDrawer::~GLDebugDrawer() {}
@@ -32,7 +34,7 @@ void DebugDraw::Init() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vert), (void*)offsetof(vert, position));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vert), (void*)offsetof(vert, color));
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_BYTE, sizeof(vert), (void*)offsetof(vert, highlightId));
     glBindVertexArray(0);
 }
 void DebugDraw::Deinit() {
@@ -57,8 +59,12 @@ void DebugDraw::Draw() {
 }
 void DebugDraw::DrawLine(const glm::vec3& from, const glm::vec3& to, const glm::vec3& color) {
     if (!m_enabled) return;
-    m_vertices.push_back({from, color});
-    m_vertices.push_back({to, color});
+    uint8_t hl;
+    if (!Highlights::GetClosestHighlightId(color, 0.02f, hl)) {
+        hl = Highlights::AddHighlight({ color });
+    }
+    m_vertices.push_back({from, hl});
+    m_vertices.push_back({to, hl});
 }
 void DebugDraw::DrawSphere(const glm::vec3& p, float radius, const glm::vec3& color) {
     if (!m_enabled) return;

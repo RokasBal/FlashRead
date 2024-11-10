@@ -21,17 +21,17 @@ void GBuffer::Resize(uint32_t width, uint32_t height) {
 void GBuffer::Create() {
 	glGenFramebuffers(1, &m_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    glGenTextures(1, &m_texColor);
+    glGenTextures(1, &m_texMaterial);
     glGenTextures(1, &m_texNormal);
     glGenTextures(1, &m_texDepth);
 
-    glBindTexture(GL_TEXTURE_2D, m_texColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_width, m_height, 0, GL_RGBA, GL_FLOAT, 0);
+    glBindTexture(GL_TEXTURE_2D, m_texMaterial);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI, m_width, m_height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texColor, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texMaterial, 0);
 
     glBindTexture(GL_TEXTURE_2D, m_texNormal);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_width, m_height, 0, GL_RGBA, GL_HALF_FLOAT, 0);
@@ -75,10 +75,10 @@ void GBuffer::Create() {
 void GBuffer::Destroy() {
     glDeleteFramebuffers(1, &m_fbo);
     glDeleteTextures(1, &m_texDepth);
-    glDeleteTextures(1, &m_texColor);
+    glDeleteTextures(1, &m_texMaterial);
     glDeleteTextures(1, &m_texNormal);
     m_fbo = 0;
     m_texDepth = 0;
-    m_texColor = 0;
+    m_texMaterial = 0;
     m_texNormal = 0;
 }

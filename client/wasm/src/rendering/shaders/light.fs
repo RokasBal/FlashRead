@@ -3,7 +3,7 @@ precision mediump float;
 out vec4 gColor;
 
 uniform sampler2D tDepth;
-uniform sampler2D tColor;
+uniform mediump usampler2D tMaterial;
 uniform sampler2D tNormal;
 uniform mediump sampler2DArray tShadow;
 
@@ -26,6 +26,8 @@ struct Material {
 layout(std140) uniform MaterialUniform {
     Material materials[<<MATERIALS_PER_UBO>>];
 };
+const vec3 highlightColors[<<HIGHLIGHT_COUNT>>] = vec3[](<<HIGHLIGHT_COLORS>>);
+
 // struct PointLight {    
 //     vec3 position;
 //     vec3 color;
@@ -50,11 +52,12 @@ void main() {
 
     vec3 normal = texture(tNormal, uv).rgb;
 
-    vec4 packedBackgroundMaterial = texture(tColor, uv);
-    uint materialId = uint(floor(packedBackgroundMaterial.a + 0.5));
-    vec3 backgroundColor = packedBackgroundMaterial.rgb;
-    // background color is a highlight if there is an object
-    vec3 highlightColor = backgroundColor;
+    uvec4 packedMaterial = texture(tMaterial, uv);
+    uint materialId = packedMaterial.r << 8 | packedMaterial.g;
+    uint highlightId = packedMaterial.b;
+    vec3 highlightColor = highlightColors[highlightId];
+
+    vec3 backgroundColor = vec3(0.5, 0.4, 0.3);
 
     // toon shading
     float lightStrength = getSunlight(position, normal);
@@ -67,7 +70,7 @@ void main() {
     color *= shadow;
 
     // add outline
-    vec3 outlineColor = vec3(0);
+    vec3 outlineColor = highlightColor;
     float outline = getOutline(normal, lDepth);
     color = mix(color, outlineColor, outline);
 
@@ -78,7 +81,7 @@ void main() {
     float gamma = 2.2;
     color = pow(color, vec3(1.0 / gamma));
 
-    gColor = vec4(color + highlightColor, 1.0f);
+    gColor = vec4(color + highlightColor * 0.5, 1.0f);
 
     // show cursor
     vec2 cursorLoc = gl_FragCoord.xy - viewportSize_nearFarPlane.xy * 0.5;
@@ -193,5 +196,4 @@ float getOutline(vec3 normal, float lDepth) {
 
     return max(positionG, normalG);
 }
-
 )"

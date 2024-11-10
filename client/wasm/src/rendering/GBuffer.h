@@ -15,7 +15,7 @@ public:
     GLuint GetFBO() const { return m_fbo; }
 
     GLuint GetDepthTexture() const { return m_texDepth; }
-    GLuint GetColorTexture() const { return m_texColor; }
+    GLuint GetMaterialTexture() const { return m_texMaterial; }
     GLuint GetNormalTexture() const { return m_texNormal; }
 
 private:
@@ -25,6 +25,6 @@ private:
     uint32_t m_width, m_height;
     GLuint m_fbo;
     GLuint m_texDepth;
-    GLuint m_texColor;
+    GLuint m_texMaterial;
     GLuint m_texNormal;
 };

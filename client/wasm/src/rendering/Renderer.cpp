@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Renderer.h"
 
 #include <unordered_map>
 #include <vector>
@@ -12,6 +13,7 @@
 #include "../core/Components.h"
 #include "../io/Input.h"
 #include "Debug.h"
+#include "Highlights.h"
 
 Renderer::Renderer()
 	: m_viewportWidth{1}, m_viewportHeight{1}, m_gbuffer(m_viewportWidth, m_viewportHeight),
@@ -36,7 +38,7 @@ void Renderer::LoadShaderFromFile(std::string file) {
 			m_shaderLoadingOutput.pop_front();
 			auto frag = m_shaderLoadingOutput.front();
 			m_shaderLoadingOutput.pop_front();
-			auto prog = m_shaderLoadingPrograms.front();
+			const auto prog = m_shaderLoadingPrograms.front();
 			m_shaderLoadingPrograms.pop_front();
 			(*prog)->Load(vert.c_str(), frag.c_str());
 		}
@@ -79,12 +81,12 @@ void Renderer::LoadShaderFromFile(std::string file) {
 	emscripten_fetch(&attr, ("http://localhost:8000/rendering/" + std::string(file)).c_str());
 }
 
-void Renderer::ReloadShaders() {
+void Renderer::ReloadShaders(ShaderType shaders) {
 	m_shadersLoading = true;
 	printf("Loading shaders ...\n");
 
 	// mesh
-	{
+	if (static_cast<uint64_t>(shaders) & static_cast<uint64_t>(ShaderType::MESH)) {
 		m_meshProgram = std::make_unique<ShaderProgram>("mesh");
 		m_meshProgram->SetConstant("MODELS_PER_UBO", std::to_string(m_matricesPerUniformBuffer));
 
@@ -103,16 +105,26 @@ void Renderer::ReloadShaders() {
         #endif
 	}
 	// lighting
-	{
+	if (static_cast<uint64_t>(shaders) & static_cast<uint64_t>(ShaderType::LIGHTING)) {
 		m_lightingProgram = std::make_unique<ShaderProgram>("lighting");
 		m_lightingProgram->SetConstant("MATERIALS_PER_UBO", std::to_string(m_materialsPerUniformBuffer));
 		m_lightingProgram->SetConstant("MAX_FRUSTUMS", std::to_string(m_maxCSMFrustums));
 		m_lightingProgram->SetConstant("CASCADE_COUNT", std::to_string(m_csmbuffer.GetFrustumCount()));
-		m_lightingProgram->SetConstant("CASCADE_SPLITS", [&]() {
+		m_lightingProgram->SetConstant("CASCADE_SPLITS", [&] {
 			std::string str = "";
 			const auto& cascades = m_csmbuffer.GetCascades();
 			for (int i = 0; i < cascades.size(); i++) {
 				str += std::to_string(cascades[i]) + (i == cascades.size() - 1 ? "" : ",");
+			}
+			return str;
+		}());
+		const auto& highlights = Highlights::GetHighlights();
+		m_lightingProgram->SetConstant("HIGHLIGHT_COUNT", std::to_string(highlights.size()));
+		m_lightingProgram->SetConstant("HIGHLIGHT_COLORS", [&] {
+			std::string str = "";
+			for (int i = 0; i < highlights.size(); i++) {
+				str += std::format("vec3({},{},{})", highlights[i].color.r, highlights[i].color.g, highlights[i].color.b)
+						+ (i == highlights.size() - 1 ? "" : ",");
 			}
 			return str;
 		}());
@@ -132,7 +144,7 @@ void Renderer::ReloadShaders() {
         #endif
 	}
 	// csm
-	{
+	if (static_cast<uint64_t>(shaders) & static_cast<uint64_t>(ShaderType::CSM)) {
 		m_csmPrograms.resize(m_csmbuffer.GetFrustumCount());
 		for (int i = 0; i < m_csmPrograms.size(); i++) {
 			auto& csmProgram = m_csmPrograms[i];
@@ -157,7 +169,7 @@ void Renderer::ReloadShaders() {
 		}
 	}
 	// debug
-	{
+	if (static_cast<uint64_t>(shaders) & static_cast<uint64_t>(ShaderType::DEBUG)) {
 		m_debugProgram = std::make_unique<ShaderProgram>("debug");
 
         #ifdef SHADER_HOT_RELOAD
@@ -221,6 +233,12 @@ void Renderer::SetupUniforms() {
 
 void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 	ImGui::Render();
+
+	// check for shader reloads
+	if (Highlights::HasChanged(true)) {
+		ReloadShaders(ShaderType::LIGHTING);
+	}
+
 	if (isHidden || m_shadersLoading || !scene) {
 		DebugDraw::Clear();
 		return;
@@ -237,7 +255,7 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 	m_cameraUniform.Update({
 		.projxview = camProjView,
 		.nearFarPlane = {camera->GetNearPlane(), camera->GetFarPlane()}
-	});
+		});
 
 	m_lightingInfoUniform.Update({
 		.sunlightDir = glm::normalize(scene->sunlightDir),
@@ -245,7 +263,7 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 		.cameraPos = camera->position,
 		.viewportSize_nearFarPlane = {m_viewportWidth, m_viewportHeight, camera->GetNearPlane(), camera->GetFarPlane()},
 		.invProjView = glm::inverse(camProjView)
-	});
+		});
 
 	static std::size_t lastMaterialCount = 0;
 	std::size_t materialCount = MeshRegistry::GetMaterials().size();
@@ -266,34 +284,33 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 		const glm::vec3& globalPos, const glm::vec3& localPos,
 		const glm::vec3& globalRot, const glm::vec3& localRot,
 		const glm::vec3& scale) -> glm::mat4 {
-		glm::mat4 model{1};
-		model = glm::translate(model, globalPos);
-		model = glm::rotate(model, globalRot.z, glm::vec3(0, 0, 1));
-		model = glm::rotate(model, globalRot.y, glm::vec3(0, 1, 0));
-		model = glm::rotate(model, globalRot.x, glm::vec3(1, 0, 0));
-		model = glm::translate(model, localPos);
-		model = glm::rotate(model, localRot.x, glm::vec3(1, 0, 0));
-		model = glm::rotate(model, localRot.y, glm::vec3(0, 1, 0));
-		model = glm::rotate(model, localRot.z, glm::vec3(0, 0, 1));
-		model = glm::scale(model, scale);
-		return model;
-	};
+			glm::mat4 model{ 1 };
+			model = glm::translate(model, globalPos);
+			model = glm::rotate(model, globalRot.z, glm::vec3(0, 0, 1));
+			model = glm::rotate(model, globalRot.y, glm::vec3(0, 1, 0));
+			model = glm::rotate(model, globalRot.x, glm::vec3(1, 0, 0));
+			model = glm::translate(model, localPos);
+			model = glm::rotate(model, localRot.x, glm::vec3(1, 0, 0));
+			model = glm::rotate(model, localRot.y, glm::vec3(0, 1, 0));
+			model = glm::rotate(model, localRot.z, glm::vec3(0, 0, 1));
+			model = glm::scale(model, scale);
+			return model;
+		};
 
 	uint32_t matrixCount = 0;
 	std::unordered_map<Mesh, std::vector<glm::mat4>> meshMatrices;
 	std::unordered_map<Mesh, std::vector<std::pair<glm::mat4, glm::vec3>>> meshHighlights;
 	for (auto&& [entity, meshComp, transformComp] :
-	     scene->registry.view<MeshComponent, TransformComponent>(entt::exclude<RigidBodyComponent>).each()) {
+		scene->registry.view<MeshComponent, TransformComponent>(entt::exclude<RigidBodyComponent>).each()) {
 		// get model matrix
 		glm::mat4 model = computeModelMatrix(
 			transformComp.position, meshComp.position,
 			glm::radians(transformComp.rotation), glm::radians(meshComp.rotation),
 			transformComp.scale * meshComp.scale);
-		// !!!! HIGHLIGHT IS SUPER HACKY, REQUIRES RESETING TO 0 IN SHADERS !!!!
-		model[0][3] = meshComp.highlightColor.x;
-		model[1][3] = meshComp.highlightColor.y;
-		model[2][3] = meshComp.highlightColor.z;
-		meshComp.highlightColor = { 0, 0, 0 };
+
+		// !!!! EXTRA DATA PACKED INTO MATRIX, REQUIRES RESETING IN SHADER !!!!
+		model[3][3] = meshComp.highlightId;
+		meshComp.highlightId = 0;
 
 		// add to map
 		meshMatrices[meshComp.mesh].push_back(model);
@@ -318,11 +335,9 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 			euler, glm::radians(meshComp.rotation),
 			meshComp.scale);
 
-		// !!!! HIGHLIGHT IS SUPER HACKY, REQUIRES RESETING TO 0 IN SHADERS !!!!
-		model[0][3] = meshComp.highlightColor.x;
-		model[1][3] = meshComp.highlightColor.y;
-		model[2][3] = meshComp.highlightColor.z;
-		meshComp.highlightColor = { 0, 0, 0 };
+		// !!!! EXTRA DATA PACKED INTO MATRIX, REQUIRES RESETING IN SHADER !!!!
+		model[3][3] = meshComp.highlightId;
+		meshComp.highlightId = 0;
 
 		// add to map
 		meshMatrices[meshComp.mesh].push_back(model);
@@ -396,7 +411,11 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 
 	// world
 	glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer.GetFBO());
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glm::uvec4 uclearColor{ 0 };
+	glm::vec4 fclearColor{ 0 };
+	glClearBufferuiv(GL_COLOR, 0, glm::value_ptr(uclearColor));
+	glClearBufferfv(GL_COLOR, 1, glm::value_ptr(fclearColor));
 	m_meshProgram->Use();
 	uint32_t currentVao = 0;
 	for (auto& batch : batches) {
@@ -423,7 +442,7 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_lightingProgram->Use();
 	m_lightingProgram->SetTexture("tDepth", GL_TEXTURE_2D, 0, m_gbuffer.GetDepthTexture());
-	m_lightingProgram->SetTexture("tColor", GL_TEXTURE_2D, 1, m_gbuffer.GetColorTexture());
+	m_lightingProgram->SetTexture("tMaterial", GL_TEXTURE_2D, 1, m_gbuffer.GetMaterialTexture());
 	m_lightingProgram->SetTexture("tNormal", GL_TEXTURE_2D, 2, m_gbuffer.GetNormalTexture());
 	m_lightingProgram->SetTexture("tShadow", GL_TEXTURE_2D_ARRAY, 3, m_csmbuffer.GetDepthTextureArray());
 	glDrawArrays(GL_TRIANGLES, 0, 3);

@@ -3,6 +3,7 @@
 #include "../io/Input.h"
 #include "../core/Components.h"
 #include "../rendering/Debug.h"
+#include "../rendering/Highlights.h"
 #include "ModelInit.h"
 
 #include "../scenes/world1.h"
@@ -52,11 +53,12 @@ void TestScene::Update(TimeDuration dt) {
             return body->getMass() != 0.f;
         });
 	entt::entity firstHitEntity = entt::null;
+    static uint8_t highlightId = Highlights::GetHighlightId("white");
 	if (!hits.empty()) {
 		const auto& firstHit = hits.front();
 		firstHitEntity = firstHit.entity;
         if (const auto meshComp = registry.try_get<MeshComponent>(firstHit.entity)) {
-            meshComp->highlightColor = glm::vec3{ 0.5, 0.5, 0.5 };
+            meshComp->highlightId = highlightId;
         }
 	}
 

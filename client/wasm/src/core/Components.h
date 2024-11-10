@@ -11,8 +11,8 @@ struct MeshComponent {
 	Mesh mesh;
 	glm::vec3 position;
 	glm::vec3 rotation;
-	glm::vec3 scale{1};
-	glm::vec3 highlightColor{0};
+	glm::vec3 scale{ 1 };
+	uint8_t highlightId{ 0 };
 };
 
 struct TransformComponent {

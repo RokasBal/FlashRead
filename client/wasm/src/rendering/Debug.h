@@ -42,7 +42,7 @@ public:
 private:
     struct vert {
         glm::vec3 position;
-        glm::vec3 color;
+        uint8_t highlightId;
     };
 
     static inline bool m_enabled = false;

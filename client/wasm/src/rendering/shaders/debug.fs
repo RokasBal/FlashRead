@@ -1,13 +1,13 @@
 R"(#version 300 es
 precision mediump float;
 
-layout (location = 0) out vec4 gColor;
+layout (location = 0) out uvec4 gMaterial;
 layout (location = 1) out vec4 gNormal;
 
-in vec3 u_color;
+flat in uint u_highlightId;
 
 void main() {
-    gColor = vec4(u_color, 1.0);
+    gMaterial = uvec4(0, 0, u_highlightId, 0);
     gNormal = vec4(0., 0., 0., 1.0);
 }
 )"

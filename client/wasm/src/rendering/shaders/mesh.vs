@@ -15,16 +15,14 @@ layout(std140) uniform ModelMatricesUniform {
 };
 
 out vec3 u_normal;
-flat out vec3 u_highlightColor;
+flat out uint u_highlightId;
 flat out uint u_materialId;
 
 void main() {
     mat4 currentModel = model[gl_InstanceID];
-    // revert highlight color
-    u_highlightColor = vec3(currentModel[0][3], currentModel[1][3], currentModel[2][3]);
-    currentModel[0][3] = 0.0;
-    currentModel[1][3] = 0.0;
-    currentModel[2][3] = 0.0;
+    u_highlightId = uint(currentModel[3][3] + 0.5);
+    // revert misc data
+    currentModel[3][3] = 1.0;
 
     u_normal = transpose(inverse(mat3(currentModel))) * normal;
     u_materialId = materialId;
