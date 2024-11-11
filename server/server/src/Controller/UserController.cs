@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using server.src;
 using server.UserNamespace;
 using System.Security.Claims;
+using server.src;
+using server.DTOs;
 
 namespace server.Controller {
     [Route("api")]
@@ -15,11 +16,13 @@ namespace server.Controller {
         }
         
         [HttpGet("Users/All")]
-        public async Task<IActionResult> GetAllUsers() {
+        public async Task<IActionResult> GetAllUsers()
+        {
             var users = await _userHandler.GetAllUsersAsync();
-            var usersWithoutPasswords = users.Select(user => new {
-            user.Name,
-            user.Email,
+            var usersWithoutPasswords = users.Select(user => new UserDTO
+            {
+                Name = user.Name,
+                Email = user.Email,
             });
             return Ok(usersWithoutPasswords);
         }
