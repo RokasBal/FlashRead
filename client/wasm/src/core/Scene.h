@@ -32,5 +32,6 @@ protected:
     PhysicsWorld m_physicsWorld;
     SceneBuilder m_sceneBuilder;
 private:
-    void OnDestroyRigidBody(entt::registry& reg, entt::entity entity) const;
+    static void OnDestroyRigidBody(entt::registry& reg, entt::entity entity);
+    static void OnConstructRigidBody(entt::registry& reg, entt::entity entity);
 };

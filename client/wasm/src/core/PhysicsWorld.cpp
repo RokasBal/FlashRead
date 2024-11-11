@@ -32,6 +32,21 @@ PhysicsWorld::~PhysicsWorld() {
 		delete obj;
 	}
 }
+void PhysicsWorld::BodyEnableGravity(btRigidBody* body) {
+	body->setFlags(body->getFlags() & ~btRigidBodyFlags::BT_DISABLE_WORLD_GRAVITY);
+	const auto& dynamicsWorld = static_cast<RigidBodyUserData*>(body->getUserPointer())->physicsWorld->dynamicsWorld;
+	body->setGravity(dynamicsWorld->getGravity());
+}
+void PhysicsWorld::BodyDisableGravity(btRigidBody* body) {
+	body->setFlags(body->getFlags() | btRigidBodyFlags::BT_DISABLE_WORLD_GRAVITY);
+	body->setGravity({ 0, 0, 0 });
+}
+void PhysicsWorld::BodyEnableCollisions(btRigidBody* body) {
+	body->setCollisionFlags(body->getCollisionFlags() & ~btRigidBody::CollisionFlags::CF_NO_CONTACT_RESPONSE);
+}
+void PhysicsWorld::BodyDisableCollisions(btRigidBody* body) {
+	body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CollisionFlags::CF_NO_CONTACT_RESPONSE);
+}
 
 template <typename T>
 void clearExpiredObjects(std::unordered_map<T, std::weak_ptr<btCollisionShape>>& map) {
@@ -98,7 +113,7 @@ std::shared_ptr<btCollisionShape> PhysicsWorld::GetCapsuleCollider(float radius,
 }
 
 btRigidBody* PhysicsWorld::CreateRigidBody(entt::entity entity, std::shared_ptr<btCollisionShape> colShape, float mass, const glm::vec3& position,
-	const glm::vec3& rotation) const {
+	const glm::vec3& rotation) {
 	btTransform transform;
 	SetTransform(transform, position, rotation);
 
@@ -115,6 +130,7 @@ btRigidBody* PhysicsWorld::CreateRigidBody(entt::entity entity, std::shared_ptr<
 	const auto userData = new RigidBodyUserData();
 	userData->entity = entity;
 	userData->collisionShape = std::move(colShape);
+	userData->physicsWorld = this;
 	body->setUserPointer(userData);
 	body->setRollingFriction(0.05f); // stops objects rolling by themselves without any forces
 

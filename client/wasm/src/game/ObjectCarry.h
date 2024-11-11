@@ -14,6 +14,7 @@ public:
 
 	void Update(const glm::vec3& holderPos, const glm::vec3& holderFront);
 
+	bool canDropByItself = true;
 private:
 	entt::registry& m_registry;
 	float m_dropDistance;

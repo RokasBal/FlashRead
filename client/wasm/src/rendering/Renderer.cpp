@@ -302,6 +302,12 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 	std::unordered_map<Mesh, std::vector<std::pair<glm::mat4, glm::vec3>>> meshHighlights;
 	for (auto&& [entity, meshComp, transformComp] :
 		scene->registry.view<MeshComponent, TransformComponent>(entt::exclude<RigidBodyComponent>).each()) {
+		// check if hidden
+		if (meshComp.hidden || meshComp.hiddenPersistent) {
+			meshComp.hidden = false;
+			continue;
+		}
+
 		// get model matrix
 		glm::mat4 model = computeModelMatrix(
 			transformComp.position, meshComp.position,
@@ -317,8 +323,15 @@ void Renderer::Render(bool isHidden, const std::shared_ptr<Scene>& scene) {
 		matrixCount++;
 	}
 	for (auto&& [entity, meshComp, rbComp] : scene->registry.view<MeshComponent, RigidBodyComponent>().each()) {
+		// check if hidden
+		if (meshComp.hidden || meshComp.hiddenPersistent) {
+			meshComp.hidden = false;
+			continue;
+		}
+
 		auto body = rbComp.body;
 		if (!body) continue;
+
 
 		// get model matrix
 		btTransform transform;

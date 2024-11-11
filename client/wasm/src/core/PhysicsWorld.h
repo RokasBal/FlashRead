@@ -9,9 +9,11 @@
 #include "entt/entt.hpp"
 #include "glm/gtx/norm.hpp"
 
+class PhysicsWorld;
 struct RigidBodyUserData {
 	entt::entity entity;
 	std::shared_ptr<btCollisionShape> collisionShape;
+	PhysicsWorld* physicsWorld;
 	bool onGround;
 };
 
@@ -20,11 +22,16 @@ public:
 	PhysicsWorld();
 	~PhysicsWorld();
 
+	static void BodyEnableGravity(btRigidBody* body);
+	static void BodyDisableGravity(btRigidBody* body);
+	static void BodyEnableCollisions(btRigidBody* body);
+	static void BodyDisableCollisions(btRigidBody* body);
+
 	std::shared_ptr<btCollisionShape> GetBoxCollider(const glm::vec3& halfExtents);
 	std::shared_ptr<btCollisionShape> GetSphereCollider(float radius);
 	std::shared_ptr<btCollisionShape> GetCapsuleCollider(float radius, float height);
 	btRigidBody* CreateRigidBody(entt::entity entity, std::shared_ptr<btCollisionShape> colShape, float mass, const glm::vec3& position,
-		const glm::vec3& rotation) const;
+		const glm::vec3& rotation);
 	void DestroyRigidBody(btRigidBody* body) const;
 
 	struct RaycastData {

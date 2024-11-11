@@ -5,7 +5,7 @@
 
 #include "Context.h"
 #include "io/Input.h"
-#include "game/TestScene.h"
+#include "game/GameScene.h"
 #include "rendering/Mesh.h"
 #include "rendering/Debug.h"
 #include "rendering/Highlights.h"
@@ -87,7 +87,7 @@ void initialize() {
 	DebugDraw::Init();
 
 	// create scene (TODO: offload to game logic or something)
-	ctx->scene = std::make_shared<TestScene>();
+	ctx->scene = std::make_shared<GameScene>();
 }
 void deinitialize() {
 	DebugDraw::Deinit();

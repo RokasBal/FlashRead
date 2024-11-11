@@ -3,10 +3,11 @@
 #include <glm/gtx/norm.hpp>
 
 #include "../core/Components.h"
+#include "../core/EntityCreator.h"
 #include "../io/Input.h"
 
 Player::Player(entt::registry& registry, PhysicsWorld& physicsWorld, const glm::vec3& position)
-	: objectCarry{registry}, m_physicsWorld{physicsWorld}, m_entity{registry.create()}, m_registry { registry } {
+	: objectCarry{registry}, m_physicsWorld{physicsWorld}, m_entity{CreateDefaultEntity(registry)}, m_registry{registry} {
 	m_camera = std::make_shared<Camera>();
 	m_camera->position = position;
 
@@ -17,7 +18,7 @@ Player::Player(entt::registry& registry, PhysicsWorld& physicsWorld, const glm::
 	m_rigidBody->setGravity({0, -100, 0});
 
 	registry.emplace<PlayerComponent>(m_entity, PlayerComponent{});
-	registry.emplace<RigidBodyComponent>(m_entity, RigidBodyComponent{ m_rigidBody });
+	registry.emplace<RigidBodyComponent>(m_entity, RigidBodyComponent{m_rigidBody});
 }
 Player::~Player() {
 	Cleanup();

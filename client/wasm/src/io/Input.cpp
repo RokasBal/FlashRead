@@ -83,15 +83,15 @@ glm::vec2 Input::GetMousePosition() {
     return {x, y};
 }
 
-bool Input::JustPressedMouse(uint32_t button) {
+bool Input::JustPressedMouse(int button) {
     if (button >= m_buttonCount) return false;
     return m_buttons[button].press;
 }
-bool Input::IsHeldMouse(uint32_t button) {
+bool Input::IsHeldMouse(int button) {
     if (button >= m_buttonCount) return false;
     return m_buttons[button].hold;
 }
-bool Input::JustReleasedMouse(uint32_t button) {
+bool Input::JustReleasedMouse(int button) {
     if (button >= m_buttonCount) return false;
     return m_buttons[button].release;
 }

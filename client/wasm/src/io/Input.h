@@ -12,9 +12,9 @@ public:
     static bool IsHeld(SDL_Scancode key);
     static bool JustReleased(SDL_Scancode key);
     static glm::vec2 GetMousePosition();
-    static bool JustPressedMouse(uint32_t button);
-    static bool IsHeldMouse(uint32_t button);
-    static bool JustReleasedMouse(uint32_t button);
+    static bool JustPressedMouse(int button);
+    static bool IsHeldMouse(int button);
+    static bool JustReleasedMouse(int button);
     static float GetMouseScrollX();
     static float GetMouseScrollY();
 

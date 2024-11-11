@@ -1,6 +1,7 @@
 #include "ObjectCarry.h"
 
 #include "../core/Components.h"
+#include "../core/PhysicsWorld.h"
 
 ObjectCarry::ObjectCarry(entt::registry& registry, float dropDist)
 	: m_registry{ registry }, m_dropDistance{ dropDist } {}
@@ -16,6 +17,10 @@ void ObjectCarry::SetCarriedEntity(entt::entity entity) {
 	if (!m_body) return;
 
 	m_carriedEntity = entity;
+
+	PhysicsWorld::BodyEnableCollisions(rigidBody->body);
+	PhysicsWorld::BodyEnableGravity(rigidBody->body);
+	m_registry.get<FlagComponent>(entity).flags &= ~(EntityFlags::DISABLE_COLLISIONS | EntityFlags::DISABLE_GRAVITY);
 }
 void ObjectCarry::DropCarriedEntity(const glm::vec3& direction, float force) {
 	if (m_body) {
@@ -30,6 +35,11 @@ void ObjectCarry::DropCarriedEntity(const glm::vec3& direction, float force) {
 }
 void ObjectCarry::Update(const glm::vec3& holderPos, const glm::vec3& holderFront) {
 	if (m_carriedEntity == entt::null) return;
+	if (!m_registry.valid(m_carriedEntity)) {
+		m_body = nullptr;
+		DropCarriedEntity();
+		return;
+	}
 
 	// get current position
 	btTransform transform;
@@ -38,13 +48,13 @@ void ObjectCarry::Update(const glm::vec3& holderPos, const glm::vec3& holderFron
 	const glm::vec3 pos = { transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z() };
 
 	// get distance
-	float distance = glm::distance(pos, holderPos);
+	const float distance = glm::distance(pos, holderPos);
 	if (m_pickupDistance == 0) m_pickupDistance = distance;
 
 	// move to new position based on previous distance
 	const glm::vec3 newPos = holderPos + holderFront * m_pickupDistance;
 	glm::vec3 posDiff = newPos - pos;
-	if (glm::length(posDiff) >= m_dropDistance) {
+	if (canDropByItself && glm::length(posDiff) >= m_dropDistance) {
 		DropCarriedEntity();
 		return;
 	}
