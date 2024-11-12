@@ -26,7 +26,7 @@ namespace server.Controller {
 
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                return Ok(new { Name = user.Name });
+                return Ok(new Name{ Value = user.Name });
             }
             return NotFound("User not found.");
         }
@@ -69,7 +69,7 @@ namespace server.Controller {
             var theme = await _userHandler.GetSettingsFontById(settingsId);
             if (theme == null)
             {
-                return NotFound("Theme not found.");
+                return NotFound("Font not found.");
             }
             var settings = await _settings.GetSettingsByFontAsync(theme);
             return Ok(settings);
@@ -99,6 +99,7 @@ namespace server.Controller {
             return Ok(settings);
         }
 
+        [Authorize]
         [HttpPost("Settings/UpdateTheme")]
         public async Task<IActionResult> UpdateSelectedTheme(string theme) {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -113,6 +114,7 @@ namespace server.Controller {
             return Ok("Theme updated successfully.");
         }
 
+        [Authorize]
         [HttpPost("Settings/UpdateFont")]
         public async Task<IActionResult> UpdateSelectedFont(string font) {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -126,5 +128,9 @@ namespace server.Controller {
             await _settings.UpdateSelectedTheme(settingsId, font);
             return Ok("Font updated successfully.");
         }
+    }
+    public record Name
+    {
+        public string? Value { get; init; }
     }
 }
