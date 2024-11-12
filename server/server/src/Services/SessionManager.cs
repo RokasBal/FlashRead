@@ -24,6 +24,7 @@ namespace server.Services {
                     SessionIds = new string[0]
                 };
                 _context.UserSessions.Add(sessionContainer);
+                await _context.SaveChangesAsync(); // Save the session container first to generate the ID
                 dbUser.SessionsId = sessionContainer.Id;
                 _context.Users.Update(dbUser);
                 await _context.SaveChangesAsync();
