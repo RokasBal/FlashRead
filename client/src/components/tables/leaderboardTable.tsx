@@ -11,6 +11,29 @@ interface AllTimeLeaderboardItem {
     score: number;
 }
 
+interface HighScoreLeaderboardItem {
+    name: string;
+    score: number;
+    gamemode: string;
+}
+
+const gameModes = [
+    'All', 
+    'Q&A', 
+    'Catch the Word', 
+    // 'Mode 3'
+];
+
+const leaderboardTypes = [
+    'High score', 
+    'All time score'
+];
+
+const taskIdToGameMode: { [key: number]: string } = {
+    1: "Q&A",
+    2: "Catch the Word"
+};
+
 const LeaderboardTable: React.FC = () => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
     const [mode, setMode] = useState<string>('All');
@@ -22,10 +45,8 @@ const LeaderboardTable: React.FC = () => {
     const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'gamemode', 'score'];
 
     const fetchAllLeaderboard = async (pageNumber: number) => {
-        // console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
         try {
             const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-            // console.log("API Response:", response.data);
             const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
                 return {
                     username: item.name,
@@ -33,33 +54,37 @@ const LeaderboardTable: React.FC = () => {
                 };
             });
             setLeaderboadData(transformedData);
-            // console.log("Transformed Data:", transformedData);
         } catch (error) {
             console.error("Error fetching leaderboard data:", error);
         }
     };
     
     const fetchHighScoreLeaderboard = async (pageNumber: number) => {
-        // console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
         try {
-            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-            // console.log("API Response:", response.data);
-            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
+            const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+            const transformedData = response.data.map((item: HighScoreLeaderboardItem) => {
                 return {
                     username: item.name,
                     score: item.score,
+                    gamemode: taskIdToGameMode[Number(item.gamemode)],
                 };
             });
             setLeaderboadData(transformedData);
-            // console.log("Transformed Data:", transformedData);
         } catch (error) {
             console.error("Error fetching leaderboard data:", error);
         }
     };
 
+    const filteredData = React.useMemo(() => {
+        if (mode === 'All') {
+            return leaderboardData;
+        }
+        return leaderboardData.filter(row => row.gamemode === mode);
+    }, [leaderboardData, mode]);
+
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
-            return [...leaderboardData].sort((a, b) => { 
+            return [...filteredData].sort((a, b) => { 
                 const aValue = a[sortConfig.key];
                 const bValue = b[sortConfig.key];
                 if (aValue < bValue) {
@@ -71,8 +96,8 @@ const LeaderboardTable: React.FC = () => {
                 return 0;
             });
         }
-        return leaderboardData;
-    }, [leaderboardData, sortConfig]);
+        return filteredData;
+    }, [filteredData, sortConfig]);
 
     const filledData = React.useMemo(() => {
         const rowsPerPage = 10;
@@ -90,14 +115,20 @@ const LeaderboardTable: React.FC = () => {
         });
     };
 
-    const checkNextPage = async (pageNumber: number) => {
+    const checkNextPage = async (pageNumber: number): Promise<boolean> => {
         try {
-            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-            return response.data.length === 0;
+            if (type === "All time score") {
+                const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+                return response.data.length === 0;
+            } else if (type === "High score") {
+                const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+                return response.data.length === 0;
+            }
         } catch (error) {
             console.error("Error checking next page:", error);
             return true;
         }
+        return true;
     };
 
     const updatePage = async (pageNumber: number) => {
@@ -116,23 +147,27 @@ const LeaderboardTable: React.FC = () => {
             } else if (choice === "High score") {
                 setType(choice);
                 setPage(1);
-                fetchAllLeaderboard(1);
+                fetchHighScoreLeaderboard(1);
             }
         }
     };
 
     useEffect(() => {
-        fetchAllLeaderboard(page);
+        if (type === "All time score") {
+            fetchAllLeaderboard(page);
+        } else {
+            fetchHighScoreLeaderboard(page);
+        }
         checkNextPage(page + 1).then(setIsNextPageBlank);
-    }, [page]);
+    }, [page, type]);
 
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
                 {type !== "All time score" && (
-                    <ChoiceBox choices={["All", "Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode" defaultValue={mode} />
+                    <ChoiceBox choices={gameModes} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode" defaultValue={mode} />
                 )}
-                <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
+                <ChoiceBox choices={leaderboardTypes} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
             </div>
             <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
             <div className="paginationControls">

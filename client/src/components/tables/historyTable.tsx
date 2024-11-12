@@ -8,6 +8,13 @@ interface CustomTableProps {
     data: TableRow[];
 }
 
+const gameModes = [
+    'All', 
+    'Q&A', 
+    'Catch the Word', 
+    // 'Mode 3'
+];
+
 const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
     const [selectedMode, setSelectedMode] = useState<string>('All');
@@ -64,7 +71,7 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
         <div className="customTableContainer">
             <div className="tableFilter">
                 <ChoiceBox 
-                    choices={["All", "Q&A", "Catch the Word", "Mode 3"]} 
+                    choices={gameModes} 
                     prompt='Modes:' 
                     onSelect={choice => handleChoice(choice)} 
                     label="Mode" 

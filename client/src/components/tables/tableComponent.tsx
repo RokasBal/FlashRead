@@ -3,7 +3,7 @@ import '../css/tables.css';
 import { TableRow } from './types';
 
 interface TableContentProps {
-    data: TableRow[];
+    data: TableRow[] | null;
     headers: string[];
     sortConfig: { key: keyof TableRow; direction: 'asc' | 'desc' } | null;
     handleSort: (key: keyof TableRow) => void;

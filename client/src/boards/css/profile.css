@@ -300,10 +300,6 @@ input[type="file"] {
 }
 
 @media (max-width: 800px) {
-    .popupContent {
-        /* overflow: auto; */
-    }
-
     .popupFooter {
         flex-direction: column; /* Stack buttons vertically */
         gap: 0.5vh;
