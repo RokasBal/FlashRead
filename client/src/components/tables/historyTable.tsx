@@ -10,12 +10,20 @@ interface CustomTableProps {
 
 const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
+    const [selectedMode, setSelectedMode] = useState<string>('All');
 
     const headers = ['gamemode', 'score', 'date'];
 
+    const filteredData = React.useMemo(() => {
+        if (selectedMode === 'All') {
+            return data;
+        }
+        return data.filter(row => row.gamemode === selectedMode);
+    }, [data, selectedMode]);
+
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
-            return [...data].sort((a, b) => {
+            return [...filteredData].sort((a, b) => {
                 const aValue = a[sortConfig.key];
                 const bValue = b[sortConfig.key];
                 if (aValue < bValue) {
@@ -27,8 +35,8 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
                 return 0;
             });
         }
-        return data;
-    }, [data, sortConfig]);
+        return filteredData;
+    }, [filteredData, sortConfig]);
 
     const handleSort = (key: keyof TableRow) => {
         setSortConfig((prevConfig) => {
@@ -39,10 +47,20 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
         });
     };
 
+    const handleChoice = (choice: string) => {
+        setSelectedMode(choice);
+    }
+
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
-                <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={choice => console.log(choice)} label="Mode"/>
+                <ChoiceBox 
+                    choices={["All", "Q&A", "Catch The Word", "Mode 3"]} 
+                    prompt='Modes:' 
+                    onSelect={choice => handleChoice(choice)} 
+                    label="Mode" 
+                    defaultValue={selectedMode}
+                />
             </div>
             <TableContent data={sortedData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
         </div>

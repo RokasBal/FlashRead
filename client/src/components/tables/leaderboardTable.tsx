@@ -6,11 +6,12 @@ import CustomButton from '../buttons/customButton.tsx';
 import axios from '../../components/axiosWrapper';
 import { TableRow } from './types';
 
-interface CustomTableProps {
-    data: TableRow[];
+interface AllTimeLeaderboardItem {
+    name: string;
+    score: number;
 }
 
-const LeaderboardTable: React.FC<CustomTableProps> = () => {
+const LeaderboardTable: React.FC = () => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
     const [mode, setMode] = useState<string>('All');
     const [type, setType] = useState<string>('All time score'); 
@@ -18,7 +19,43 @@ const LeaderboardTable: React.FC<CustomTableProps> = () => {
     const [page, setPage] = useState<number>(1);
     const [isNextPageBlank, setIsNextPageBlank] = useState<boolean>(false);
 
-    const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'score', 'gamemode'];
+    const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'gamemode', 'score'];
+
+    const fetchAllLeaderboard = async (pageNumber: number) => {
+        // console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
+        try {
+            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+            // console.log("API Response:", response.data);
+            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
+                return {
+                    username: item.name,
+                    score: item.score,
+                };
+            });
+            setLeaderboadData(transformedData);
+            // console.log("Transformed Data:", transformedData);
+        } catch (error) {
+            console.error("Error fetching leaderboard data:", error);
+        }
+    };
+    
+    const fetchHighScoreLeaderboard = async (pageNumber: number) => {
+        // console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
+        try {
+            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+            // console.log("API Response:", response.data);
+            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
+                return {
+                    username: item.name,
+                    score: item.score,
+                };
+            });
+            setLeaderboadData(transformedData);
+            // console.log("Transformed Data:", transformedData);
+        } catch (error) {
+            console.error("Error fetching leaderboard data:", error);
+        }
+    };
 
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
@@ -37,10 +74,12 @@ const LeaderboardTable: React.FC<CustomTableProps> = () => {
         return leaderboardData;
     }, [leaderboardData, sortConfig]);
 
-    interface AllTimeLeaderboardItem {
-        name: string;
-        score: number;
-    }
+    const filledData = React.useMemo(() => {
+        const rowsPerPage = 10;
+        const emptyRows = rowsPerPage - sortedData.length;
+        const emptyRow = { username: '', score: '', gamemode: '' };
+        return [...sortedData, ...Array(emptyRows).fill(emptyRow)];
+    }, [sortedData]);
 
     const handleSort = (key: keyof TableRow) => {
         setSortConfig((prevConfig) => {
@@ -49,24 +88,6 @@ const LeaderboardTable: React.FC<CustomTableProps> = () => {
             }
             return { key, direction: 'asc' };
         });
-    };
-
-    const fetchAllLeaderboard = async (pageNumber: number) => {
-        // console.log("FETCHING LEADERBOARD DATA FOR PAGE ", pageNumber);
-        try {
-            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-            // console.log("API Response:", response.data);
-            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
-                return {
-                    username: item.name,
-                    score: item.score,
-                };
-            });
-            setLeaderboadData(transformedData);
-            // console.log("Transformed Data:", transformedData);
-        } catch (error) {
-            console.error("Error fetching leaderboard data:", error);
-        }
     };
 
     const checkNextPage = async (pageNumber: number) => {
@@ -88,9 +109,15 @@ const LeaderboardTable: React.FC<CustomTableProps> = () => {
 
     const handleTypeChoice = (choice: string) => {
         if (choice !== type) {
-            setType(choice);
-            setPage(1);
-            fetchAllLeaderboard(1);
+            if (choice === "All time score") {
+                setType(choice);
+                setPage(1);
+                fetchAllLeaderboard(1);
+            } else if (choice === "High score") {
+                setType(choice);
+                setPage(1);
+                fetchAllLeaderboard(1);
+            }
         }
     };
 
@@ -107,7 +134,7 @@ const LeaderboardTable: React.FC<CustomTableProps> = () => {
                 )}
                 <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
             </div>
-            <TableContent data={sortedData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
+            <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
             <div className="paginationControls">
                 <div className="left">
                     {page > 1 && (

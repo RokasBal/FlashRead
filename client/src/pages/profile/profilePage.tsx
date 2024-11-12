@@ -10,6 +10,8 @@ import LeaderboardTable from '../../components/tables/leaderboardTable.tsx';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
 interface GameHistoryItem {
     taskId: number;
     score: number;
@@ -19,7 +21,7 @@ interface GameHistoryItem {
 const ProfilePage: React.FC = () => {
     const [gameHistory, setGameHistory] = useState<any[]>([]);
     const [detailContent, setDetailContent] = useState<JSX.Element | string>();
-    const [username, setUsername] = useState<string>('Error');
+    const [username, setUsername] = useState<string>('');
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -27,19 +29,9 @@ const ProfilePage: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    const MAX_FILE_SIZE = 2 * 1024 * 1024;
-
     const taskIdToGameMode: { [key: number]: string } = {
         1: "Q&A",
         2: "Catch the Word"
-    };
-    
-    const handleEditClick = () => {
-        setIsPopupVisible(true);
-    };
-
-    const handleButtonClick = (content: JSX.Element | string) => {
-        setDetailContent(content);
     };
 
     const fetchGameHistory = async () => {
@@ -63,9 +55,36 @@ const ProfilePage: React.FC = () => {
             });
     
             setGameHistory(transformedData);
-            console.log('Game history:', transformedData);
         } catch (err) {
             console.error('Error fetching game history:', err);
+        }
+    };
+
+    const fetchProfilePicture = async () => {
+        try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            const response = await axios.get('/api/Settings/GetProfilePicture', {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob'
+            });
+            const imageUrl = URL.createObjectURL(response.data);
+            setProfilePictureUrl(imageUrl);
+        } catch (err) {
+            console.error('Error fetching profile picture:', err);
+        }
+    };
+
+    const fetchUsername = async () => {
+        try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            const response = await axios.get('/api/User/GetCurrentUserName',{
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUsername(response.data.name);
+        } catch (err) {
+            console.error('Error fetching username:', err);
         }
     };
 
@@ -82,8 +101,8 @@ const ProfilePage: React.FC = () => {
             }
             try {
                 const options = {
-                    maxSizeMB: 0.2, 
-                    maxWidthOrHeight: 256,
+                    maxSizeMB: 0.3, 
+                    maxWidthOrHeight: 360,
                     useWebWorker: true,
                 };
                 const compressedFile = await imageCompression(file, options);
@@ -115,7 +134,6 @@ const ProfilePage: React.FC = () => {
             });
 
             if (response.status === 200) {
-                // alert('Profile picture updated successfully.');
                 setProfilePictureUrl(URL.createObjectURL(selectedFile));
             } else {
                 alert('Failed to update profile picture.');
@@ -128,33 +146,13 @@ const ProfilePage: React.FC = () => {
         setIsPopupVisible(false);
     };
 
-    const fetchProfilePicture = async () => {
-        try {
-            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-            const response = await axios.get('/api/Settings/GetProfilePicture', {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: 'blob'
-            });
-            const imageUrl = URL.createObjectURL(response.data);
-            setProfilePictureUrl(imageUrl);
-        } catch (err) {
-            console.error('Error fetching profile picture:', err);
-        }
+    const handleEditClick = () => {
+        setIsPopupVisible(true);
     };
 
-    const fetchUsername = async () => {
-        try {
-            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-            const response = await axios.get('/api/User/GetCurrentUserName',{
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setUsername(response.data.name);
-        } catch (err) {
-            console.error('Error fetching username:', err);
-        }
-    }
+    const handleButtonClick = (content: JSX.Element | string) => {
+        setDetailContent(content);
+    };
 
     useEffect(() => {
         if(!isAuthenticated){
@@ -164,7 +162,7 @@ const ProfilePage: React.FC = () => {
         fetchUsername();
         fetchProfilePicture();
         fetchGameHistory();
-    },);
+    }, [isAuthenticated, navigate]);
 
     useEffect(() => {
         const updateDetailContent = async () => {
@@ -194,9 +192,7 @@ const ProfilePage: React.FC = () => {
                     <div className="gameDetailsContainer">
                         <div className="detailHeader">
                             <CustomButton label="Game history" className="wideButton" id="gameHistoryButton" onClick={() => handleButtonClick(<HistoryTable data={gameHistory} />)}/>
-                            <CustomButton label="Leaderboards" className="wideButton" id="leaderboardsButton" onClick={() => handleButtonClick(<LeaderboardTable data={gameHistory} />)}/>
-                            {/* <button className="textButton" onClick={() => handleButtonClick(<HistoryTable data={testData} />)}>History</button> */}
-                            {/* <button className="textButton" onClick={() => handleButtonClick(<LeaderboardTable data={leaderboardData} />)}>Leaderboards</button> */}
+                            <CustomButton label="Leaderboards" className="wideButton" id="leaderboardsButton" onClick={() => handleButtonClick(<LeaderboardTable/>)}/>
                         </div>
                         <div className="detailContent">
                             {detailContent}
