@@ -30,6 +30,9 @@ jobs:
       - name: Run tests
         working-directory: ./client
         run: npm test
+      - name: Run Coverage
+        working-directory: ./client
+        run: npm run coverage
       - name: Run linter
         working-directory: ./client
         run: npm run lint
