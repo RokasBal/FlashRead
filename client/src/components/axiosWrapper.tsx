@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+const getTokenFromCookie = () => {
+    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+    return tokenCookie ? tokenCookie.split('=')[1] : null;
+};
 
 const axiosWrapper = axios.create({
     baseURL: 'http://localhost:5076',
@@ -9,8 +11,20 @@ const axiosWrapper = axios.create({
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
     },
 });
+
+axiosWrapper.interceptors.request.use(
+    (config) => {
+        const token = getTokenFromCookie();
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 export default axiosWrapper;

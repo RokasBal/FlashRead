@@ -4,28 +4,31 @@ import CustomButton from '../../components/buttons/customButton';
 import '../../boards/css/main.board.css';
 import '../../boards/css/dropdown.css';
 import { useAuth } from '../../context/AuthContext';
+
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const { logOut } = useAuth();
+
     const handleLogout = async () => {
         await logOut();
         navigate('/login');
     }
+
     return (
         <div className="MainBoard_main">
 
             <div className="MainBoard_header" id="headerDiv">
                 <div className="headerLinks">
-                        <div className="outerLinkContainer">
-                            <div className="innerLinkContainer">
-                                <a className="linksText" href="/about">About Us</a>
-                            </div>
+                    <div className="outerLinkContainer">
+                        <div className="innerLinkContainer">
+                            <span className="linksText" onClick={() => navigate("/about")}>About Us</span>
                         </div>
-                        <div className="outerLinkContainer">
-                            <div className="innerLinkContainer">
-                                <a className="linksText" href="/contact"> Contacts</a>
-                            </div>
+                    </div>
+                    <div className="outerLinkContainer">
+                        <div className="innerLinkContainer">
+                            <span className="linksText" onClick={() => navigate("/contact")}>Contacts</span>
                         </div>
+                    </div>
                 </div>
                 <Dropdown onSelect={function (item: string): void {
                 if (item === "Login") {
@@ -36,6 +39,9 @@ const HomePage: React.FC = () => {
                 }
                 else if (item === "Settings") {
                     navigate("/settings");
+                } 
+                else if (item === "Profile") {
+                    navigate("/profile");
                 }
                 } } />
             </div>

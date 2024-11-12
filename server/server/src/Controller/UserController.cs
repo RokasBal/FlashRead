@@ -46,11 +46,65 @@ namespace server.Controller {
             }
             return NotFound("User not found.");
         }
-        [HttpGet("Users/GetUserHistory")]
-        public async Task<IActionResult> GetUserHistory([FromQuery] string email) {
-            var user = await _userHandler.GetUserByEmailAsync(email);
+        [Authorize]
+        [HttpGet("Settings/GetProfilePicture")]
+        public async Task<IActionResult> GetProfilePicture() {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized("Invalid token.");
+            }
+            var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                var history = await _userHandler.GetTaskHistoryByEmail(email);
+                Console.WriteLine("defaultPicture: ");
+                Console.WriteLine(user.ProfilePic);
+                if (user.ProfilePic == null || user.ProfilePic.Length == 0) {
+                    var defaultPicturePath = Path.Combine(Directory.GetCurrentDirectory(), "src", "images", "defaultPicture.jpg");
+                    var defaultPicture = await System.IO.File.ReadAllBytesAsync(defaultPicturePath);
+                    return File(defaultPicture, "image/jpeg", "defaultPicture.jpg");
+                }
+
+                return File(user.ProfilePic, "image/jpeg", "profile.jpg");
+            }
+            return NotFound("User not found.");
+        }
+        [Authorize]
+        [HttpPost("Settings/UpdateProfilePicture")]
+        public async Task<IActionResult> UpdateProfilePicture(IFormFile profilePicture) {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail)) {
+                return Unauthorized("Invalid token.");
+            }
+            var user = await _userHandler.GetUserByEmailAsync(userEmail);
+            if (user == null) {
+                return NotFound("User not found.");
+            }
+
+            if (profilePicture == null || profilePicture.Length == 0) {
+                return BadRequest("Invalid profile picture.");
+            }
+
+            var profilePic = null as byte[];
+
+            using (var memoryStream = new MemoryStream()) {
+                await profilePicture.CopyToAsync(memoryStream);
+                profilePic = memoryStream.ToArray();
+            }
+
+            await _userHandler.UpdateProfilePictureAsync(userEmail, profilePic);
+
+            return Ok("Profile picture updated successfully.");
+        }
+        [Authorize]
+        [HttpGet("Users/GetUserHistory")]
+        public async Task<IActionResult> GetUserHistory() {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail)) {
+                return Unauthorized("Invalid token.");
+            }
+            var user = await _userHandler.GetUserByEmailAsync(userEmail);
+            if (user != null) {
+                var history = await _userHandler.GetTaskHistoryByEmail(userEmail);
                 return Ok(history);
             }
             return NotFound("User not found.");
@@ -104,6 +158,43 @@ namespace server.Controller {
             }
             await _userHandler.DeleteUserByEmailAsync(userEmail);
             return Ok("User deleted.");
-        } 
+        }
+        [HttpPost("Users/TotalScoreLeaderboard")]
+        public async Task<IActionResult> GetTotalScoreLeaderBoard([FromQuery] int page) {
+            var users = await _userHandler.GetAllUsersAsync();
+            
+            var updatedUsers = new List<UserScore>();
+            foreach (var user in users) {
+                var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
+                var totalScore = userHistory.Sum(history => history.Score);
+                updatedUsers.Add(new UserScore { Name = user.Name, Score = totalScore });
+            }
+
+            var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
+            var pageSize = 10;
+            var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
+            return Ok(pagedResult);
+        }
+
+        [HttpPost("Users/HighScoreLeaderboard")]
+        public async Task<IActionResult> GetHighScoreLeaderBoard([FromQuery] int page) {
+            var users = await _userHandler.GetAllUsersAsync();
+            
+            var updatedUsers = new List<UserScore>();
+            foreach (var user in users) {
+                var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
+                var highScore = userHistory.Max(history => history.Score);
+                updatedUsers.Add(new UserScore { Name = user.Name, Score = highScore });
+            }
+
+            var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
+            var pageSize = 10;
+            var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
+            return Ok(pagedResult);
+        }
+        public record UserScore {
+            public string? Name { get; set; }
+            public int Score { get; set; }
+        }
     }
 }

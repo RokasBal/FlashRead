@@ -18,6 +18,7 @@ namespace server.UserNamespace {
             }
             var dbUser = convertUserToDbUser(user);
             dbUser.Password = HashPassword(dbUser.Password);
+            dbUser.ProfilePic = null;
             await createSettingsId(dbUser);
             await createSessionsId(dbUser);
             try
@@ -87,6 +88,18 @@ namespace server.UserNamespace {
             }
             return (User)dbUser;
         }
+        public async Task<DbUser?> UpdateProfilePictureAsync(string email, byte[] profilePic)
+        {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (dbUser == null)
+            {
+                return null;
+            }
+            dbUser.ProfilePic = profilePic;
+            _context.Users.Update(dbUser);
+            await _context.SaveChangesAsync();
+            return dbUser;
+        }
         public async Task<DbUser?> GetUserByEmailAsync(string email)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -151,8 +164,8 @@ namespace server.UserNamespace {
             }
             return userSettings.Theme;
         }
-        public async Task SaveTaskResult(string email, uint sessionId, int taskId, int[]? selectedVariants = null) {
-            await historyManager.SaveTaskResult(email, sessionId, taskId, selectedVariants);
+        public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
+            await historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
         }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
