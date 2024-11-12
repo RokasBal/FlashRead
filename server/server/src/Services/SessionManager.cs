@@ -11,7 +11,7 @@ namespace server.Services {
         public SessionManager(DbContextFactory dbContextFactory) {
             _dbContextFactory = dbContextFactory;
         }
-        public async Task CreateSessionsTable(string email) {
+        public virtual async Task CreateSessionsTable(string email) {
             using (var _context = _dbContextFactory.GetDbContext()) {
                 var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (dbUser == null)
@@ -29,7 +29,7 @@ namespace server.Services {
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task SaveUserSession(string email, UserSession session) {
+        public virtual async Task SaveUserSession(string email, UserSession session) {
             using (var _context = _dbContextFactory.GetDbContext()) {
                 var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (dbUser == null)
@@ -53,7 +53,7 @@ namespace server.Services {
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task AddSessionToDictionary(string email) {
+        public virtual async Task AddSessionToDictionary(string email) {
             using (var _context = _dbContextFactory.GetDbContext()) {
                 var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
                 if (dbUser == null)
@@ -68,7 +68,7 @@ namespace server.Services {
                 _sessions.TryAdd(email, session);
             }
         }
-        public async Task HealthCheck() {
+        public virtual async Task HealthCheck() {
             foreach (var session in _sessions)
             {
                 if (DateTime.UtcNow - session.Value.LatestTimeAlive > TimeSpan.FromMinutes(2))
@@ -89,7 +89,7 @@ namespace server.Services {
                 await AddSessionToDictionary(email);
             }
         }
-        public List<string> GetConnectedUsers() {
+        public virtual List<string> GetConnectedUsers() {
             var connectedUsers = new List<string>();
             foreach (var session in _sessions)
             {

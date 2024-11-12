@@ -19,6 +19,26 @@ namespace server.UserNamespace
             Name = name;
         }
 
+        public string GetEmail()
+        {
+            return Email;
+        }
+
+        public int GetScore()
+        {
+            return Score;
+        }
+
+        public string GetPassword()
+        {
+            return Password;
+        }
+
+        public string GetName()
+        {
+            return Name;
+        }
+
         public int CompareTo(User other)
         {
             return Score.CompareTo(other.Score);
