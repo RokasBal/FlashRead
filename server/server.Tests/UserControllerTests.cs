@@ -17,7 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace server.Tests {
-    public class UserControllerTests {
+    public class UserControllerTests : IDisposable {
         private readonly UserDataController _controller;
         private readonly FlashDbContext _context;
         private readonly UserHandler _userHandler;
@@ -49,10 +49,11 @@ namespace server.Tests {
         }
 
         private void SetUserEmail(string email) {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Email, email)
-            }, "mock"));
+            var claims = new List<Claim>();
+            if (email != null) {
+                claims.Add(new Claim(ClaimTypes.Email, email));
+            }
+            var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "mock"));
             _controller.ControllerContext = new ControllerContext {
                 HttpContext = new DefaultHttpContext { User = user }
             };
@@ -80,14 +81,12 @@ namespace server.Tests {
                     Name = user.Name,
                     Email = user.Email,
                     Password = user.Password,
-                    SessionsId = Guid.NewGuid().ToString(),
-                    SettingsId = Guid.NewGuid().ToString()
+                    SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                    SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
                 };
                 _context.Users.Add(dbUser);
             }
             await _context.SaveChangesAsync();
-
-            SetUserEmail("admin@example.com");
 
             // Act
             var result = await _controller.GetAllUsers();
@@ -101,9 +100,200 @@ namespace server.Tests {
                 Assert.NotNull(returnedUser.Name);
                 Assert.NotNull(returnedUser.Email);
             }
-
         }
 
+        [Fact]
+        public async Task GetAllUsers_EmptyDatabase_ReturnsEmptyList()
+        {
+            // Act
+            var result = await _controller.GetAllUsers();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedUsers = Assert.IsAssignableFrom<IEnumerable<UserDTO>>(okResult.Value);
+            Assert.Empty(returnedUsers);
+        }
+        [Fact]
+        public async Task GetUser_ValidToken_ReturnsUser()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            // Act
+            var result = await _controller.GetUser();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedUser = Assert.IsType<UserDTO>(okResult.Value);
+            Assert.Equal(user.Email, returnedUser.Email);
+            Assert.Equal(user.Name, returnedUser.Name);
+        }
+
+        [Fact]
+        public async Task GetUser_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Act
+            var result = await _controller.GetUser();
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+
+        [Fact]
+        public async Task GetUser_UserNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            SetUserEmail("nonexistent@example.com");
+
+            // Act
+            var result = await _controller.GetUser();
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", notFoundResult.Value);
+        }
+        [Fact]
+        public async Task GetUserDetails_ValidEmail_ReturnsUserDetails()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString(),  // Set to a valid value
+                JoinedAt = DateTime.UtcNow
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.GetUserDetails(user.Email);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedUser = Assert.IsType<UserDetailsDTO>(okResult.Value);
+            Assert.Equal(user.Email, returnedUser.Email);
+            Assert.Equal(user.Name, returnedUser.Name);
+            Assert.NotNull(returnedUser.JoinedAt);
+        }
+
+        [Fact]
+        public async Task GetUserDetails_InvalidEmail_ReturnsNotFound()
+        {
+            // Act
+            var result = await _controller.GetUserDetails("nonexistent@example.com");
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", notFoundResult.Value);
+        }
+        [Fact]
+        public async Task GetProfilePicture_ValidToken_ReturnsProfilePicture()
+        {
+            // Arrange
+            var dbUser = new DbUser
+            {
+                Name = "John Doe",
+                Email = "johndoe@example.com",
+                Password = _userHandler.HashPassword("password123"),
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString(),  // Set to a valid value
+                ProfilePic = new byte[] { 1, 2, 3, 4 }
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(dbUser.Email);
+
+            // Act
+            var result = await _controller.GetProfilePicture();
+
+            // Assert
+            var fileResult = Assert.IsType<FileContentResult>(result);
+            Assert.Equal("image/jpeg", fileResult.ContentType);
+            Assert.Equal("profile.jpg", fileResult.FileDownloadName);
+            Assert.Equal(dbUser.ProfilePic, fileResult.FileContents);
+        }
+        [Fact]
+        public async Task GetProfilePicture_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Act
+            var result = await _controller.GetProfilePicture();
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task GetProfilePicture_UserNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            SetUserEmail("nonexistent@example.com");
+
+            // Act
+            var result = await _controller.GetProfilePicture();
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", notFoundResult.Value);
+        }
+        [Fact]
+        public async Task GetProfilePicture_NoProfilePic_ReturnsDefaultPicture()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            // Act
+            var result = await _controller.GetProfilePicture();
+
+            // Assert
+            var fileResult = Assert.IsType<FileContentResult>(result);
+            Assert.Equal("image/jpeg", fileResult.ContentType);
+            Assert.Equal("defaultPicture.jpg", fileResult.FileDownloadName);
+        }
+
+        public void Dispose()
+        {
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
+        }
         public class FailingFlashDbContext : FlashDbContext
         {
             public FailingFlashDbContext(DbContextOptions<FlashDbContext> options)
@@ -118,231 +308,3 @@ namespace server.Tests {
         }
     }
 }
-// namespace server.Tests
-// {
-//     public class UserHandlerTests
-//     {
-//         private readonly FlashDbContext _context;
-//         private readonly UserHandler _userHandler;
-
-//         public UserHandlerTests()
-//         {
-//             var options = new DbContextOptionsBuilder<FlashDbContext>()
-//                 .UseInMemoryDatabase(databaseName: "TestDatabase")
-//                 .Options;
-//             _context = new FlashDbContext(options);
-//             _userHandler = new UserHandler(_context);
-//         }
-
-//         [Fact]
-//         public async Task RegisterUserAsync_ValidUser_ReturnsTrue()
-//         {
-//             // Arrange
-//             var user = new User("john.doe@example.com", "password123", "John Doe");
-
-//             // Act
-//             var result = await _userHandler.RegisterUserAsync(user);
-
-//             // Assert
-//             Assert.True(result);
-//             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-//             Assert.NotNull(dbUser);
-//         }
-
-//         [Fact]
-//         public async Task RegisterUserAsync_SaveChangesFails_ReturnsFalse()
-//         {
-//             // Arrange
-//             var user = new User("john.doe@example.com", "password123", "John Doe");
-
-//             // Use a derived context class to simulate failure
-//             var options = new DbContextOptionsBuilder<FlashDbContext>()
-//                 .UseInMemoryDatabase(databaseName: "TestDatabase")
-//                 .Options;
-//             var failingContext = new FailingFlashDbContext(options);
-//             var userHandlerWithFailingContext = new UserHandler(failingContext);
-
-//             // Act
-//             var result = await userHandlerWithFailingContext.RegisterUserAsync(user);
-
-//             // Assert
-//             Assert.False(result);
-//         }
-
-//         [Fact]
-//         public async Task RegisterUserAsync_UserAlreadyExists_ReturnsFalse()
-//         {
-//             // Arrange
-//             var user = new User("john.doe.repeating@example.com", "password123", "John Doe Repeating");
-//             user.Password = _userHandler.HashPassword(user.Password);
-//             var dbUser = new DbUser
-//             {
-//                 Name = user.Name,
-//                 Email = user.Email,
-//                 Password = user.Password
-//             };
-//             _context.Users.Add(dbUser);
-//             await _context.SaveChangesAsync();
-
-//             // Act
-//             var result = await _userHandler.RegisterUserAsync(user);
-
-//             // Assert
-//             Assert.False(result);
-//         }
-
-//         [Fact]
-//         public void HashPassword_ValidPassword_ReturnsHashedPassword()
-//         {
-//             // Arrange
-//             var password = "password123";
-
-//             // Act
-//             var hashedPassword = _userHandler.HashPassword(password);
-
-//             // Assert
-//             Assert.NotNull(hashedPassword);
-//             Assert.NotEqual(password, hashedPassword);
-//         }
-
-//         [Fact]
-//         public void VerifyPassword_ValidPassword_ReturnsTrue()
-//         {
-//             // Arrange
-//             var password = "password123";
-//             var hashedPassword = _userHandler.HashPassword(password);
-
-//             // Act
-//             var result = _userHandler.VerifyPassword(password, hashedPassword);
-
-//             // Assert
-//             Assert.True(result);
-//         }
-
-//         [Fact]
-//         public void VerifyPassword_InvalidPassword_ReturnsFalse()
-//         {
-//             // Arrange
-//             var password = "password123";
-//             var hashedPassword = _userHandler.HashPassword(password);
-
-//             // Act
-//             var result = _userHandler.VerifyPassword("wrongpassword", hashedPassword);
-
-//             // Assert
-//             Assert.False(result);
-//         }
-//         [Fact]
-//         public async Task LoginUserAsync_UserDoesNotExist_ReturnsFalse()
-//         {
-//             // Arrange
-//             var user = new User("john.doe.doesnt_exist@example.com", "password123");
-
-//             // Act
-//             var result = await _userHandler.LoginUserAsync(user);
-
-//             // Assert
-//             Assert.False(result);
-//         }
-//         [Fact]
-//         public async Task LoginUserAsync_UserExists_CorrectPassword_ReturnsTrue()
-//         {
-           
-//             // Arrange
-//             var user = new User("john.doe.login.true@example.com", "password123", "John Doe Login");
-            
-//             user.Password = _userHandler.HashPassword(user.Password);
-//             var dbUser = new DbUser
-//             {
-//                 Name = user.Name,
-//                 Email = user.Email,
-//                 Password = user.Password
-//             };
-//             _context.Users.Add(dbUser);
-//             await _context.SaveChangesAsync();
-
-//             user = new User("john.doe.login.true@example.com", "password123");
-
-//             // Act
-//             var result = await _userHandler.LoginUserAsync(user);
-
-//             // Assert
-//             Assert.True(result);
-//         }
-//         [Fact]
-//         public async Task LoginUserAsync_UserExists_IncorrectPassword_ReturnsFalse()
-//         {
-           
-//             // Arrange
-//             var user = new User("john.doe.login.false@example.com", "password123", "John Doe Login");
-            
-//             user.Password = _userHandler.HashPassword(user.Password);
-//             var dbUser = new DbUser
-//             {
-//                 Name = user.Name,
-//                 Email = user.Email,
-//                 Password = user.Password
-//             };
-//             _context.Users.Add(dbUser);
-//             await _context.SaveChangesAsync();
-
-//             user = new User("john.doe.login.false@example.com", "password1234");
-
-//             // Act
-
-//             var result = await _userHandler.LoginUserAsync(user);
-
-//             // Assert
-
-//             Assert.False(result);
-//         }
-//         [Fact]
-//         public async Task DeleteUserAsync_UserDoesNotExist_ReturnsFalse()
-//         {
-//             // Arrange
-//             var user = new User("nonexist@example.com", "password123");
-
-//             // Act
-//             var result = await _userHandler.DeleteUserAsync(user);
-
-//             // Assert
-//             Assert.False(result);
-//         }
-//         [Fact]
-//         public async Task DeleteUserAsync_UserExists_ReturnsTrue()
-//         {
-//             // Arrange
-//             var user = new User("exist@example.com", "password123", "John Doe");
-//             user.Password = _userHandler.HashPassword(user.Password);
-//             var dbUser = new DbUser
-//             {
-//                 Name = user.Name,
-//                 Email = user.Email,
-//                 Password = user.Password
-//             };
-//             _context.Users.Add(dbUser);
-//             await _context.SaveChangesAsync();
-
-//             // Act
-//             var result = await _userHandler.DeleteUserAsync(user);
-
-//             // Assert
-//             Assert.True(result);
-//         }
-
-//     }
-    
-//     // Derived context class to simulate failure
-//     public class FailingFlashDbContext : FlashDbContext
-//     {
-//         public FailingFlashDbContext(DbContextOptions<FlashDbContext> options)
-//             : base(options)
-//         {
-//         }
-    
-//         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-//         {
-//             throw new Exception("Database error");
-//         }
-//     }
-// }

@@ -36,7 +36,7 @@ namespace server.Controller {
 
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                return Ok(new { Email = user?.Email, Name = user?.Name});
+                return Ok(new UserDTO { Email = user?.Email, Name = user?.Name});
             }
             return NotFound("User not found.");
         }
@@ -44,7 +44,7 @@ namespace server.Controller {
         public async Task<IActionResult> GetUserDetails([FromQuery] string email) {
             var user = await _userHandler.GetUserByEmailAsync(email);
             if (user != null) {
-                return Ok(new { Email = user?.Email, Name = user?.Name, JoinedAt = user?.JoinedAt });
+                return Ok(new UserDetailsDTO { Email = user?.Email, Name = user?.Name, JoinedAt = user?.JoinedAt });
             }
             return NotFound("User not found.");
         }

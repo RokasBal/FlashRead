@@ -44,7 +44,13 @@ namespace server.UserNamespace
     }
     public class UserDTO
     {
-        public string Name { get; set; }
-        public string Email { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+    }
+    public class UserDetailsDTO
+    {
+        public string? Email { get; set; }
+        public string? Name { get; set; }
+        public DateTime? JoinedAt { get; set; }
     }
 }
