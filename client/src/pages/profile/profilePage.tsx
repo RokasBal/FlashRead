@@ -9,6 +9,7 @@ import HistoryTable from '../../components/tables/historyTable.tsx';
 import LeaderboardTable from '../../components/tables/leaderboardTable.tsx';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { TableRow } from '../../components/tables/types.ts';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
@@ -19,13 +20,16 @@ interface GameHistoryItem {
 }
 
 const ProfilePage: React.FC = () => {
-    const [gameHistory, setGameHistory] = useState<any[]>([]);
+    const [gameHistory, setGameHistory] = useState<TableRow[]>([]);
     const [detailContent, setDetailContent] = useState<JSX.Element | string>();
     const [username, setUsername] = useState<string>('');
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
+    const [joinDate, setJoinDate] = useState<string>("");
+    const [gamesPlayed, setGamesPlayed] = useState<number>(0);
+    const [totalScore, setTotalScore] = useState<number>(0);
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
@@ -38,23 +42,33 @@ const ProfilePage: React.FC = () => {
         try {
             const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
             const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+            if (!token) {
+                throw new Error('No auth token found');
+            }
+
             const response = await axios.get('/api/Users/GetUserHistory', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-    
+
+            let totalScore = 0;
             const transformedData = response.data.map((item: GameHistoryItem) => {
                 const date = new Date(item.timePlayed);
                 const formattedDate = date.toLocaleDateString('en-CA');
                 const formattedTime = date.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false });
-    
+
+                totalScore += item.score;
+
                 return {
                     gamemode: taskIdToGameMode[item.taskId] || "Unknown",
                     score: item.score,
                     date: `${formattedDate}, ${formattedTime}`
                 };
             });
-    
+
+            setGamesPlayed(transformedData.length);
             setGameHistory(transformedData);
+            setTotalScore(totalScore);
         } catch (err) {
             console.error('Error fetching game history:', err);
         }
@@ -79,10 +93,14 @@ const ProfilePage: React.FC = () => {
         try {
             const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
             const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-            const response = await axios.get('/api/User/GetCurrentUserName',{
+            const response = await axios.get('/api/User/GetUserInfo',{
                 headers: { Authorization: `Bearer ${token}` }
             });
+            const joinedAt = new Date(response.data.joinedAt);
+            const formattedDate = `${joinedAt.getFullYear()}-${String(joinedAt.getMonth() + 1).padStart(2, '0')}-${String(joinedAt.getDate()).padStart(2, '0')}`;
             setUsername(response.data.name);
+            setJoinDate(formattedDate);
+
         } catch (err) {
             console.error('Error fetching username:', err);
         }
@@ -185,8 +203,25 @@ const ProfilePage: React.FC = () => {
                             <ProfileCard imageSrc={profilePictureUrl} name={username} onEditClick={handleEditClick}/>
                         </div>    
                         <div className="restOfProfile">
-                            {/* <span>friends page?</span>
-                            <span>account information?</span> */}
+                            <div className="accountInfoContainer">
+                                <div className="accountInfoHeader">
+                                    <h1>Account Statistics</h1>
+                                </div>
+                                <div className="accountInfoContent">
+                                    <div className="accountInfoItem">
+                                        <h2>Games played:</h2>
+                                        <p>{gamesPlayed}</p>
+                                    </div>
+                                    <div className="accountInfoItem">
+                                        <h2>Total score:</h2>
+                                        <p>{totalScore}</p>
+                                    </div>
+                                    <div className="accountInfoItem">
+                                        <h2>Join date:</h2>
+                                        <p>{joinDate}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div className="gameDetailsContainer">

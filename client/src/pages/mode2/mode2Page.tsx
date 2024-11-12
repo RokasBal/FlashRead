@@ -9,7 +9,7 @@ import * as apiTask from './api';
 import ChoiceBox from '../../components/choiceBox';
 import fullHeart from '../../images/fullHeart.png';
 import TimerMode2, { TimerHandle } from '../../components/timerMode2';
-
+import axios from '../../components/axiosWrapper';
 
 const Mode2Page: React.FC = () => {
     const navigate = useNavigate();
@@ -37,6 +37,15 @@ const Mode2Page: React.FC = () => {
         setTimeAlive(time);
     };
 
+    const submitScore = async (score: number) => {
+        try {
+            console.log('Posting task 2 score:', score);
+            await axios.post(`/api/GetTask2Score?maxPoints=${score}`);
+        } catch (err) {
+            console.error('Error posting task text:', err);
+        }
+    }
+
     useEffect(() => {
         if (maxCombo < combo) {
             setMaxCombo(combo);
@@ -60,6 +69,7 @@ const Mode2Page: React.FC = () => {
     
     useEffect(() => {
         if (gameEnded) {
+            submitScore(maxPoints);
             const gameEndedDiv = document.getElementById("gameEndedDiv");
             if (gameEndedDiv) {
                 gameEndedDiv.style.visibility = "visible";

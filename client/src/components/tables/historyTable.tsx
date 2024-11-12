@@ -9,7 +9,7 @@ interface CustomTableProps {
 }
 
 const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
-    const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
     const [selectedMode, setSelectedMode] = useState<string>('All');
 
     const headers = ['gamemode', 'score', 'date'];
@@ -51,18 +51,27 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
         setSelectedMode(choice);
     }
 
+    const displayData = React.useMemo(() => {
+        const rowsToAdd = 10 - sortedData.length;
+        if (rowsToAdd > 0) {
+            const emptyRows = Array.from({ length: rowsToAdd }, () => ({ gamemode: '', score: '', date: '' }));
+            return [...sortedData, ...emptyRows];
+        }
+        return sortedData;
+    }, [sortedData]);
+
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
                 <ChoiceBox 
-                    choices={["All", "Q&A", "Catch The Word", "Mode 3"]} 
+                    choices={["All", "Q&A", "Catch the Word", "Mode 3"]} 
                     prompt='Modes:' 
                     onSelect={choice => handleChoice(choice)} 
                     label="Mode" 
                     defaultValue={selectedMode}
                 />
             </div>
-            <TableContent data={sortedData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
+            <TableContent data={displayData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
         </div>
     );
 };

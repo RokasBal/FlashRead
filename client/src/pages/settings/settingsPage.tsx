@@ -120,12 +120,10 @@ const SettingsPage: React.FC = () => {
         fetchUsername();
         fetchAndSetThemes();
         fetchAndSetFonts();
-
+    
         if (isAuthenticated) {
-            // console.log("AUTHENTICATED IN USE EFFECT");
             fetchSettings();
         } else {
-            // console.log("NOT AUTHENTICATED IN USE EFFECT");
             const getSettingsFromCookie = async () => {
                 const settingsJson = Cookies.get('visualSettings');
                 if (settingsJson) {
@@ -137,14 +135,7 @@ const SettingsPage: React.FC = () => {
             }
             getSettingsFromCookie();
         }
-
-        // console.log("THEME IN USE EFFECT: ", theme);
-    },);
-
-    useEffect(() => {
-        console.log("username: ", username);
-    }, [username]);
-    
+    }, [isAuthenticated]);
     
     const handleFontChange = (newFont: string) => {
         console.log("FONT IN HANDLE FONT CHANGE: ", newFont);

@@ -42,5 +42,22 @@ namespace server.Controller {
             }
             return checkAns;
         }
+        [HttpPost("GetTask2Score")]
+        public async Task<IActionResult> GetTask2Score(int maxPoints) {
+            int taskId = 2;
+            int score =  maxPoints;
+            System.Console.WriteLine("Score: " + score);
+
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail) == false)
+            {
+                System.Console.WriteLine("Saving task result");
+                await _userHandler.SaveTaskResult(userEmail, 0, taskId, score, null);
+            }
+            else {
+                return NotFound("User not found.");
+            }
+            return Ok("Mode 2 score saved");
+        }
     }
 }
