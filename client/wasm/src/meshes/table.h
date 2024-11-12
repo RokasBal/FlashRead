@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../rendering/Vertex.h"
+#include <wgleng/rendering/Vertex.h>
 
 constexpr uint32_t table_materialCount = 3;
 const Material table_materials[] = {

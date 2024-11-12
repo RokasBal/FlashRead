@@ -1,5 +1,5 @@
 #pragma once
 
-#include "../util/SceneBuilder.h"
+#include <wgleng/util/SceneBuilder.h>
 
 void LoadModels(SceneBuilder& sceneBuilder);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../core/Actions.h"
+#include <wgleng/core/Actions.h>
 
 enum class Action {
 	PickUp,

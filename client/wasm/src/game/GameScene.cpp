@@ -1,10 +1,10 @@
 #include "GameScene.h"
 
-#include "../io/Input.h"
-#include "../core/Components.h"
-#include "../core/EntityCreator.h"
-#include "../rendering/Debug.h"
-#include "../rendering/Highlights.h"
+#include <wgleng/io/Input.h>
+#include <wgleng/core/Components.h>
+#include <wgleng/core/EntityCreator.h>
+#include <wgleng/rendering/Debug.h>
+#include <wgleng/rendering/Highlights.h>
 #include "ModelInit.h"
 #include "Script.h"
 #include "scripts/MainScript.h"

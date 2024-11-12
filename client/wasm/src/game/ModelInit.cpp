@@ -1,6 +1,6 @@
 #include "ModelInit.h"
 
-#include "../rendering/Mesh.h"
+#include <wgleng/rendering/Mesh.h>
 
 #include "../meshes/candle.h"
 #include "../meshes/chair.h"

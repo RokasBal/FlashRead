@@ -1,8 +1,8 @@
 #include "HeldObjectScript.h"
 
-#include "../../core/Components.h"
-#include "../../io/Input.h"
-#include "../../rendering/Highlights.h"
+#include <wgleng/core/Components.h>
+#include <wgleng/io/Input.h>
+#include <wgleng/rendering/Highlights.h>
 
 HeldObjectScript::HeldObjectScript(GameScene& scene) : Script(scene) {
 	m_highlightId = Highlights::GetHighlightId("white");

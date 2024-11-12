@@ -1,8 +1,8 @@
 #include "ObjectInteractScript.h"
 
-#include "../../core/Components.h"
-#include "../../core/EntityCreator.h"
-#include "../../io/Input.h"
+#include <wgleng/core/Components.h>
+#include <wgleng/core/EntityCreator.h>
+#include <wgleng/io/Input.h>
 
 ObjectInteractScript::ObjectInteractScript(GameScene& scene) : Script(scene) {
 	m_listener = scene.actions.Listen(Action::Interact, [&] {

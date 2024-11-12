@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../util/SceneBuilder.h"
+#include <wgleng/util/SceneBuilder.h>
 
 constexpr uint32_t test_stateVersion = 4;
 constexpr uint32_t test_stateCount = 16;

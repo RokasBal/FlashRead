@@ -3,9 +3,9 @@
 #include <entt/entt.hpp>
 #include <memory>
 
-#include "../core/Camera.h"
-#include "../core/PhysicsWorld.h"
-#include "../util/Timer.h"
+#include <wgleng/core/Camera.h>
+#include <wgleng/core/PhysicsWorld.h>
+#include <wgleng/util/Timer.h>
 #include "ObjectCarry.h"
 
 class Player {

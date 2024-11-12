@@ -2,9 +2,9 @@
 
 #include <glm/gtx/norm.hpp>
 
-#include "../core/Components.h"
-#include "../core/EntityCreator.h"
-#include "../io/Input.h"
+#include <wgleng/core/Components.h>
+#include <wgleng/core/EntityCreator.h>
+#include <wgleng/io/Input.h>
 
 Player::Player(entt::registry& registry, PhysicsWorld& physicsWorld, const glm::vec3& position)
 	: objectCarry{registry}, m_physicsWorld{physicsWorld}, m_entity{CreateDefaultEntity(registry)}, m_registry{registry} {

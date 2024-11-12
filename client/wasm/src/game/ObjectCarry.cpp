@@ -1,7 +1,7 @@
 #include "ObjectCarry.h"
 
-#include "../core/Components.h"
-#include "../core/PhysicsWorld.h"
+#include <wgleng/core/Components.h>
+#include <wgleng/core/PhysicsWorld.h>
 
 ObjectCarry::ObjectCarry(entt::registry& registry, float dropDist)
 	: m_registry{ registry }, m_dropDistance{ dropDist } {}
