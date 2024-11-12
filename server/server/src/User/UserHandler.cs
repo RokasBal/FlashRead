@@ -136,14 +136,8 @@ namespace server.UserNamespace {
             _context.UserSettings.Add(userSettings);
             var firstTheme = await _context.SettingsThemes.FirstOrDefaultAsync();
             var firstFont = await _context.SettingsFonts.FirstOrDefaultAsync();
-            if (firstTheme != null)
-            {
-                userSettings.Theme = firstTheme.Theme;
-            }
-            if (firstFont != null)
-            {
-                userSettings.Font = firstFont.Font;
-            }
+            userSettings.Theme = firstTheme?.Theme ?? "default_theme";
+            userSettings.Font = firstFont?.Font ?? "default_font";
             dbUser.SettingsId = userSettings.Id;
             await _context.SaveChangesAsync();
         }
