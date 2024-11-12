@@ -78,7 +78,7 @@ namespace server.Services {
                 }
             }
         }
-        public async Task UpdateSession(string email) {
+        public virtual async Task UpdateSession(string email) {
             if (_sessions.TryGetValue(email, out var session))
             {
                 session.LatestTimeAlive = DateTime.UtcNow;
