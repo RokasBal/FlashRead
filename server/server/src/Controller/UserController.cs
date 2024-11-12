@@ -202,11 +202,17 @@ namespace server.Controller {
             var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
             return Ok(pagedResult);
         }
-
-        public record UserScore {
-            public string? Name { get; set; }
-            public int Score { get; set; }
-            public int? Gamemode { get; set; }
-        }
+    }
+    public record UserScore {
+        public string? Name { get; set; }
+        public int Score { get; set; }
+        public int? Gamemode { get; set; }
+    }
+    public record ChangePasswordRequest {
+        public string? OldPassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+    public record ChangeUserNameRequest {
+        public string? NewName { get; set; }
     }
 }

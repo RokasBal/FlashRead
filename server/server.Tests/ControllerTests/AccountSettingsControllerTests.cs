@@ -16,6 +16,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace server.Tests {
     public class AccountSettingsControllerTests : IDisposable {
@@ -27,6 +28,7 @@ namespace server.Tests {
         private readonly HistoryManager _historyManager;
         private readonly DbContextFactory _dbContextFactory;
         private readonly Settings _settings;
+        private readonly ILogger<Settings> _logger;
 
         public AccountSettingsControllerTests()
         {
@@ -47,7 +49,8 @@ namespace server.Tests {
             _historyManager = new HistoryManager(_context);
             _sessionManager = new SessionManager(_dbContextFactory);
             _userHandler = new UserHandler(_context, _tokenProvider, _historyManager, _sessionManager);
-            _settings = new Settings(_context);
+            _logger = new Mock<ILogger<Settings>>().Object;
+            _settings = new Settings(_context, _logger);
             _controller = new AccountSettingsController(_userHandler, _settings);
         }
 
