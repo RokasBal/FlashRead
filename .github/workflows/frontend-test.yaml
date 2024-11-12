@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         working-directory: ./client
         run: npm install
+      - name: Run tests
+        working-directory: ./client
+        run: npm test
       - name: Run linter
         working-directory: ./client
         run: npm run lint
