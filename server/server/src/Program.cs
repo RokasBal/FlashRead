@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using server.src.Settings;
 using server.Services;
-using server.DTOs;
 namespace server
 {
     public class Program

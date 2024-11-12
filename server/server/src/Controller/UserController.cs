@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using server.UserNamespace;
 using System.Security.Claims;
 using server.src;
-using server.DTOs;
 
 namespace server.Controller {
     [Route("api")]

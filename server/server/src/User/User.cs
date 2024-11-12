@@ -42,4 +42,9 @@ namespace server.UserNamespace
             return new DbUser { Email = u.Email, Password = u.Password, Name = u.Name };
         }
     }
+    public class UserDTO
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
 }

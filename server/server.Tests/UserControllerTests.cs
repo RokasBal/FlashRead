@@ -11,7 +11,6 @@ using server.src;
 using server.Controller;
 using server.UserNamespace;
 using server.Services;
-using server.DTOs;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -81,8 +80,8 @@ namespace server.Tests {
                     Name = user.Name,
                     Email = user.Email,
                     Password = user.Password,
-                    SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
-                    SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+                    SessionsId = Guid.NewGuid().ToString(),
+                    SettingsId = Guid.NewGuid().ToString()
                 };
                 _context.Users.Add(dbUser);
             }
@@ -95,7 +94,7 @@ namespace server.Tests {
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedUsers = Assert.IsAssignableFrom<IEnumerable<UserDto>>(okResult.Value);
+            var returnedUsers = Assert.IsAssignableFrom<IEnumerable<UserDTO>>(okResult.Value);
             Assert.Equal(users.Count, returnedUsers.Count());
             foreach (var returnedUser in returnedUsers)
             {
