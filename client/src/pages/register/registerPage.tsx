@@ -22,6 +22,26 @@ const RegisterPage: React.FC = () => {
     }, [isAuthenticated, navigate]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!username) {
+            alert('Please fill in the username.');
+            return;
+        }
+        if (!email) {
+            alert('Please fill in the email.');
+            return;
+        }
+        if (!password) {
+            alert('Please fill in the password.');
+            return;
+        }
+        if (!repeatPassword) {
+            alert('Please fill in the repeat password.');
+            return;
+        }
+        if (password !== repeatPassword) {
+            alert('Passwords do not match.');
+            return;
+        }
         try {
             await register(email, password, username);
             checkUserAuth();
