@@ -144,13 +144,6 @@ namespace server.Controller {
             await _userHandler.ChangeUserNameAsync(userEmail, request.NewName);
             return Ok("Name changed.");
         }
-        public record ChangePasswordRequest {
-            public string? OldPassword { get; set; }
-            public string? NewPassword { get; set; }
-        }
-        public record ChangeUserNameRequest {
-            public string? NewName { get; set; }
-        }
         [Authorize]
         [HttpGet("Users/DeleteUser")]
         public async Task<IActionResult> DeleteUser() {
@@ -163,6 +156,9 @@ namespace server.Controller {
         }
         [HttpPost("Users/TotalScoreLeaderboard")]
         public async Task<IActionResult> GetTotalScoreLeaderBoard([FromQuery] int page) {
+            if (page < 1) {
+                return BadRequest("Invalid page number.");
+            }
             var users = await _userHandler.GetAllUsersAsync();
             
             var updatedUsers = new List<UserScore>();
@@ -180,6 +176,9 @@ namespace server.Controller {
 
         [HttpPost("Users/HighScoreLeaderboard")]
         public async Task<IActionResult> GetHighScoreLeaderBoard([FromQuery] int page) {
+            if (page < 1) {
+                return BadRequest("Invalid page number.");
+            }
             var users = await _userHandler.GetAllUsersAsync();
             
             var updatedUsers = new List<UserScore>();
@@ -194,9 +193,16 @@ namespace server.Controller {
             var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
             return Ok(pagedResult);
         }
-        public record UserScore {
-            public string? Name { get; set; }
-            public int Score { get; set; }
-        }
+    }
+    public record ChangePasswordRequest {
+        public string? OldPassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+    public record ChangeUserNameRequest {
+        public string? NewName { get; set; }
+    }
+    public record UserScore {
+        public string? Name { get; set; }
+        public int Score { get; set; }
     }
 }

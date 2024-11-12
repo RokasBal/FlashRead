@@ -48,7 +48,7 @@ namespace server.Tests {
             _controller = new UserDataController(_userHandler);
         }
 
-        private void SetUserEmail(string email) {
+        private void SetUserEmail(string? email) {
             var claims = new List<Claim>();
             if (email != null) {
                 claims.Add(new Claim(ClaimTypes.Email, email));
@@ -288,6 +288,498 @@ namespace server.Tests {
             Assert.Equal("image/jpeg", fileResult.ContentType);
             Assert.Equal("defaultPicture.jpg", fileResult.FileDownloadName);
         }
+        [Fact]
+        public async Task UpdateProfilePicture_ValidToken_UpdatesProfilePicture()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var profilePicture = new FormFile(new MemoryStream(new byte[] { 1, 2, 3, 4 }), 0, 4, "profilePicture", "profile.jpg");
+
+            // Act
+            var result = await _controller.UpdateProfilePicture(profilePicture);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Profile picture updated successfully.", okResult.Value);
+
+            var updatedUser = await _context.Users.FindAsync(user.Email);
+            Assert.NotNull(updatedUser);
+            Assert.Equal(new byte[] { 1, 2, 3, 4 }, updatedUser.ProfilePic);
+        }
+        [Fact]
+        public async Task UpdateProfilePicture_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Act
+            var result = await _controller.UpdateProfilePicture(null);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task UpdateProfilePicture_UserNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            SetUserEmail("nonexistent@example.com");
+
+            // Act
+            var result = await _controller.UpdateProfilePicture(null);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        }
+        [Fact]
+        public async Task GetUserHistory_ValidToken_ReturnsUserHistory()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var history = new List<DbTaskHistory>
+            {
+                new DbTaskHistory(),
+                new DbTaskHistory(),
+                new DbTaskHistory()
+            };
+            foreach (var task in history)
+            {
+                task.Id = Guid.NewGuid().ToString();
+                task.SessionId = 1; // Set to a valid value
+                task.TaskId = 1; // Set to a valid value
+                task.Answers = new int[] { 1, 2, 3 }; // Set to a valid value
+                task.Score = 100; // Set to a valid value
+                task.TimePlayed = DateTime.UtcNow;
+            }
+            foreach (var task in history)
+            {
+                _context.UserTaskHistories.Add(task);
+                _context.Users.Find(dbUser.Email)!.HistoryIds = _context.Users.Find(dbUser.Email)!.HistoryIds.Append(task.Id).ToArray();
+            }
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.GetUserHistory();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedHistory = Assert.IsAssignableFrom<IEnumerable<DbTaskHistory>>(okResult.Value);
+            Assert.Equal(history.Count, returnedHistory.Count());
+        }
+        [Fact]
+        public async Task GetUserHistory_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Act
+            var result = await _controller.GetUserHistory();
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task GetUserHistory_UserNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            SetUserEmail("nonexistent@example.com");
+
+            // Act
+            var result = await _controller.GetUserHistory();
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", notFoundResult.Value);
+        }
+        [Fact]
+        public async Task ChangeUserPassword_ValidToken_ChangesPassword()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var request = new ChangePasswordRequest { OldPassword = "password123", NewPassword = "newpassword123" };
+
+            // Act
+            var result = await _controller.ChangeUserPassword(request);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Password changed.", okResult.Value);
+
+            var updatedUser = await _context.Users.FindAsync(user.Email);
+            Assert.NotNull(updatedUser);
+            Assert.True(_userHandler.VerifyPassword("newpassword123", updatedUser.Password));
+        }
+        [Fact]
+        public async Task ChangeUserPassword_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            var request = new ChangePasswordRequest { OldPassword = "password123", NewPassword = "newpassword123" };
+
+            // Act
+            var result = await _controller.ChangeUserPassword(request);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task ChangeUserPassword_InvalidOldPassword_ReturnsUnauthorized()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var request = new ChangePasswordRequest { OldPassword = "wrongpassword", NewPassword = "newpassword123" };
+
+            // Act
+            var result = await _controller.ChangeUserPassword(request);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid password.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task ChangeUserPassword_EmptyNewPassword_ReturnsBadRequest()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var request = new ChangePasswordRequest { OldPassword = "password123", NewPassword = "" };
+
+            // Act
+            var result = await _controller.ChangeUserPassword(request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("New password cannot be null or empty.", badRequestResult.Value);
+        }
+        [Fact]
+        public async Task ChangeUserName_ValidToken_ChangesUserName()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var request = new ChangeUserNameRequest { NewName = "Johnathan Doe" };
+
+            // Act
+            var result = await _controller.ChangeUserName(request);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Name changed.", okResult.Value);
+
+            var updatedUser = await _context.Users.FindAsync(user.Email);
+            Assert.NotNull(updatedUser);
+            Assert.Equal("Johnathan Doe", updatedUser.Name);
+        }
+        [Fact]
+        public async Task ChangeUserName_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            var request = new ChangeUserNameRequest { NewName = "Johnathan Doe" };
+
+            // Act
+            var result = await _controller.ChangeUserName(request);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task ChangeUserName_EmptyNewName_ReturnsBadRequest()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var request = new ChangeUserNameRequest { NewName = "" };
+
+            // Act
+            var result = await _controller.ChangeUserName(request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("New name cannot be null or empty.", badRequestResult.Value);
+        }
+        [Fact]
+        public async Task DeleteUser_ValidToken_DeletesUser()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            // Act
+            var result = await _controller.DeleteUser();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("User deleted.", okResult.Value);
+
+            var deletedUser = await _context.Users.FindAsync(user.Email);
+            Assert.Null(deletedUser);
+        }
+        [Fact]
+        public async Task DeleteUser_InvalidToken_ReturnsUnauthorized()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Act
+            var result = await _controller.DeleteUser();
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task GetTotalScoreLeaderBoard_ValidRequest_ReturnsLeaderboard()
+        {
+            // Arrange
+            var users = new List<User>
+            {
+                new User("john.doe@example.com", "password123", "John Doe"),
+                new User("jane.doe@example.com", "password123", "Jane Doe")
+            };
+
+            foreach (var user in users)
+            {
+                var dbUser = new DbUser
+                {
+                    Name = _userHandler.HashPassword(user.Password),
+                    Email = user.Email,
+                    Password = user.Password,
+                    SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                    SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+                };
+                _context.Users.Add(dbUser);
+            }
+            await _context.SaveChangesAsync();
+
+            foreach (var user in users)
+            {
+                var history = new List<DbTaskHistory>
+                {
+                    new DbTaskHistory { Id = Guid.NewGuid().ToString(), SessionId = 1, TaskId = 1, Answers = new int[] { 1, 2, 3 }, Score = 100, TimePlayed = DateTime.UtcNow },
+                    new DbTaskHistory { Id = Guid.NewGuid().ToString(), SessionId = 1, TaskId = 1, Answers = new int[] { 1, 2, 3 }, Score = 200, TimePlayed = DateTime.UtcNow }
+                };
+                foreach (var task in history)
+                {
+                    _context.UserTaskHistories.Add(task);
+                    _context.Users.Find(user.Email)!.HistoryIds = _context.Users.Find(user.Email)!.HistoryIds.Append(task.Id).ToArray();
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.GetTotalScoreLeaderBoard(1);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedLeaderboard = Assert.IsAssignableFrom<IEnumerable<UserScore>>(okResult.Value);
+            Assert.Equal(2, returnedLeaderboard.Count());
+            Assert.Equal(300, returnedLeaderboard.First().Score);
+        }
+        [Fact]
+        public async Task GetTotalScoreLeaderBoard_EmptyDatabase_ReturnsEmptyList()
+        {
+            // Act
+            var result = await _controller.GetTotalScoreLeaderBoard(1);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedLeaderboard = Assert.IsAssignableFrom<IEnumerable<UserScore>>(okResult.Value);
+            Assert.Empty(returnedLeaderboard);
+        }
+        [Fact]
+        public async Task GetTotalScoreLeaderBoard_InvalidPage_ReturnsBadRequest()
+        {
+            // Act
+            var result = await _controller.GetTotalScoreLeaderBoard(0);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Invalid page number.", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task GetHighScoreLeaderBoard_ValidRequest_ReturnsLeaderboard()
+        {
+            // Arrange
+            var users = new List<User>
+            {
+                new User("john.doe@example.com", "password123", "John Doe"),
+                new User("jane.doe@example.com", "password123", "Jane Doe")
+            };
+
+            foreach (var user in users)
+            {
+                var dbUser = new DbUser
+                {
+                    Name = _userHandler.HashPassword(user.Password),
+                    Email = user.Email,
+                    Password = user.Password,
+                    SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                    SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+                };
+                _context.Users.Add(dbUser);
+            }
+            await _context.SaveChangesAsync();
+
+            foreach (var user in users)
+            {
+                var history = new List<DbTaskHistory>
+                {
+                    new DbTaskHistory { Id = Guid.NewGuid().ToString(), SessionId = 1, TaskId = 1, Answers = new int[] { 1, 2, 3 }, Score = 100, TimePlayed = DateTime.UtcNow },
+                    new DbTaskHistory { Id = Guid.NewGuid().ToString(), SessionId = 1, TaskId = 1, Answers = new int[] { 1, 2, 3 }, Score = 200, TimePlayed = DateTime.UtcNow }
+                };
+                foreach (var task in history)
+                {
+                    _context.UserTaskHistories.Add(task);
+                    _context.Users.Find(user.Email)!.HistoryIds = _context.Users.Find(user.Email)!.HistoryIds.Append(task.Id).ToArray();
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.GetHighScoreLeaderBoard(1);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedLeaderboard = Assert.IsAssignableFrom<IEnumerable<UserScore>>(okResult.Value);
+            Assert.Equal(2, returnedLeaderboard.Count());
+            Assert.Equal(200, returnedLeaderboard.First().Score);
+        }
+        [Fact]
+        public async Task GetHighScoreLeaderBoard_EmptyDatabase_ReturnsEmptyList()
+        {
+            // Act
+            var result = await _controller.GetHighScoreLeaderBoard(1);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedLeaderboard = Assert.IsAssignableFrom<IEnumerable<UserScore>>(okResult.Value);
+            Assert.Empty(returnedLeaderboard);
+        }
+        [Fact]
+        public async Task GetHighScoreLeaderBoard_InvalidPage_ReturnsBadRequest()
+        {
+            // Act
+            var result = await _controller.GetHighScoreLeaderBoard(0);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Invalid page number.", badRequestResult.Value);
+        }
+
 
         public void Dispose()
         {
@@ -306,5 +798,6 @@ namespace server.Tests {
                 throw new Exception("Database error");
             }
         }
+        
     }
 }
