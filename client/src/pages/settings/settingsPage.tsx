@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../components/axiosWrapper';
+import { isAxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../../boards/css/settings.css';
 import CustomButton from '../../components/buttons/customButton';
@@ -37,9 +38,9 @@ const SettingsPage: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const { visualSettings, setVisualSettings } = useVisualSettings();
     const [themes, setThemes] = useState<string[]>([]);
-    const [theme, setTheme] = useState<string>(visualSettings.theme);
+    const [theme, setTheme] = useState<string>(visualSettings?.theme || 'defaultTheme');
     const [fonts, setFonts] = useState<string[]>([]);
-    const [font, setFont] = useState<string>(visualSettings.font);
+    const [font, setFont] = useState<string>(visualSettings?.font || 'defaultFont');
     const [username, setUsername] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +58,19 @@ const SettingsPage: React.FC = () => {
 
     const fetchUsername = async () => {
         try {
-            const response = await axios.get('/api/User/GetCurrentUserName');
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+            if (!token) {
+                throw new Error('No auth token found');
+            }
+
+            const response = await axios.get('/api/User/GetCurrentUserName', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
             setUsername(response.data.name);
         } catch (err) {
             console.error('Error fetching username:', err);
@@ -66,7 +79,7 @@ const SettingsPage: React.FC = () => {
     
 
     const fetchSettings = async () => {
-        // console.log("ATTEMPTING TO FETCH SETTINGS");
+        console.log("ATTEMPTING TO FETCH SETTINGS");
         try {
             const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
             const token = tokenCookie ? tokenCookie.split('=')[1] : null;
@@ -81,23 +94,26 @@ const SettingsPage: React.FC = () => {
                 }
             });
 
+            console.log("THEME RESPONSE ", themeResponse.data);
+    
             const fontResponse = await axios.get('/api/User/GetFontSettings', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
-            // console.log("THEME RESPONCE ", themeResponse.data);
-            // console.log("FONT RESPONCE ", fontResponse.data);
-
+            console.log("FONT RESPONSE ", fontResponse.data);
+    
             const capitalizedTheme = themeResponse.data.theme.charAt(0).toUpperCase() + themeResponse.data.theme.slice(1);
             const capitalizedFont = fontResponse.data.font.charAt(0).toUpperCase() + fontResponse.data.font.slice(1);
             setTheme(capitalizedTheme);
             setFont(capitalizedFont);
-            // console.log("FETCHED THEME: ", capitalizedTheme, " SET THEME TO: ", theme);
-            // console.log("FETCHED FONT: ", capitalizedFont, " SET FONT TO: ", font);
         } catch (err) {
-            console.error('Error fetching settings:', err);
+            if (isAxiosError(err)) {
+                console.error('Error fetching settings:', err.response?.data || err.message);
+            } else {
+                console.error('Error fetching settings:', err);
+            }
         }
     }
 
@@ -131,30 +147,40 @@ const SettingsPage: React.FC = () => {
     }, [username]);
     
     
-    const handleFontChange = (font: string) => {
-        setFont(font);
-        changeFont(font);
-        sendSettingsUpdate(theme);
-    }
+    const handleFontChange = (newFont: string) => {
+        console.log("FONT IN HANDLE FONT CHANGE: ", newFont);
+        setFont(newFont);
+        changeFont(newFont);
+        sendSettingsUpdate(theme, newFont);
+    };
+    
 
     const handleThemeChange = async (theme: string) => {
         const lowerCaseTheme = theme.toLowerCase();
         setTheme(theme);
         changeTheme(lowerCaseTheme);
-        sendSettingsUpdate(lowerCaseTheme);
+        sendSettingsUpdate(lowerCaseTheme, font);
     };
 
     const handleChangeName = async (newName: string) => {
         try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            if (!token) {
+                throw new Error('No auth token found');
+            }
+            console.log("UPDATE NAME: ", newName);
             await axios.post('/api/Users/ChangeUserName', {
-                newName,
+                newName: newName
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
         } catch (err) {
-            setError('Username change failed. Please try again.');
+            console.error('Username change failed. Please try again.', err);
         }
     };
 
-    const sendSettingsUpdate = (theme: string) => {
+    const sendSettingsUpdate = (theme: string, font: string) => {
         const newSettings = { theme, font };
         setVisualSettings(newSettings);
         if (isAuthenticated) {
@@ -162,7 +188,7 @@ const SettingsPage: React.FC = () => {
         } else {
             saveSettingsToCookie(newSettings);
         }
-    }
+    };
 
     const updateSettings = async (settings: { theme: string, font: string }) => {
         try {
@@ -174,9 +200,21 @@ const SettingsPage: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (err) {
-            console.error('Error updating settings:', err);
+            console.error('Error updating theme settings:', err);
         }
-    }
+    
+        try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            console.log("SETTINGS PAGE FONT IN UPDATE: ", settings.font);
+            await axios.post('/api/Settings/UpdateFont', null, {
+                params: { font: settings.font },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (err) {
+            console.error('Error updating font settings:', err);
+        }
+    };
 
     const saveSettingsToCookie = (settings: { theme: string, font: string }) => {
         const settingsJson = JSON.stringify(settings);
@@ -192,7 +230,7 @@ const SettingsPage: React.FC = () => {
     
                 <div className="settingsContent">
                     <SettingsChoiceBox label="Theme" value={theme} options={themes} onChange={choice => handleThemeChange(choice)}/>
-                    <SettingsChoiceBox label="Font" value={font} options={fonts} onChange={choice => handleFontChange(choice)}/>
+                    <SettingsChoiceBox label="Font" value={font} options={fonts} onChange={choice2 => handleFontChange(choice2)}/>
                 </div>
     
                 <div className="settingsFooter">
@@ -210,7 +248,7 @@ const SettingsPage: React.FC = () => {
                 <div className="settingsContentAuth">
                     <div className="settingsColumn">
                         <SettingsChoiceBox label="Theme" value={theme} options={themes} onChange={choice => handleThemeChange(choice)}/>
-                        <SettingsChoiceBox label="Font" value={font} options={fonts} onChange={choice => handleFontChange(choice)}/>
+                        <SettingsChoiceBox label="Font" value={font} options={fonts} onChange={choice3 => handleFontChange(choice3)}/>
                     </div>
                     <div className="settingsColumn">
                         <EditableField label="Profile Name: " initialValue={username} onSave={handleChangeName} />

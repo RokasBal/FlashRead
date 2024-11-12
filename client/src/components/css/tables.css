@@ -1,8 +1,9 @@
 .customTableContainer {
-    width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    overflow: auto;
+    background-color: transparent;
 }
 
 .tableFilter {
@@ -11,26 +12,64 @@
     width: 100%;
     justify-content: center;
     align-items: center;
-    background-color: var(--backgroundColor);
+    background-color: transparent;
 }
 
 .tableContent {
-    display: flex;
-    flex: 9;
+    flex: 1 1 auto;
     width: 100%;
     justify-content: center;
     align-items: center;
-    background-color: var(--backgroundColor);
-    overflow: auto;
+    background-color: transparent;
+    overflow: auto; 
+    border: 3px solid var(--borderColor);
+    border-radius: 10px;
+}
+
+.paginationControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1vh;
+}
+
+.paginationControls .left,
+.paginationControls .center,
+.paginationControls .right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.paginationControls .left {
+    justify-content: flex-start;
+}
+
+.paginationControls .right {
+    justify-content: flex-end;
+}
+
+.paginationControls button {
+    margin: 0 5px;
+}
+
+.pageIndicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* margin-top: 10px; */
+    color: var(--textColor);
+    font-family: var(--fontStyle);
 }
 
 .customTable {
     width: 100%;
     height: 100%;
     border-collapse: separate;
-    table-layout: fixed; /* Ensure columns have a consistent width */
-    border: 3px solid var(--borderColor);
-    border-radius: 10px;
+    table-layout: fixed; 
+    /* border: 3px solid var(--borderColor);
+    border-radius: 10px; */
 }
 
 .customTable thead {
@@ -57,9 +96,6 @@
 }
 
 .customTable tbody td {
-    /* display: table-cell;
-    width: 100%;
-    table-layout: fixed; */
     border: none;
 }
 
@@ -67,11 +103,11 @@
     border: 1px solid var(--borderColor);
     padding: 8px;
     text-align: left;
-    width: 33.33%; /* Ensure each column takes up an equal width */
+    width: 33.33%;
 }
 
 .customTable th {
-    background-color: var(--backgroundColor);
+    background-color: transparent;
     font-weight: bold;
 }
 
@@ -81,5 +117,11 @@
 }
 
 .customTable tr:nth-child(even) {
-    background-color: var(--backgroundColor);
+    background-color: transparent;
+}
+
+@media (max-height: 800px) {
+    .customTableContainer {
+        flex-direction: column-reverse;
+    }
 }
