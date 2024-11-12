@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../rendering/Vertex.h"
+#include <wgleng/rendering/Vertex.h>
 
 constexpr uint32_t emptyBookshelf_materialCount = 1;
 const Material emptyBookshelf_materials[] = {

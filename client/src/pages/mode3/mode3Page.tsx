@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainModule } from '../../../wasm/interface/wasmInterface';
 import { loadWasmModule } from './wasmLoader';
@@ -6,30 +6,78 @@ import CustomButton from '../../components/buttons/customButton';
 import "../../boards/css/mode3.css"
 import "../../boards/css/keyboardControls.css"
 
+function useOnScreen(ref: React.RefObject<HTMLElement>) {
+    const [isOnScreen, setIsOnScreen] = useState(false);
+    const [isTabVisible, setIsTabVisible] = useState(!document.hidden);
+    const [isWindowFocused, setIsWindowFocused] = useState(true);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            setIsTabVisible(!document.hidden);
+        };
+        const handleFocus = () => setIsWindowFocused(true);
+        const handleBlur = () => setIsWindowFocused(false);
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleFocus);
+        window.addEventListener('blur', handleBlur);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('blur', handleBlur);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!ref.current) return;
+
+        const observer = new IntersectionObserver(([entry]) => setIsOnScreen(entry.isIntersecting));
+        observer.observe(ref.current);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [ref]);
+
+    return isOnScreen && isTabVisible && isWindowFocused;
+}
+
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
     const [canvasSize, setCanvasSize] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const [module, setModule] = useState<MainModule | undefined>(undefined);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasOnScreen = useOnScreen(canvasRef);
+    const moduleRef = useRef<MainModule>();
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
         loadWasmModule().then((val) => {
-            setModule(val);
+            moduleRef.current = val;
             console.log("Mode3 wasm module loaded.");
+
+            // cast to any to avoid TypeScript error, canvas is not generated in the type definition
+            (moduleRef.current as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
+
+            // try-catch is a must because emscripten_set_main_loop() throws to exit the function
+            try {
+                moduleRef.current?.start();
+            } catch (error) {}
         });
+        return () => {
+            moduleRef.current?.stop();
+            (moduleRef.current as any)['canvas'] = undefined;
+            moduleRef.current = undefined;
+            console.log("Unloaded mode3 wasm module.");
+        };
     }, []);
 
     useEffect(() => {
-        if (module === undefined) return;
-        
-        // cast to any to avoid TypeScript error, canvas is not generated in the type definition
-        (module as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
-
-        // try-catch is a must because emscripten_set_main_loop() throws to exit the function
+        // needs try-catch because throws to change emscripten main loop
         try {
-            module.start();
+            moduleRef.current?.setHidden(!canvasOnScreen);
         } catch (error) {}
-    }, [module]);
+    }, [canvasOnScreen]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -50,9 +98,18 @@ const Mode3Page: React.FC = () => {
         window.addEventListener('keydown', handleKeyDown);
         handleResize();
 
+        document.addEventListener('fullscreenchange', handleResize);
+        document.addEventListener('mozfullscreenchange', handleResize);
+        document.addEventListener('webkitfullscreenchange', handleResize);
+        document.addEventListener('msfullscreenchange', handleResize);
+
         return () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('fullscreenchange', handleResize);
+            document.removeEventListener('mozfullscreenchange', handleResize);
+            document.removeEventListener('webkitfullscreenchange', handleResize);
+            document.removeEventListener('msfullscreenchange', handleResize);
         };
     }, []);
 
@@ -121,11 +178,11 @@ const Mode3Page: React.FC = () => {
                             <div className='mode3_game' id='mode3Game'>
                                 <canvas
                                     id="canvas"
-                                    className=''
+                                    ref={canvasRef}
                                     width={canvasSize.x}
                                     height={canvasSize.y}
-                                    onFocus={() => module?.setFocused(true)}
-                                    onBlur={() => module?.setFocused(false)}
+                                    onFocus={() => moduleRef.current?.setFocused(true)}
+                                    onBlur={() => moduleRef.current?.setFocused(false)}
                                     tabIndex={-1}
                                 />
                             </div>

@@ -16,9 +16,10 @@ interface WasmModule {
 }
 
 interface EmbindModule {
-  start(): boolean;
   stop(): void;
+  start(): boolean;
   setFocused(_0: boolean): void;
+  setHidden(_0: boolean): void;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
