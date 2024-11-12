@@ -6,7 +6,7 @@ export const changeFont = async (font: string) => {
             params: { font: font }
         });
         const fontSettings = response.data;
-        var fontValue = fontSettings.font + ", " + fontSettings.fontFamily;
+        const fontValue = fontSettings.font + ", " + fontSettings.fontFamily;
         document.documentElement.style.setProperty('--fontStyle', fontValue);
     } catch (err) {
         console.error('Error fetching font settings:', err);

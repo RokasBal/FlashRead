@@ -7,15 +7,11 @@ import '../../boards/css/buttons.css';
 import '../../boards/css/settings.css'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { register } from '../../services/authService';
 import axios from '../../components/axiosWrapper'
 
 const ChangePassword: React.FC = () => {
-    const { checkUserAuth, isAuthenticated } = useAuth();
-    const [error, setError] = useState('');
+    const isAuthenticated = useAuth();
     const navigate = useNavigate();
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');
@@ -38,7 +34,7 @@ const ChangePassword: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            setError('Password change failed. Please try again.');
+            console.error('Password change failed. Please try again.', error);
         }
     };
 

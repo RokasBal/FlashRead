@@ -16,10 +16,10 @@ interface Mode2TaskProps {
 }
 
 
-const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStarted, setPoints, setCombo, setHealth, setCorrectWords, difficulty }) => {
+const Mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStarted, setPoints, setCombo, setHealth, setCorrectWords, difficulty }) => {
     const [canvasSize, setCanvasSize] = useState<vec2>({ x: 600, y: 300 });
     const [playerPos, setPlayerPos] = useState<vec2>({ x: 0, y: 0.1});
-    const [textArray, setTextArray] = useState<droppingText[]>([]);
+    const [textArray] = useState<droppingText[]>([]);
     const playerPosRef = useRef<vec2>(); playerPosRef.current = playerPos;
     const textArrayRef = useRef<droppingText[]>(); textArrayRef.current = textArray;
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -61,7 +61,7 @@ const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
         return 0;
     };
 
-    const handleMouseMove = (e: any) => {
+    const handleMouseMove = (e: MouseEvent) => {
 
         const pos = { x: e.clientX / canvasSize.x - getCanvasOffset(), y: 0.1 };
         setPlayerPos(pos);
@@ -159,7 +159,7 @@ const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
                        Math.cos(text.angle) * (playerPos.y - centerPos.y) + centerPos.y
                 };
     
-                let closestPoint = {x: 0, y: 0};
+                const closestPoint = {x: 0, y: 0};
                 if (unrotatedPlayer.x < minPos.x)
                     closestPoint.x = minPos.x;
                 else if (unrotatedPlayer.x > maxPos.x)
@@ -226,4 +226,4 @@ const mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
     );
 };
 
-export default mode2Task;
+export default Mode2Task;

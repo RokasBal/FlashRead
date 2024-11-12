@@ -10,7 +10,7 @@ interface CustomTableProps {
     data: TableRow[];
 }
 
-const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
+const LeaderboardTable: React.FC<CustomTableProps> = () => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
     const [mode, setMode] = useState<string>('All');
     const [type, setType] = useState<string>('All time score'); 

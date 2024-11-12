@@ -10,10 +10,15 @@ import LeaderboardTable from '../../components/tables/leaderboardTable.tsx';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+interface GameHistoryItem {
+    taskId: number;
+    score: number;
+    timePlayed: string;
+}
+
 const ProfilePage: React.FC = () => {
     const [gameHistory, setGameHistory] = useState<any[]>([]);
     const [detailContent, setDetailContent] = useState<JSX.Element | string>();
-    const [detailFilters, setDetailFilters] = useState<JSX.Element | string>('Default Filters');
     const [username, setUsername] = useState<string>('Error');
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -28,12 +33,6 @@ const ProfilePage: React.FC = () => {
         1: "Q&A",
         2: "Catch the Word"
     };
-    
-    interface GameHistoryItem {
-        taskId: number;
-        score: number;
-        timePlayed: string;
-    }
     
     const handleEditClick = () => {
         setIsPopupVisible(true);
@@ -165,7 +164,7 @@ const ProfilePage: React.FC = () => {
         fetchUsername();
         fetchProfilePicture();
         fetchGameHistory();
-    }, []);
+    },);
 
     useEffect(() => {
         const updateDetailContent = async () => {

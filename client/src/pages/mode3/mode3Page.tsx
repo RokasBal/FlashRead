@@ -62,7 +62,9 @@ const Mode3Page: React.FC = () => {
             // try-catch is a must because emscripten_set_main_loop() throws to exit the function
             try {
                 moduleRef.current?.start();
-            } catch (error) {}
+            } catch (error) {
+                console.error(error);
+            }
         });
         return () => {
             moduleRef.current?.stop();
@@ -76,7 +78,9 @@ const Mode3Page: React.FC = () => {
         // needs try-catch because throws to change emscripten main loop
         try {
             moduleRef.current?.setHidden(!canvasOnScreen);
-        } catch (error) {}
+        } catch (error) {
+            console.error(error);
+        }
     }, [canvasOnScreen]);
 
     useEffect(() => {

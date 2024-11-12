@@ -42,7 +42,6 @@ const SettingsPage: React.FC = () => {
     const [fonts, setFonts] = useState<string[]>([]);
     const [font, setFont] = useState<string>(visualSettings?.font || 'defaultFont');
     const [username, setUsername] = useState<string>('');
-    const [error, setError] = useState<string | null>(null);
 
     const fetchAndSetThemes = async () => {
         const fetchedThemes = await fetchThemes();
@@ -140,7 +139,7 @@ const SettingsPage: React.FC = () => {
         }
 
         // console.log("THEME IN USE EFFECT: ", theme);
-    }, []);
+    },);
 
     useEffect(() => {
         console.log("username: ", username);

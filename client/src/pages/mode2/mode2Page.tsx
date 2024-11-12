@@ -44,7 +44,7 @@ const Mode2Page: React.FC = () => {
         if (points > maxPoints) {
             setMaxPoints(points);
         }   
-    }, [combo, points]);
+    }, [combo, points, maxCombo, maxPoints]);
 
     useEffect(() => {
         if (health <= 0) {

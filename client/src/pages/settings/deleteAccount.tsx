@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CustomButton from "../../components/buttons/customButton.tsx";
@@ -20,8 +20,6 @@ const DeleteAccount: React.FC = () => {
             navigate('/home');
         }
     }, [isAuthenticated, navigate]);
-
-    const [error, setError] = useState<string | null>(null);
     
     const handleAccountDeletion = async () => {
         try {
@@ -32,7 +30,7 @@ const DeleteAccount: React.FC = () => {
             });
             handleLogout();
         } catch (error) {
-            setError('Account deletion failed. Please try again.');
+            console.error('Account deletion failed. Please try again.', error);
         }
     }
     return (

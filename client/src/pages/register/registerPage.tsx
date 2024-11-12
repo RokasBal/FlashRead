@@ -10,7 +10,6 @@ import { register } from '../../services/authService';
 
 const RegisterPage: React.FC = () => {
     const { checkUserAuth, isAuthenticated } = useAuth();
-    const [error, setError] = useState('');
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -27,7 +26,7 @@ const RegisterPage: React.FC = () => {
             await register(email, password, username);
             checkUserAuth();
         } catch (error) {
-            setError('Register failed. Please try again.');
+            console.error('Register failed. Please try again.', error);
         }
     };
     return (

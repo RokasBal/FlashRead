@@ -15,7 +15,7 @@ export interface TimerHandle {
     getTime: () => number;
 }
 
-const TimerMode2 = forwardRef(({ id, initialTime = 0, onComplete, onTimeUpdate }: TimerProps, ref) => {
+const TimerMode2 = forwardRef(({initialTime = 0, onComplete, onTimeUpdate }: TimerProps, ref) => {
     const [seconds, setSeconds] = useState(initialTime); 
     const [isActive, setIsActive] = useState(true); 
 
