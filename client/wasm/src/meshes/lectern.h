@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../rendering/Vertex.h"
+#include <wgleng/rendering/Vertex.h>
 
 constexpr uint32_t lectern_materialCount = 1;
 const Material lectern_materials[] = {

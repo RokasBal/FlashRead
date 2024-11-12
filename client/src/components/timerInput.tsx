@@ -5,7 +5,7 @@ interface TimerInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     onTimeChange: (seconds: number) => void;
 }
 
-const TimerInput: React.FC<TimerInputProps> = ({ className, id, onTimeChange, ...props }) => {
+const TimerInput: React.FC<TimerInputProps> = ({id, onTimeChange }) => {
     const [inputSequence, setInputSequence] = useState<string>(''); // Initial state as empty string
     const [focused, setFocused] = useState<boolean>(false); // Track focus
 

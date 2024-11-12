@@ -17,7 +17,7 @@ const AboutPage: React.FC = () => {
                 </div>
 
                 <div className="logoContainer">
-                    <img src={logoImg} className='logoImg slideIn' />
+                    <img alt='logo' src={logoImg} className='logoImg slideIn' />
                 </div>
 
                 <div className="content">

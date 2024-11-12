@@ -32,6 +32,21 @@ namespace server.Controller {
         }
 
         [Authorize]
+        [HttpGet("User/GetUserInfo")]
+        public async Task<IActionResult> GetUserInfo() {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail)) {
+                return Unauthorized("Invalid token.");
+            }
+
+            var user = await _userHandler.GetUserByEmailAsync(userEmail);
+            if (user != null) {
+                return Ok(new { Name = user.Name, JoinedAt = user.JoinedAt });
+            }
+            return NotFound("User not found.");
+        }
+
+        [Authorize]
         [HttpGet("User/GetThemeSettings")]
         public async Task<IActionResult> GetThemeSettings() {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -125,7 +140,7 @@ namespace server.Controller {
             if (settingsId == null) {
                 return NotFound("Settings not found for update.");
             }
-            await _settings.UpdateSelectedTheme(settingsId, font);
+            await _settings.UpdateSelectedFont(settingsId, font);
             return Ok("Font updated successfully.");
         }
     }
