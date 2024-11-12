@@ -38,9 +38,9 @@ const SettingsPage: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const { visualSettings, setVisualSettings } = useVisualSettings();
     const [themes, setThemes] = useState<string[]>([]);
-    const [theme, setTheme] = useState<string>(visualSettings.theme);
+    const [theme, setTheme] = useState<string>(visualSettings?.theme || 'defaultTheme');
     const [fonts, setFonts] = useState<string[]>([]);
-    const [font, setFont] = useState<string>(visualSettings.font);
+    const [font, setFont] = useState<string>(visualSettings?.font || 'defaultFont');
     const [username, setUsername] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
@@ -164,11 +164,19 @@ const SettingsPage: React.FC = () => {
 
     const handleChangeName = async (newName: string) => {
         try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            if (!token) {
+                throw new Error('No auth token found');
+            }
+            console.log("UPDATE NAME: ", newName);
             await axios.post('/api/Users/ChangeUserName', {
-                newName,
+                newName: newName
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
         } catch (err) {
-            setError('Username change failed. Please try again.');
+            console.error('Username change failed. Please try again.', err);
         }
     };
 

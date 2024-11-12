@@ -11,6 +11,8 @@ interface CustomTableProps {
 const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
 
+    const headers = ['gamemode', 'score', 'date'];
+
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
             return [...data].sort((a, b) => {
@@ -42,7 +44,7 @@ const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {
             <div className="tableFilter">
                 <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={choice => console.log(choice)} label="Mode"/>
             </div>
-            <TableContent data={sortedData} sortConfig={sortConfig} handleSort={handleSort} />
+            <TableContent data={sortedData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
         </div>
     );
 };

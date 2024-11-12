@@ -12,16 +12,17 @@ interface CustomTableProps {
 
 const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
-    const [mode, setMode] = useState<string>('Q&A');
-    const [type, setType] = useState<string>('All time score'); // Set default type to "All time score"
+    const [mode, setMode] = useState<string>('All');
+    const [type, setType] = useState<string>('All time score'); 
     const [leaderboardData, setLeaderboadData] = useState<TableRow[]>([]);
     const [page, setPage] = useState<number>(1);
     const [isNextPageBlank, setIsNextPageBlank] = useState<boolean>(false);
 
-    // Sort the data based on the current sorting configuration
+    const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'score', 'gamemode'];
+
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
-            return [...leaderboardData].sort((a, b) => {
+            return [...leaderboardData].sort((a, b) => { 
                 const aValue = a[sortConfig.key];
                 const bValue = b[sortConfig.key];
                 if (aValue < bValue) {
@@ -36,7 +37,7 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
         return leaderboardData;
     }, [leaderboardData, sortConfig]);
 
-    interface GameHistoryItem {
+    interface AllTimeLeaderboardItem {
         name: string;
         score: number;
     }
@@ -44,10 +45,8 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
     const handleSort = (key: keyof TableRow) => {
         setSortConfig((prevConfig) => {
             if (prevConfig && prevConfig.key === key) {
-                // Toggle the sort direction if the same column is clicked
                 return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
             }
-            // Set to ascending by default if a new column is clicked
             return { key, direction: 'asc' };
         });
     };
@@ -57,9 +56,9 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
         try {
             const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
             // console.log("API Response:", response.data);
-            const transformedData = response.data.map((item: GameHistoryItem) => {
+            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
                 return {
-                    username: item.name, // Map 'name' to 'username'
+                    username: item.name,
                     score: item.score,
                 };
             });
@@ -104,11 +103,11 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
         <div className="customTableContainer">
             <div className="tableFilter">
                 {type !== "All time score" && (
-                    <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode"/>
+                    <ChoiceBox choices={["All", "Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode" defaultValue={mode} />
                 )}
-                <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue="All time score" />
+                <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
             </div>
-            <TableContent data={sortedData} sortConfig={sortConfig} handleSort={handleSort} />
+            <TableContent data={sortedData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
             <div className="paginationControls">
                 <div className="left">
                     {page > 1 && (

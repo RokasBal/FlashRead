@@ -169,26 +169,11 @@ const ProfilePage: React.FC = () => {
 
     useEffect(() => {
         const updateDetailContent = async () => {
-            if (gameHistory.length > 0) {
-                // Wait until gameHistory is fetched
-                setDetailContent(<HistoryTable data={gameHistory} />);
-            }
+            setDetailContent(<HistoryTable data={gameHistory} />);
         };
 
         updateDetailContent();
     }, [gameHistory]);
-
-    // const testData = [
-    //     { gamemode: 'Mode 1', score: 100, date: '2023-01-01' },
-    //     { gamemode: 'Mode 2', score: 200, date: '2023-01-02' },
-    //     { gamemode: 'Mode 3', score: 300, date: '2023-01-03' },
-    // ];
-
-    // const leaderboardData = [
-    //     { player: 'AAAA', score: 123123, date: '2023-01-01' },
-    //     { player: 'BBBB', score: 5, date: '2023-01-02' },
-    //     { player: 'CC', score: 9000, date: '2023-01-03' },
-    // ];
 
     return (
         <div className="profilePage">
