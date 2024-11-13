@@ -125,17 +125,17 @@ namespace server.Tests {
             user.Password = _userHandler.HashPassword(user.Password);
             var dbUser = new DbUser
             {
-            Name = user.Name,
-            Email = user.Email,
-            Password = user.Password,
-            SessionsId = Guid.NewGuid().ToString(),
-            SettingsId = Guid.NewGuid().ToString()
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString()
             };
             _context.Users.Add(dbUser);
             await _context.SaveChangesAsync();
-            SetUserEmail(user.Email);
+            SetUserEmail(user.Email); 
 
-            var themeSettings = new DbSettingsTheme { Theme = "Dark" };
+            var themeSettings = new DbSettingsTheme { Theme = "dark" };
             themeSettings.MainBackground = "#000000";
             themeSettings.SecondaryBackground = "#111111";
             themeSettings.PrimaryColor = "#222222";
@@ -145,10 +145,9 @@ namespace server.Tests {
             _context.SettingsThemes.Add(themeSettings);
             await _context.SaveChangesAsync();
 
-            var userSettings = new DbUserSettings { Id = dbUser.SettingsId, Theme = "Dark", Font = "Arial" };
+            var userSettings = new DbUserSettings { Id = dbUser.SettingsId, Theme = "dark", Font = "Arial" };
             _context.UserSettings.Add(userSettings);
             await _context.SaveChangesAsync();
-
 
             // Act
             var result = await _controller.GetThemeSettings();
@@ -156,7 +155,7 @@ namespace server.Tests {
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnValue = Assert.IsType<DbSettingsTheme>(okResult.Value);
-            Assert.Equal("Dark", returnValue.Theme);
+            Assert.Equal("dark", returnValue.Theme);
         }
         [Fact]
         public async Task GetThemeSettings_ReturnsNotFound_WhenSettingsNotFound()
@@ -328,7 +327,7 @@ namespace server.Tests {
         public async Task GetThemeSettingsByTheme_ReturnsOkResult_WithThemeSettings()
         {
             // Arrange
-            var theme = "Dark";
+            var theme = "dark";
             var themeSettings = new DbSettingsTheme { Theme = theme, MainBackground = "#000000", SecondaryBackground = "#111111", PrimaryColor = "#222222", AccentColor = "#333333", TextColor = "#444444", BorderColor = "#555555" };
             _context.SettingsThemes.Add(themeSettings);
             await _context.SaveChangesAsync();
