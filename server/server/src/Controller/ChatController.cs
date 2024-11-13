@@ -21,7 +21,7 @@ namespace server.Controller {
             _context = context;
             _userHandler = userHandler;
         }
-        [HttpPost("GetGlobalChats")]
+        [HttpGet("GetGlobalChats")]
         public async Task<IActionResult> GetGlobalChats() {
             var chats = await _context.GlobalChats.ToListAsync();
             var last100Chats = chats.OrderByDescending(chat => chat.ChatIndex).Take(100)
