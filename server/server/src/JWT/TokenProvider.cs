@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace server.UserNamespace;
 
 public class TokenProvider(IConfiguration configuration) {
-    public string Create(User user) {
+    public virtual string Create(User user) {
         string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT_SECRET environment variable is not set!");
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
