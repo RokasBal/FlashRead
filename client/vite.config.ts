@@ -12,7 +12,8 @@ export default defineConfig({
     setupFiles: '/setupTests.ts',
     coverage: {
       provider: 'v8',
-      exclude: ['**/*.js', '**/*.ts']
+      exclude: ['**/*.js', '**/*.ts', '**/*.test.tsx'],
+      all: true,
     }
   }
 });

@@ -31,7 +31,7 @@ const TableContent: React.FC<TableContentProps> = ({ data, headers, sortConfig, 
         <div className="tableContent">
             <table className="customTable">
                 <thead>
-                    <tr>
+                    <tr role="row">
                         {headers.map((header) => (
                             <th
                                 key={header}
@@ -46,7 +46,7 @@ const TableContent: React.FC<TableContentProps> = ({ data, headers, sortConfig, 
                 <tbody>
                     {sortedData.length > 0 ? (
                         sortedData.map((row, index) => (
-                            <tr key={index}>
+                            <tr key={index} role='row'>
                                 {headers.map((header) => (
                                     <td key={header}>{row[header]}</td>
                                 ))}

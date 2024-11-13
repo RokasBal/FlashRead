@@ -67,7 +67,7 @@ const TimerMode2 = forwardRef(({initialTime = 0, onComplete, onTimeUpdate }: Tim
 
     return (
         <div className="timer-container">
-            <div className="timer-text-container">
+            <div className="timer-text-container" role='timer'>
                 <h1>{formatTime(seconds)}</h1>
             </div>
         </div>

@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import Mode1Page from '../pages/mode1/mode1Page';
-import { AuthProvider } from '../context/AuthContext';
-import { VisualSettingsProvider } from '../context/VisualSettingsContext';
-import * as mode1Task from '../pages/mode1/mode1Task';
+import Mode1Page from '../../pages/mode1/mode1Page';
+import { AuthProvider } from '../../context/AuthContext';
+import { VisualSettingsProvider } from '../../context/VisualSettingsContext';
+import * as mode1Task from '../../pages/mode1/mode1Task';
 import { vi } from 'vitest';
 
-vi.mock('../pages/mode1/mode1Task');
+vi.mock('../../pages/mode1/mode1Task');
 
 const renderWithRouter = (ui: React.ReactElement, { route = '/' } = {}) => {
     window.history.pushState({}, 'Test page', route);
