@@ -34,6 +34,10 @@ const MessageHandle: React.FC = () => {
 
     }, []);
 
+    const byteArrayToBase64 = (byteArray: string) => {
+        return `data:image/jpeg;base64,${byteArray}`;
+    };
+
     return (
         <ul>
             {messages.map((message, index) => (
@@ -44,7 +48,7 @@ const MessageHandle: React.FC = () => {
                     </div>
                     <div className="message_body">
                         <p>{message.chatText}</p>
-                        <img src={message.profilePic} alt="Profile" />
+                        <img src={byteArrayToBase64(message.profilePic)} alt="Profile" />
                     </div>
                 </li>
             ))}
