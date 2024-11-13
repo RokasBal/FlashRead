@@ -82,11 +82,10 @@ namespace server.Tests {
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var chats = Assert.IsType<List<Chat>>(okResult.Value);
-            Assert.Equal(100, chats.Count);
-            Assert.Equal("Chat 150", chats.First().ChatText);
+            var chatList = Assert.IsType<ChatList>(okResult.Value);
+            Assert.Equal(100, chatList.Chats.Count);
+            Assert.Equal("Chat 150", chatList.Chats.First().ChatText);
         }
-
         [Fact]
         public async Task SendGlobalChat_ValidUser_ReturnsOkResult()
         {

@@ -36,7 +36,7 @@ namespace server.Controller {
                 }
                 updatedChats.Add(new Chat(chat.ChatText, chat.Author, chat.WrittenAt, ProfilePic));
             }
-            return Ok(updatedChats);
+            return Ok(new ChatList { Chats = updatedChats });
         }
         [Authorize]
         [HttpPost("SendGlobalChat")]
@@ -74,4 +74,8 @@ namespace server.Controller {
         DateTime WrittenAt,
         byte[] ProfilePic
     );
+    public record ChatList
+    {
+        public List<Chat> Chats { get; init; } = new List<Chat>();
+    }
 }
