@@ -22,7 +22,7 @@ namespace server.Controller {
             _userHandler = userHandler;
         }
         [HttpPost("GetGlobalChats")]
-        public async Task<List<Chat>> GetGlobalChats() {
+        public async Task<IActionResult> GetGlobalChats() {
             var chats = await _context.GlobalChats.ToListAsync();
             var last100Chats = chats.OrderByDescending(chat => chat.ChatIndex).Take(100)
                 .Select(chat => new Chat(chat.ChatText, chat.Author, chat.WrittenAt, new byte[0])).ToList();
@@ -36,7 +36,7 @@ namespace server.Controller {
                 }
                 updatedChats.Add(new Chat(chat.ChatText, chat.Author, chat.WrittenAt, ProfilePic));
             }
-            return updatedChats;
+            return Ok(updatedChats);
         }
         [Authorize]
         [HttpPost("SendGlobalChat")]

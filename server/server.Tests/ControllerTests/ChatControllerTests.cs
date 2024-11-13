@@ -67,13 +67,13 @@ namespace server.Tests {
             // Arrange
             for (int i = 0; i < 150; i++)
             {
-                _context.GlobalChats.Add(new DbGlobalChat
-                {
-                    ChatIndex = i + 1,
-                    ChatText = $"Chat {i + 1}",
-                    Author = "test@example.com",
-                    WrittenAt = DateTime.UtcNow
-                });
+            _context.GlobalChats.Add(new DbGlobalChat
+            {
+                ChatIndex = i + 1,
+                ChatText = $"Chat {i + 1}",
+                Author = "test@example.com",
+                WrittenAt = DateTime.UtcNow
+            });
             }
             await _context.SaveChangesAsync();
 
@@ -81,8 +81,10 @@ namespace server.Tests {
             var result = await _controller.GetGlobalChats();
 
             // Assert
-            Assert.Equal(100, result.Count);
-            Assert.Equal("Chat 150", result.First().ChatText);
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var chats = Assert.IsType<List<Chat>>(okResult.Value);
+            Assert.Equal(100, chats.Count);
+            Assert.Equal("Chat 150", chats.First().ChatText);
         }
 
         [Fact]
