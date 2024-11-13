@@ -26,7 +26,7 @@ GameScene::GameScene()
     keyMapper.AddMapping().PressKey(SDL_SCANCODE_F).Then([&] {
         actions.Trigger(Action::PickUp);
     });
-	keyMapper.AddMapping().PressMouse(SDL_BUTTON_RIGHT).Then([&] {
+	keyMapper.AddMapping().PressKey(SDL_SCANCODE_Q).Then([&] {
 		actions.Trigger(Action::Throw);
 	});
 	keyMapper.AddMapping().PressKey(SDL_SCANCODE_E).Then([&] {
