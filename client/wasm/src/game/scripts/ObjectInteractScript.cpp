@@ -62,12 +62,15 @@ void ObjectInteractScript::StartReading(entt::entity book) {
 		.position = {0, 0, 0},
 		.scale = {0.7f, 0.7f, 0.7f}
 	});
-	std::shared_ptr<DrawableText> text = Text::CreateText("arial", "TESTINNNNG 1");
+
+	std::string testText = "Lorem ipsum dolor sit amet 123456123456123456123456123456123456123456, consectetur adipiscing elit. Aenean id auctor tortor, vel maximus est. Mauris eu pellentesque purus. Mauris neque justo, finibus vitae nunc nec, facilisis bibendum purus. In pulvinar sapien ante, ac tincidunt quam ultrices nec. Sed feugiat libero nec lacus dignissim suscipit. Duis in purus in nisi vestibulum rutrum eget eget purus. Fusce luctus neque nec lorem sollicitudin, nec sollicitudin justo placerat. Morbi condimentum turpis risus. Ut leo erat, luctus eu arcu a, cursus eleifend felis.";
+	std::string testText2 = "abcde $<5>gefgh";
+	std::shared_ptr<DrawableText> text = Text::CreateText("arial", testText, 15);
 	text->useOrtho = false;
 	text->position = {-0.6, 0.55, 0.12};
 	text->scale = glm::vec3{0.05f};
 
-	std::shared_ptr<DrawableText> text2 = Text::CreateText("arial", "GERAS DALYKAS");
+	std::shared_ptr<DrawableText> text2 = Text::CreateText("arial", testText2, 15);
 	text2->useOrtho = false;
 	text2->position = text->position;
 	text2->position.x = 0.05;

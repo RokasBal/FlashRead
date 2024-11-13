@@ -57,6 +57,7 @@ const Mode3Page: React.FC = () => {
             console.log("Mode3 wasm module loaded.");
 
             // cast to any to avoid TypeScript error, canvas is not generated in the type definition
+            // eslint-disable-next-line
             (moduleRef.current as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
 
             // try-catch is a must because emscripten_set_main_loop() throws to exit the function
@@ -68,6 +69,7 @@ const Mode3Page: React.FC = () => {
         });
         return () => {
             moduleRef.current?.stop();
+            // eslint-disable-next-line
             (moduleRef.current as any)['canvas'] = undefined;
             moduleRef.current = undefined;
             console.log("Unloaded mode3 wasm module.");
