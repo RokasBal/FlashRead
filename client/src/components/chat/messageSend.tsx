@@ -20,7 +20,7 @@ const MessageSend: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='chat_input_obj'>
             <input
                 type="text"
                 value={chatText}
