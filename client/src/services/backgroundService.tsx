@@ -2,6 +2,7 @@ import axiosWrapper from '../components/axiosWrapper';
 
 const updateSession = async () => {
     try {
+        console.log('Calling UpdateSession');
         const response = await axiosWrapper.get('/api/Session/Update');
         console.log('Session updated:', response.data);
     } catch (error) {

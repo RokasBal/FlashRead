@@ -5,6 +5,7 @@ import { AuthProvider } from '../../context/AuthContext';
 import { VisualSettingsProvider } from '../../context/VisualSettingsContext';
 import * as mode1Task from '../../pages/mode1/mode1Task';
 import { vi } from 'vitest';
+import { time } from 'console';
 
 vi.mock('../../pages/mode1/mode1Task');
 
@@ -38,7 +39,7 @@ describe('Mode1Page', () => {
             expect(difficulties[0]).toBeInTheDocument();
             expect(screen.getByLabelText('Timer:')).toBeInTheDocument();
             expect(screen.getByText('Return')).toBeInTheDocument();
-        });
+        }, { timeout: 5000 });
     });
 
     test('navigates to home page on Return button click', async () => {

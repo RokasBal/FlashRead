@@ -178,7 +178,7 @@ const Mode3Page: React.FC = () => {
                 </div>
                 <div className='mode3_containerMiddle'>
                     <div className='mode3_middleTop'>
-                        <div className='mode3_gameContainer' id='gameSize'>
+                        <div className='mode3_gameContainer' id='gameSize' role="presentation">
                             <div className='mode3_game' id='mode3Game'>
                                 <canvas
                                     id="canvas"
