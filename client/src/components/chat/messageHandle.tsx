@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axiosWrapper from './axiosWrapper';
+import axiosWrapper from '../axiosWrapper';
 
 interface Message {
-    ChatText: string;
-    Author: string;
-    WrittenAt: string;
-    ProfilePic: string;
+    chatText: string;
+    author: string;
+    writtenAt: string;
+    profilePic: string;
 }
 
 const MessageHandle: React.FC = () => {
@@ -39,11 +39,12 @@ const MessageHandle: React.FC = () => {
             {messages.map((message, index) => (
                 <li key={index} className="message">
                     <div className="message_header">
-                        <span className="username">{message.Author}</span>
-                        <span className="date_sent">{message.WrittenAt}</span>
+                        <span>{message.author}</span>
+                        <span>{message.writtenAt}</span>
                     </div>
                     <div className="message_body">
-                        {message.ChatText}
+                        <p>{message.chatText}</p>
+                        <img src={message.profilePic} alt="Profile" />
                     </div>
                 </li>
             ))}

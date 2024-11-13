@@ -79,6 +79,7 @@
     flex-direction: column;
     overflow-y: auto;
     padding: 5%;
+    color: var(--textColor);
 }
 .chat_input {
     display: flex;

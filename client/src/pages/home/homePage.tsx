@@ -5,7 +5,8 @@ import '../../boards/css/main.board.css';
 import '../../boards/css/dropdown.css';
 import '../../boards/css/chat.css';
 import { useAuth } from '../../context/AuthContext';
-import MessageHandle from "../../components/messageHandle";
+import MessageHandle from "../../components/chat/messageHandle";
+import MessageSend from "../../components/chat/messageSend";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -37,8 +38,7 @@ const HomePage: React.FC = () => {
                                 <MessageHandle />
                             </div>
                             <div className="chat_input">
-                                <input type="text" id="chatInput" placeholder="Type a message..."/>
-                                <button id="chatSendButton">Send</button>
+                                <MessageSend />
                             </div>
                         </div>
                     </div>
