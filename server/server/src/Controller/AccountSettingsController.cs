@@ -30,7 +30,7 @@ namespace server.Controller {
             if (user == null) {
                 throw new NotFoundException("User not found.");
             }
-            return Ok(new { Name = user.Name });
+            return Ok(new Name { Value = user.Name });
         }
 
         [Authorize]
@@ -116,6 +116,7 @@ namespace server.Controller {
             return Ok(settings);
         }
 
+        [Authorize]
         [HttpPost("Settings/UpdateTheme")]
         public async Task<IActionResult> UpdateSelectedTheme(string theme) {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -130,6 +131,7 @@ namespace server.Controller {
             return Ok("Theme updated successfully.");
         }
 
+        [Authorize]
         [HttpPost("Settings/UpdateFont")]
         public async Task<IActionResult> UpdateSelectedFont(string font) {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -143,5 +145,9 @@ namespace server.Controller {
             await _settings.UpdateSelectedFont(settingsId, font);
             return Ok("Font updated successfully.");
         }
+    }
+    public record Name
+    {
+        public string? Value { get; init; }
     }
 }

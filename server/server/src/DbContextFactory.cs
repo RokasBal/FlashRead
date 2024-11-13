@@ -9,7 +9,7 @@ namespace server.Services {
             _serviceScopeFactory = serviceScopeFactory;
         }
 
-        public FlashDbContext GetDbContext() {
+        public virtual FlashDbContext GetDbContext() {
             var scope = _serviceScopeFactory.CreateScope();
             return scope.ServiceProvider.GetRequiredService<FlashDbContext>();
         }

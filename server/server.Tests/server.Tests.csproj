@@ -26,5 +26,10 @@
     <ItemGroup>
         <ProjectReference Include="..\server\server.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <None Update="..\server\src\images\defaultPicture.jpg">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>
