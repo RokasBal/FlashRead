@@ -795,5 +795,72 @@ namespace server.Tests {
             var exception = await Assert.ThrowsAsync<Exception>(() => _userHandler.DeleteUserByEmailAsync(email));
             Assert.Equal("User not found", exception.Message);
         }
+
+        [Fact]
+        public async Task GetUserProfilePicByEmailAsync_ShouldReturnProfilePic_WhenUserExists()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var profilePic = new byte[] { 1, 2, 3, 4, 5 };
+            var dbUser = new DbUser
+            {
+                Name = "Test User",
+                Email = email,
+                Password = _userHandler.HashPassword("password123"),
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString(),
+                JoinedAt = DateTime.UtcNow,
+                ProfilePic = profilePic
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _userHandler.GetUserProfilePicByEmailAsync(email);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(profilePic, result);
+        }
+
+        [Fact]
+        public async Task GetUserProfilePicByEmailAsync_ShouldReturnEmptyArray_WhenUserExistsButNoProfilePic()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var dbUser = new DbUser
+            {
+                Name = "Test User",
+                Email = email,
+                Password = _userHandler.HashPassword("password123"),
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString(),
+                JoinedAt = DateTime.UtcNow,
+                ProfilePic = null
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _userHandler.GetUserProfilePicByEmailAsync(email);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetUserProfilePicByEmailAsync_ShouldReturnNull_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var email = "nonexistent@example.com";
+
+            // Act
+            var result = await _userHandler.GetUserProfilePicByEmailAsync(email);
+
+            // Assert
+            Assert.Null(result);
+        }
+
     }
 }

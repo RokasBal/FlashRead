@@ -41,8 +41,14 @@ namespace server.Controller {
         [Authorize]
         [HttpPost("SendGlobalChat")]
         public async Task<IActionResult> SendGlobalChat([FromBody] incomingChat chat) {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(email)) {
+            string? email = null;
+            try {
+                email = User.FindFirst(ClaimTypes.Email)?.Value;
+                if (string.IsNullOrEmpty(email)) {
+                    return Unauthorized("Invalid token.");
+                }
+            } catch (Exception ex) {
+                System.Console.WriteLine(ex.Message);
                 return Unauthorized("Invalid token.");
             }
             var lastChat = await _context.GlobalChats.OrderByDescending(c => c.ChatIndex).FirstOrDefaultAsync();
