@@ -83,6 +83,7 @@ const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
         <div className="dropdown" style={{ position: 'relative', height: '100%', width: '50%' }}>  {/* width of the dropdown */}
             <button
                 ref={buttonRef}
+                role="button"
                 onClick={toggleDropdown}
                 style={buttonStyle}
                 onMouseEnter={() => setIsHovered(true)}

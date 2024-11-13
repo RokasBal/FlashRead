@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import HomePage from '../pages/home/homePage';
-import { AuthProvider } from '../context/AuthContext'; // Import the AuthProvider
+import HomePage from '../../pages/home/homePage';
+import { AuthProvider } from '../../context/AuthContext'; // Import the AuthProvider
 
 const renderWithRouter = (ui: React.ReactElement, { route = '/' } = {}) => {
     window.history.pushState({}, 'Test page', route);

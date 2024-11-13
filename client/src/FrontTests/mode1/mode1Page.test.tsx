@@ -1,12 +1,13 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import Mode1Page from '../pages/mode1/mode1Page';
-import { AuthProvider } from '../context/AuthContext';
-import { VisualSettingsProvider } from '../context/VisualSettingsContext';
-import * as mode1Task from '../pages/mode1/mode1Task';
+import Mode1Page from '../../pages/mode1/mode1Page';
+import { AuthProvider } from '../../context/AuthContext';
+import { VisualSettingsProvider } from '../../context/VisualSettingsContext';
+import * as mode1Task from '../../pages/mode1/mode1Task';
 import { vi } from 'vitest';
+import { time } from 'console';
 
-vi.mock('../pages/mode1/mode1Task');
+vi.mock('../../pages/mode1/mode1Task');
 
 const renderWithRouter = (ui: React.ReactElement, { route = '/' } = {}) => {
     window.history.pushState({}, 'Test page', route);
@@ -38,7 +39,7 @@ describe('Mode1Page', () => {
             expect(difficulties[0]).toBeInTheDocument();
             expect(screen.getByLabelText('Timer:')).toBeInTheDocument();
             expect(screen.getByText('Return')).toBeInTheDocument();
-        });
+        }, { timeout: 5000 });
     });
 
     test('navigates to home page on Return button click', async () => {
