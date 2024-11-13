@@ -4,6 +4,8 @@ using server.src;
 using server.UserNamespace;
 using System.Security.Claims;
 using server.src.Settings;
+using server.Exceptions;
+
 namespace server.Controller {
     [Route("api")]
 
@@ -21,14 +23,14 @@ namespace server.Controller {
         public async Task<IActionResult> GetCurrentUserName() {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail)) {
-                return Unauthorized("Invalid token.");
+                throw new UnauthorizedException("Invalid token.");
             }
 
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
-            if (user != null) {
-                return Ok(new { Name = user.Name });
+            if (user == null) {
+                throw new NotFoundException("User not found.");
             }
-            return NotFound("User not found.");
+            return Ok(new { Name = user.Name });
         }
 
         [Authorize]
@@ -36,14 +38,14 @@ namespace server.Controller {
         public async Task<IActionResult> GetUserInfo() {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail)) {
-                return Unauthorized("Invalid token.");
+                throw new UnauthorizedException("Invalid token.");
             }
 
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
-            if (user != null) {
-                return Ok(new { Name = user.Name, JoinedAt = user.JoinedAt });
+            if (user == null) {
+                throw new NotFoundException("User not found.");
             }
-            return NotFound("User not found.");
+            return Ok(new { Name = user.Name, JoinedAt = user.JoinedAt });   
         }
 
         [Authorize]
@@ -52,17 +54,17 @@ namespace server.Controller {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail))
             {
-                return Unauthorized("Invalid token.");
+                throw new UnauthorizedException("Invalid token.");
             }
             var settingsId = await _userHandler.GetSettingsIdByEmailAsync(userEmail);
             if (settingsId == null)
             {
-                return NotFound("Settings not found.");
+                throw new NotFoundException("Settings not found.");
             }
             var theme = await _userHandler.GetSettingsThemeById(settingsId);
             if (theme == null)
             {
-                return NotFound("Theme not found.");
+                throw new NotFoundException("Theme not found.");
             }
             var settings = await _settings.GetSettingsByThemeAsync(theme);
             return Ok(settings);
@@ -74,17 +76,17 @@ namespace server.Controller {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail))
             {
-                return Unauthorized("Invalid token.");
+                throw new UnauthorizedException("Invalid token.");
             }
             var settingsId = await _userHandler.GetSettingsIdByEmailAsync(userEmail);
             if (settingsId == null)
             {
-                return NotFound("Settings not found.");
+                throw new NotFoundException("Settings not found.");
             }
             var theme = await _userHandler.GetSettingsFontById(settingsId);
             if (theme == null)
             {
-                return NotFound("Theme not found.");
+                throw new NotFoundException("Font not found.");
             }
             var settings = await _settings.GetSettingsByFontAsync(theme);
             return Ok(settings);
@@ -118,11 +120,11 @@ namespace server.Controller {
         public async Task<IActionResult> UpdateSelectedTheme(string theme) {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail)) {
-                return Unauthorized("Invalid token.");
+                throw new UnauthorizedException("Invalid token.");
             }
             var settingsId = await _userHandler.GetSettingsIdByEmailAsync(userEmail);
             if (settingsId == null) {
-                return NotFound("Settings not found for update.");
+                throw new NotFoundException("Settings not found for update.");
             }
             await _settings.UpdateSelectedTheme(settingsId, theme);
             return Ok("Theme updated successfully.");
@@ -132,11 +134,11 @@ namespace server.Controller {
         public async Task<IActionResult> UpdateSelectedFont(string font) {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail)) {
-                return Unauthorized("Invalid token.");
+                throw new UnauthorizedException("Invalid token.");
             }
             var settingsId = await _userHandler.GetSettingsIdByEmailAsync(userEmail);
             if (settingsId == null) {
-                return NotFound("Settings not found for update.");
+                throw new NotFoundException("Settings not found for update.");
             }
             await _settings.UpdateSelectedFont(settingsId, font);
             return Ok("Font updated successfully.");

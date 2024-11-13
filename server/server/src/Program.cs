@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using server.src.Settings;
 using server.Services;
+using server.Exceptions;
+
 namespace server
 {
     public class Program
@@ -82,6 +84,10 @@ namespace server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGenWithAuth();
 
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -94,6 +100,8 @@ namespace server
             app.UseCors(MyAllowSpecificOrigins);
             
             app.UseHsts();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.MapControllers();
 
