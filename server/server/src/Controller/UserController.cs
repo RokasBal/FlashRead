@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using server.src;
 using server.UserNamespace;
 using System.Security.Claims;
+using server.src;
 
 namespace server.Controller {
     [Route("api")]
@@ -15,11 +15,13 @@ namespace server.Controller {
         }
         
         [HttpGet("Users/All")]
-        public async Task<IActionResult> GetAllUsers() {
+        public async Task<IActionResult> GetAllUsers()
+        {
             var users = await _userHandler.GetAllUsersAsync();
-            var usersWithoutPasswords = users.Select(user => new {
-            user.Name,
-            user.Email,
+            var usersWithoutPasswords = users.Select(user => new UserDTO
+            {
+                Name = user.Name,
+                Email = user.Email,
             });
             return Ok(usersWithoutPasswords);
         }
@@ -34,7 +36,7 @@ namespace server.Controller {
 
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                return Ok(new { Email = user?.Email, Name = user?.Name});
+                return Ok(new UserDTO { Email = user?.Email, Name = user?.Name});
             }
             return NotFound("User not found.");
         }
@@ -42,7 +44,7 @@ namespace server.Controller {
         public async Task<IActionResult> GetUserDetails([FromQuery] string email) {
             var user = await _userHandler.GetUserByEmailAsync(email);
             if (user != null) {
-                return Ok(new { Email = user?.Email, Name = user?.Name, JoinedAt = user?.JoinedAt });
+                return Ok(new UserDetailsDTO { Email = user?.Email, Name = user?.Name, JoinedAt = user?.JoinedAt });
             }
             return NotFound("User not found.");
         }
@@ -142,13 +144,6 @@ namespace server.Controller {
             await _userHandler.ChangeUserNameAsync(userEmail, request.NewName);
             return Ok("Name changed.");
         }
-        public record ChangePasswordRequest {
-            public string? OldPassword { get; set; }
-            public string? NewPassword { get; set; }
-        }
-        public record ChangeUserNameRequest {
-            public string? NewName { get; set; }
-        }
         [Authorize]
         [HttpGet("Users/DeleteUser")]
         public async Task<IActionResult> DeleteUser() {
@@ -161,6 +156,9 @@ namespace server.Controller {
         }
         [HttpPost("Users/TotalScoreLeaderboard")]
         public async Task<IActionResult> GetTotalScoreLeaderBoard([FromQuery] int page) {
+            if (page < 1) {
+                return BadRequest("Invalid page number.");
+            }
             var users = await _userHandler.GetAllUsersAsync();
             
             var updatedUsers = new List<UserScore>();
@@ -178,6 +176,9 @@ namespace server.Controller {
 
         [HttpPost("Users/HighScoreLeaderboard")]
         public async Task<IActionResult> GetHighScoreLeaderBoard([FromQuery] int page) {
+            if (page < 1) {
+                return BadRequest("Invalid page number.");
+            }
             var users = await _userHandler.GetAllUsersAsync();
             
             var updatedUsers = new List<UserScore>();
@@ -201,11 +202,17 @@ namespace server.Controller {
             var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
             return Ok(pagedResult);
         }
-
-        public record UserScore {
-            public string? Name { get; set; }
-            public int Score { get; set; }
-            public int? Gamemode { get; set; }
-        }
+    }
+    public record UserScore {
+        public string? Name { get; set; }
+        public int Score { get; set; }
+        public int? Gamemode { get; set; }
+    }
+    public record ChangePasswordRequest {
+        public string? OldPassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+    public record ChangeUserNameRequest {
+        public string? NewName { get; set; }
     }
 }
