@@ -1,28 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CustomButton from "../../components/buttons/customButton.tsx";
 import '../../boards/css/buttons.css';
 import '../../boards/css/deleteAccount.css';
 import axios from '../../components/axiosWrapper';
+
 const DeleteAccount: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, logOut } = useAuth();
     const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logOut();
+        navigate('/login');
+    }
 
     useEffect(() => {
         if (!isAuthenticated) {
             navigate('/home');
         }
     }, [isAuthenticated, navigate]);
-
-    const [error, setError] = useState<string | null>(null);
     
     const handleAccountDeletion = async () => {
         try {
-            await axios.get('/api/Users/DeleteUser');
-            navigate('/login');
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+            await axios.get('/api/Users/DeleteUser', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            handleLogout();
         } catch (error) {
-            setError('Account deletion failed. Please try again.');
+            console.error('Account deletion failed. Please try again.', error);
         }
     }
     return (

@@ -2,9 +2,9 @@ name: frontend-test
 
 on:
   push:
-    branches: [main]
+    branches: [dev-test]
   pull_request:
-    branches: [main]
+    branches: [dev-test]
 
 jobs:
   frontend-test:
@@ -20,11 +20,19 @@ jobs:
         id: cache-restore 
         uses: actions/cache@v3
         with: 
-          path: ./src/node_modules 
+          path: | 
+            ./src/node_modules 
+            !./client/wasm
           key: npm-${{ hashFiles('./src/package-lock.json') }} 
       - name: Install dependencies
         working-directory: ./client
         run: npm install
+      - name: Run tests
+        working-directory: ./client
+        run: npm test
+      - name: Run Coverage
+        working-directory: ./client
+        run: npm run coverage
       - name: Run linter
         working-directory: ./client
         run: npm run lint

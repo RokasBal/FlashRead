@@ -1,19 +1,15 @@
 import React from 'react';
 import '../css/tables.css';
-
-interface TableRow {
-    player: string;
-    score: number;
-    date: string;
-}
+import { TableRow } from './types';
 
 interface TableContentProps {
-    data: TableRow[];
+    data: TableRow[] | null;
+    headers: string[];
     sortConfig: { key: keyof TableRow; direction: 'asc' | 'desc' } | null;
     handleSort: (key: keyof TableRow) => void;
 }
 
-const TableContent: React.FC<TableContentProps> = ({ data, sortConfig, handleSort }) => {
+const TableContent: React.FC<TableContentProps> = ({ data, headers, sortConfig, handleSort }) => {
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
             return [...data].sort((a, b) => {
@@ -35,43 +31,36 @@ const TableContent: React.FC<TableContentProps> = ({ data, sortConfig, handleSor
         <div className="tableContent">
             <table className="customTable">
                 <thead>
-                    <tr>
-                        <th
-                            onClick={() => handleSort('player')}
-                            className={sortConfig?.key === 'player' ? `sort-${sortConfig.direction}` : ''}
-                        >
-                            Username
-                        </th>
-                        <th
-                            onClick={() => handleSort('score')}
-                            className={sortConfig?.key === 'score' ? `sort-${sortConfig.direction}` : ''}
-                        >
-                            Score
-                        </th>
-                        <th
-                            onClick={() => handleSort('date')}
-                            className={sortConfig?.key === 'date' ? `sort-${sortConfig.direction}` : ''}
-                        >
-                            Date
-                        </th>
+                    <tr role="row">
+                        {headers.map((header) => (
+                            <th
+                                key={header}
+                                onClick={() => handleSort(header as keyof TableRow)}
+                                className={sortConfig?.key === header ? `sort-${sortConfig.direction}` : ''}
+                            >
+                                {header.charAt(0).toUpperCase() + header.slice(1)}
+                            </th>
+                        ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {sortedData.map((row, index) => (
-                        <tr key={index}>
-                            <td>{row.player}</td>
-                            <td>{row.score}</td>
-                            <td>{row.date}</td>
-                        </tr>
-                    ))}
-                    {/* Add empty rows to fill the space */}
-                    {Array.from({ length: Math.max(0, 10 - sortedData.length) }).map((_, index) => (
-                        <tr key={`empty-${index}`}>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                        </tr>
-                    ))}
+                    {sortedData.length > 0 ? (
+                        sortedData.map((row, index) => (
+                            <tr key={index} role='row'>
+                                {headers.map((header) => (
+                                    <td key={header}>{row[header]}</td>
+                                ))}
+                            </tr>
+                        ))
+                    ) : (
+                        Array.from({ length: 10 }).map((_, index) => (
+                            <tr key={`empty-${index}`}>
+                                {headers.map((header) => (
+                                    <td key={header}>&nbsp;</td>
+                                ))}
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
         </div>

@@ -11,7 +11,7 @@ type Task1Response = {
   text: string;
   questions: question[];
 };
-type Task1AnswerRequest = {
+export type Task1AnswerRequest = {
   session: number;
   selectedVariants: number[];
   timeTaken: number;

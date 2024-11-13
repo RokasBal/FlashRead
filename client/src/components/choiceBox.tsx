@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import '../boards/css/choiceBox.css'; 
 
@@ -7,10 +7,18 @@ interface ChoiceBoxProps {
   prompt: string;
   onSelect: (choice: string) => void;
   label?: string;
+  defaultValue?: string; // Add a defaultValue prop
 }
 
-const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, prompt, onSelect, label = 'Choose an option:' }) => {
-  const [selectedChoice, setSelectedChoice] = useState<string>('');
+const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, prompt, onSelect, label = 'Choose an option:', defaultValue = '' }) => {
+  const [selectedChoice, setSelectedChoice] = useState<string>(defaultValue);
+
+  useEffect(() => {
+    if (defaultValue) {
+      setSelectedChoice(defaultValue);
+      onSelect(defaultValue);
+    }
+  }, [defaultValue, onSelect]);
 
   const handleSelect = (event: SelectChangeEvent<string>) => {
     const choice = event.target.value;

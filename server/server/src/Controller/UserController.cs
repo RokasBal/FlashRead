@@ -183,8 +183,17 @@ namespace server.Controller {
             var updatedUsers = new List<UserScore>();
             foreach (var user in users) {
                 var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
-                var highScore = userHistory.Max(history => history.Score);
-                updatedUsers.Add(new UserScore { Name = user.Name, Score = highScore });
+                if (userHistory.Any()) {
+                    var highestScores = userHistory
+                        .GroupBy(history => history.TaskId)
+                        .Select(group => group
+                            .OrderByDescending(history => history.Score)
+                            .First()
+                        )
+                        .Select(history => new UserScore { Name = user.Name, Score = history.Score, Gamemode = history.TaskId });
+
+                    updatedUsers.AddRange(highestScores);
+                }
             }
 
             var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
@@ -192,9 +201,11 @@ namespace server.Controller {
             var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
             return Ok(pagedResult);
         }
+
         public record UserScore {
             public string? Name { get; set; }
             public int Score { get; set; }
+            public int? Gamemode { get; set; }
         }
     }
 }

@@ -1,16 +1,14 @@
-import React, { useState, CSSProperties, useRef, useEffect } from 'react';
+import React, { useState, CSSProperties, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { login } from '../services/authService';
 interface DropdownProps {
     onSelect: (item: string) => void;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
-    const { checkUserAuth, isAuthenticated } = useAuth();
+    const isAuthenticated = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isClicked, setIsClicked] = useState(false);
-    const [buttonSize, setButtonSize] = useState<number>(0);
     
     const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -22,13 +20,6 @@ const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
         setIsOpen(false);  // Close dropdown on item selection
         onSelect(item);    // Call the passed-in callback function
     };
-
-    // Update the button size to match height
-    useEffect(() => {
-        if (buttonRef.current) {
-            setButtonSize(buttonRef.current.offsetHeight); // Set the width based on height
-        }
-    }, [buttonRef]);
 
     const buttonStyle: CSSProperties = {
         opacity: isClicked ? 0.95 : 1,
@@ -92,6 +83,7 @@ const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
         <div className="dropdown" style={{ position: 'relative', height: '100%', width: '50%' }}>  {/* width of the dropdown */}
             <button
                 ref={buttonRef}
+                role="button"
                 onClick={toggleDropdown}
                 style={buttonStyle}
                 onMouseEnter={() => setIsHovered(true)}

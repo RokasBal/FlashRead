@@ -1,19 +1,16 @@
 import axios from '../../components/axiosWrapper';
 
-export const changeFont = (font: string) => {
-    let fontValue;
-    switch (font) {
-        case 'Poppins':
-            fontValue = "\"Poppins\", sans-serif";
-            break;
-        case 'Merriweather':
-            fontValue = "\"Merriweather\", serif";
-            break;
-        default:
-            fontValue = "\"Poppins\", sans-serif";
-            break;
+export const changeFont = async (font: string) => {
+    try {
+        const response = await axios.get('/api/Settings/GetFontSettingsByFont', {
+            params: { font: font }
+        });
+        const fontSettings = response.data;
+        const fontValue = fontSettings.font + ", " + fontSettings.fontFamily;
+        document.documentElement.style.setProperty('--fontStyle', fontValue);
+    } catch (err) {
+        console.error('Error fetching font settings:', err);
     }
-    document.documentElement.style.setProperty('--fontStyle', fontValue);
 }
 
 export const changeTheme = async (theme: string) => {

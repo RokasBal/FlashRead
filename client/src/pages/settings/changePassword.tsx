@@ -7,15 +7,11 @@ import '../../boards/css/buttons.css';
 import '../../boards/css/settings.css'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { register } from '../../services/authService';
 import axios from '../../components/axiosWrapper'
 
 const ChangePassword: React.FC = () => {
-    const { checkUserAuth, isAuthenticated } = useAuth();
-    const [error, setError] = useState('');
+    const isAuthenticated = useAuth();
     const navigate = useNavigate();
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');
@@ -29,12 +25,16 @@ const ChangePassword: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
             await axios.post('/api/Users/ChangePassword', {
-                oldPassword,
-                newPassword
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            setError('Password change failed. Please try again.');
+            console.error('Password change failed. Please try again.', error);
         }
     };
 
@@ -54,6 +54,10 @@ const ChangePassword: React.FC = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPassword(e.target.value)}
                         type="password"
                         sx={{
+                            '& .MuiFormLabel-root': {
+                                color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderWidth: '3px',
@@ -67,7 +71,7 @@ const ChangePassword: React.FC = () => {
                                     borderWidth: '3px',
                                     borderColor: '#1976d2', // Border color when focused
                                 },
-                        
+
                                 width: '100%',
                             },
                         }}
@@ -78,6 +82,10 @@ const ChangePassword: React.FC = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
                         type="password"
                         sx={{
+                            '& .MuiFormLabel-root': {
+                                color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderWidth: '3px',
@@ -91,7 +99,7 @@ const ChangePassword: React.FC = () => {
                                     borderWidth: '3px',
                                     borderColor: '#1976d2', // Border color when focused
                                 },
-                        
+
                                 width: '100%',
                             },
                         }}
@@ -102,6 +110,10 @@ const ChangePassword: React.FC = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRepeatPassword(e.target.value)}
                         type="password"
                         sx={{
+                            '& .MuiFormLabel-root': {
+                                color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderWidth: '3px',
@@ -115,7 +127,7 @@ const ChangePassword: React.FC = () => {
                                     borderWidth: '3px',
                                     borderColor: '#1976d2', // Border color when focused
                                 },
-                        
+
                                 width: '100%',
                             },
                         }}

@@ -2,28 +2,89 @@ import React, { useState, useEffect } from 'react';
 import '../css/tables.css';
 import ChoiceBox from '../choiceBox.tsx';
 import TableContent from './tableComponent.tsx';
+import CustomButton from '../buttons/customButton.tsx';
 import axios from '../../components/axiosWrapper';
+import { TableRow } from './types';
 
-interface TableRow {
-    player: string;
+interface AllTimeLeaderboardItem {
+    name: string;
     score: number;
-    date: string;
 }
 
-interface CustomTableProps {
-    data: TableRow[];
+interface HighScoreLeaderboardItem {
+    name: string;
+    score: number;
+    gamemode: string;
 }
 
-const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
+const gameModes = [
+    'All', 
+    'Q&A', 
+    'Catch the Word', 
+    // 'Mode 3'
+];
+
+const leaderboardTypes = [
+    'High score', 
+    'All time score'
+];
+
+const taskIdToGameMode: { [key: number]: string } = {
+    1: "Q&A",
+    2: "Catch the Word"
+};
+
+const LeaderboardTable: React.FC = () => {
     const [sortConfig, setSortConfig] = useState<{ key: keyof TableRow; direction: 'asc' | 'desc' } | null>(null);
-    const [mode, setMode] = useState<string>('Q&A');
-    const [type, setType] = useState<string>('High score');
-    const [leaderboardData, setLeaderboadData] = useState<any[]>([]);
+    const [mode, setMode] = useState<string>('All');
+    const [type, setType] = useState<string>('All time score'); 
+    const [leaderboardData, setLeaderboadData] = useState<TableRow[]>([]);
+    const [page, setPage] = useState<number>(1);
+    const [isNextPageBlank, setIsNextPageBlank] = useState<boolean>(false);
 
-    // Sort the data based on the current sorting configuration
+    const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'gamemode', 'score'];
+
+    const fetchAllLeaderboard = async (pageNumber: number) => {
+        try {
+            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
+                return {
+                    username: item.name,
+                    score: item.score,
+                };
+            });
+            setLeaderboadData(transformedData);
+        } catch (error) {
+            console.error("Error fetching leaderboard data:", error);
+        }
+    };
+    
+    const fetchHighScoreLeaderboard = async (pageNumber: number) => {
+        try {
+            const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+            const transformedData = response.data.map((item: HighScoreLeaderboardItem) => {
+                return {
+                    username: item.name,
+                    score: item.score,
+                    gamemode: taskIdToGameMode[Number(item.gamemode)],
+                };
+            });
+            setLeaderboadData(transformedData);
+        } catch (error) {
+            console.error("Error fetching leaderboard data:", error);
+        }
+    };
+
+    const filteredData = React.useMemo(() => {
+        if (mode === 'All') {
+            return leaderboardData;
+        }
+        return leaderboardData.filter(row => row.gamemode === mode);
+    }, [leaderboardData, mode]);
+
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
-            return [...data].sort((a, b) => {
+            return [...filteredData].sort((a, b) => { 
                 const aValue = a[sortConfig.key];
                 const bValue = b[sortConfig.key];
                 if (aValue < bValue) {
@@ -35,80 +96,95 @@ const LeaderboardTable: React.FC<CustomTableProps> = ({ data }) => {
                 return 0;
             });
         }
-        return data;
-    }, [data, sortConfig]);
+        return filteredData;
+    }, [filteredData, sortConfig]);
 
-    interface GameHistoryItem {
-        username: string;
-        taskId: number;
-        score: number;
-    }
-
-    const taskIdToGameMode: { [key: number]: string } = {
-        1: "Q&A",
-        2: "Catch the Word"
-    };
+    const filledData = React.useMemo(() => {
+        const rowsPerPage = 10;
+        const emptyRows = rowsPerPage - sortedData.length;
+        const emptyRow = { username: '', score: '', gamemode: '' };
+        return [...sortedData, ...Array(emptyRows).fill(emptyRow)];
+    }, [sortedData]);
 
     const handleSort = (key: keyof TableRow) => {
         setSortConfig((prevConfig) => {
             if (prevConfig && prevConfig.key === key) {
-                // Toggle the sort direction if the same column is clicked
                 return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
             }
-            // Set to ascending by default if a new column is clicked
             return { key, direction: 'asc' };
         });
     };
 
-    const fetchData = async () => {
-        console.log("FETCHING LEADERBOARD DATA");
-        if (type === 'High score') {
-            try {
-                const response = await axios.get('/api/Users/totalScoreLeaderboard');
-                const transformedData = response.data.map((item: GameHistoryItem) => {
-                    return {
-                        username: item.username,
-                        gamemode: taskIdToGameMode[item.taskId] || "Unknown",
-                        score: item.score,
-                    };
-                });
-                console.log(data);
-            } catch (error) {
-                console.error(error);
+    const checkNextPage = async (pageNumber: number): Promise<boolean> => {
+        try {
+            if (type === "All time score") {
+                const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+                return response.data.length === 0;
+            } else if (type === "High score") {
+                const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+                return response.data.length === 0;
             }
-        } else if (type === 'All time score') {
-            try {
-                const response = await axios.get('/api/Users/totalScoreLeaderboard');
-                const transformedData = response.data.map((item: GameHistoryItem) => {
-                    return {
-                        username: item.username,
-                        gamemode: taskIdToGameMode[item.taskId] || "Unknown",
-                        score: item.score,
-                    };
-                });
-                console.log(data);
-            } catch (error) {
-                console.error(error);
-            }
+        } catch (error) {
+            console.error("Error checking next page:", error);
+            return true;
         }
-    }  
+        return true;
+    };
 
-    const handleTypeChoice = (choice: string) => {
-        setType(choice);
-        fetchData();
+    const updatePage = async (pageNumber: number) => {
+        const nextPageBlank = await checkNextPage(pageNumber + 1);
+        setIsNextPageBlank(nextPageBlank);
+        setPage(pageNumber);
+        fetchAllLeaderboard(pageNumber);
     }
 
+    const handleTypeChoice = (choice: string) => {
+        if (choice !== type) {
+            if (choice === "All time score") {
+                setType(choice);
+                setPage(1);
+                fetchAllLeaderboard(1);
+            } else if (choice === "High score") {
+                setType(choice);
+                setPage(1);
+                fetchHighScoreLeaderboard(1);
+            }
+        }
+    };
+
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (type === "All time score") {
+            fetchAllLeaderboard(page);
+        } else {
+            fetchHighScoreLeaderboard(page);
+        }
+        checkNextPage(page + 1).then(setIsNextPageBlank);
+    }, [page, type]);
 
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
-                <ChoiceBox choices={["Q&A", "Catch The Word", "Mode 3"]} prompt='Modes:' onSelect={(choice: string) => console.log(choice)} label="Mode"/>
-                <ChoiceBox choices={["High score", "All time score"]} prompt='Type:' onSelect={handleTypeChoice} label="Type"/>
+                {type !== "All time score" && (
+                    <ChoiceBox choices={gameModes} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode" defaultValue={mode} />
+                )}
+                <ChoiceBox choices={leaderboardTypes} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
             </div>
-            <TableContent data={leaderboardData} sortConfig={sortConfig} handleSort={handleSort} />
+            <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
+            <div className="paginationControls">
+                <div className="left">
+                    {page > 1 && (
+                        <CustomButton label="Previous" className="wideButton" id="gameHistoryButton" onClick={() => updatePage(Math.max(page - 1, 1))}/>
+                    )}
+                </div>
+                <div className="center">
+                    <span className="pageIndicator">Page {page}</span>
+                </div>
+                <div className="right">
+                    {!isNextPageBlank && (
+                        <CustomButton label="Next" className="wideButton" id="gameHistoryButton" onClick={() => updatePage(page + 1)} />
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

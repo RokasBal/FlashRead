@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import CustomButton from './buttons/customButton';
 import './css/editableField.css'; // Import the CSS file
 
 interface SettingsButtonProps {
