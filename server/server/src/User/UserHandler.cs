@@ -244,5 +244,14 @@ namespace server.UserNamespace {
             _context.Users.Remove(dbUser);
             await _context.SaveChangesAsync();
         }
+        public async Task<Byte[]?> GetUserProfilePicByEmailAsync(string email)
+        {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (dbUser == null)
+            {
+                return null;
+            }
+            return dbUser.ProfilePic ?? Array.Empty<byte>();
+        }
     }
 }

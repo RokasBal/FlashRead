@@ -18,6 +18,7 @@ namespace server.src {
         public DbSet<DbSettingsFont> SettingsFonts { get; set; }
         public DbSet<DbUserSessions> UserSessions { get; set; }
         public DbSet<DbUserSingleSession> UserSingleSessions { get; set; }
+        public DbSet<DbGlobalChat> GlobalChats { get; set; }
         public FlashDbContext(DbContextOptions<FlashDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
@@ -111,6 +112,14 @@ namespace server.src {
                 entity.HasKey(e => e.Font).HasName("font_pkey");
                 entity.Property(e => e.Font).HasColumnName("font");
                 entity.Property(e => e.FontFamily).HasColumnName("font_family");
+            });
+            modelBuilder.Entity<DbGlobalChat>(entity => {
+                entity.ToTable("global_chat", "chats");
+                entity.HasKey(e => e.ChatIndex).HasName("global_chat_pkey");
+                entity.Property(e => e.ChatIndex).HasColumnName("chat_index");
+                entity.Property(e => e.ChatText).HasColumnName("chat_text");
+                entity.Property(e => e.Author).HasColumnName("author");
+                entity.Property(e => e.WrittenAt).HasColumnName("written_at");
             });
         }
     }
