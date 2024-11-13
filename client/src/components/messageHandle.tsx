@@ -24,8 +24,8 @@ const MessageHandle: React.FC = () => {
                     throw new TypeError("Received non-JSON response");
                 }
                 const data = await response.json();
-                console.log('Fetched messages:', data); // Log the fetched data
-                setMessages(data);
+                console.log('Fetched messages:', data.chats); // Log the fetched data
+                setMessages(data.chats);
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
