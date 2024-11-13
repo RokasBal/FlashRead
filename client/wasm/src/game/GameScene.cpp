@@ -9,16 +9,17 @@
 #include "Script.h"
 #include "scripts/MainScript.h"
 
-#include "../scenes/world1.h"
+#include "../scenes/firstmap.h"
 
 GameScene::GameScene()
     : player(registry, m_physicsWorld, { 0, 5, 0 }) {
     SetCamera(player.GetCamera());
+    sunlightDir = glm::normalize(glm::vec3{1, 2, 1});
 
     LoadModels(m_sceneBuilder);
 
     #ifndef SHADER_HOT_RELOAD
-        m_sceneBuilder.Load(world1_stateCount, world1_states);
+        m_sceneBuilder.Load(firstmap_stateCount, firstmap_states);
     #endif
 
 	mainScript = new MainScript(*this);
