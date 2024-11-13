@@ -20,7 +20,7 @@ const defaultSettings: VisualSettings = {
   font: 'Poppins',
 };
 
-const VisualSettingsContext = createContext<VisualSettingsContextProps | undefined>(undefined);
+export const VisualSettingsContext = createContext<VisualSettingsContextProps | undefined>(undefined);
 
 export const VisualSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [visualSettings, setVisualSettings] = useState<VisualSettings | null>(null);

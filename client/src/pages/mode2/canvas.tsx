@@ -155,7 +155,7 @@ const Canvas: React.FC<{
         return () => cancelAnimationFrame(frameRef.current);
     }, [canvasSize, onTick, canvasRef]);
 
-    return <canvas ref={canvasRef} style={{ cursor: 'none'}}/>;
+    return <canvas role="img" ref={canvasRef} style={{ cursor: 'none'}}/>;
 }
 
 export default Canvas;
