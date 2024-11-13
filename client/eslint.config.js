@@ -8,7 +8,8 @@ export default tseslint.config(
   { ignores: [
         'dist', 
         'wasm/*',
-        'src/FrontTests/*'
+        'src/FrontTests/*',
+        'setupTests.ts',
     ] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
