@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using server.Exceptions;
 
 namespace server.Tests {
     public class AccountSettingsControllerTests : IDisposable {
@@ -97,12 +98,9 @@ namespace server.Tests {
             var testEmail = "nonexistent@example.com";
             SetUserEmail(testEmail);
 
-            // Act
-            var result = await _controller.GetCurrentUserName();
-
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("User not found.", notFoundResult.Value);
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetCurrentUserName());
+            Assert.Equal("User not found.", exception.Message);
         }
         [Fact]
         public async Task GetCurrentUserName_ReturnsUnauthorized_WhenEmailClaimIsMissing()
@@ -110,12 +108,9 @@ namespace server.Tests {
             // Arrange
             SetUserEmail(null);
 
-            // Act
-            var result = await _controller.GetCurrentUserName();
-
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () => await _controller.GetCurrentUserName());
+            Assert.Equal("Invalid token.", exception.Message);
         }
         [Fact]
         public async Task GetThemeSettings_ReturnsOkResult_WithThemeSettings()
@@ -185,11 +180,9 @@ namespace server.Tests {
             _context.SettingsThemes.Add(themeSettings);
             await _context.SaveChangesAsync();
 
-            // Act
-            var result = await _controller.GetThemeSettings();
-
             // Assert
-            var okResult = Assert.IsType<NotFoundObjectResult>(result);
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetThemeSettings());
+            Assert.Equal("Theme not found.", exception.Message);
         }
         [Fact]
         public async Task GetThemeSettings_ReturnsUnauthorized_WhenEmailClaimIsMissing()
@@ -197,12 +190,9 @@ namespace server.Tests {
             // Arrange
             SetUserEmail(null);
 
-            // Act
-            var result = await _controller.GetThemeSettings();
-
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () => await _controller.GetThemeSettings());
+            Assert.Equal("Invalid token.", exception.Message);
         }
 
         [Fact]
@@ -226,11 +216,10 @@ namespace server.Tests {
             var fontSettings = new DbSettingsFont { Font = "Arial", FontFamily = "Arial, sans-serif" };
             _context.SettingsFonts.Add(fontSettings);
             await _context.SaveChangesAsync();
-            // Act
-            var result = await _controller.GetFontSettings();
-
+            
             // Assert
-            var okResult = Assert.IsType<NotFoundObjectResult>(result);
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetFontSettings());
+            Assert.Equal("Font not found.", exception.Message);
         }
         [Fact]
         public async Task GetFontSettings_ReturnsOkResult_WithFontSettings()
@@ -272,12 +261,10 @@ namespace server.Tests {
             // Arrange
             SetUserEmail(null);
 
-            // Act
-            var result = await _controller.GetFontSettings();
-
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () => await _controller.GetFontSettings());
+            Assert.Equal("Invalid token.", exception.Message);
+            
         }
         [Fact]
         public async Task GetAllThemes_ReturnsOkResult_WithThemes()
@@ -397,12 +384,9 @@ namespace server.Tests {
             // Arrange
             SetUserEmail("nonexistent@example.com");
 
-            // Act
-            var result = await _controller.UpdateSelectedTheme("Dark");
-
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("Settings not found for update.", notFoundResult.Value);
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.UpdateSelectedTheme("Dark"));
+            Assert.Equal("Settings not found for update.", exception.Message);
         }
 
         [Fact]
@@ -411,12 +395,9 @@ namespace server.Tests {
             // Arrange
             SetUserEmail(null);
 
-            // Act
-            var result = await _controller.UpdateSelectedTheme("Dark");
-
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () => await _controller.UpdateSelectedTheme("Dark"));
+            Assert.Equal("Invalid token.", exception.Message);
         }
 
         [Fact]
@@ -455,12 +436,9 @@ namespace server.Tests {
             // Arrange
             SetUserEmail("nonexistent@example.com");
 
-            // Act
-            var result = await _controller.UpdateSelectedFont("Arial");
-
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("Settings not found for update.", notFoundResult.Value);
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.UpdateSelectedFont("Arial"));
+            Assert.Equal("Settings not found for update.", exception.Message);
         }
 
         [Fact]
@@ -469,12 +447,9 @@ namespace server.Tests {
             // Arrange
             SetUserEmail(null);
 
-            // Act
-            var result = await _controller.UpdateSelectedFont("Arial");
-
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () => await _controller.UpdateSelectedFont("Arial"));
+            Assert.Equal("Invalid token.", exception.Message);
         }
 
         public void Dispose()

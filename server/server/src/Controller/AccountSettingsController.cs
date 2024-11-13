@@ -30,7 +30,7 @@ namespace server.Controller {
             if (user == null) {
                 throw new NotFoundException("User not found.");
             }
-            return Ok(new { Name = user.Name });
+            return Ok(new Name { Value = user.Name });
         }
 
         [Authorize]
