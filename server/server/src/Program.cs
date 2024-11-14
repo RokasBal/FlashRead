@@ -54,6 +54,8 @@ namespace server
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Database connection failed: {ex.Message}");
+                    Console.WriteLine("Retrying in 5 seconds...");
+                    System.Threading.Thread.Sleep(5000);
                 }
             }
             
@@ -72,7 +74,6 @@ namespace server
                 });
 
             builder.Services.AddSingleton<TokenProvider>();
-            
             builder.Services.AddSingleton<DbContextFactory>();
             builder.Services.AddSingleton<SessionManager>();
             builder.Services.AddHostedService<SessionBackgroundService>();

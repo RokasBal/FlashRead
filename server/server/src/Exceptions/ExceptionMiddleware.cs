@@ -4,18 +4,20 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-
+using server.src;
 namespace server.Exceptions
 {
-    public class ExceptionMiddleware(FlashDbContext _context)
+    public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly FlashDbContext _context;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, FlashDbContext _context)
         {
             _next = next;
             _logger = logger;
+            _context = _context;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -51,7 +53,7 @@ namespace server.Exceptions
 
             context.Response.StatusCode = (int)statusCode;
             var result = JsonConvert.SerializeObject(new { error = exception.Message });
-            _context.DbLogs.Add(new DbLogs { 
+            _context.Logs.Add(new DbLogs { 
                 Id = Guid.NewGuid().ToString(),
                 LogMessage = exception.Message,
                 LogTime = DateTime.UtcNow
