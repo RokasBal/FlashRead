@@ -33,6 +33,8 @@ GameScene::GameScene()
 	keyMapper.AddMapping().PressKey(SDL_SCANCODE_E).Then([&] {
         actions.Trigger(Action::Interact);
     });
+
+    m_sceneBuilder.Play();
 }
 
 GameScene::~GameScene() {
