@@ -37,7 +37,7 @@ namespace server
             while (true) {
                 try
                 {
-                    var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionStringBuilder.BuildConnectionString());
+                    var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionStringBuilder.BuildConnectionString("./secrets/config.json"));
                     dataSourceBuilder.MapEnum<Task1.Theme>();
                     dataSourceBuilder.MapEnum<Task2Data.Theme>();
                     var dataSource = dataSourceBuilder.Build();

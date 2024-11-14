@@ -249,6 +249,36 @@ const Mode3Page: React.FC = () => {
                             <p>- Full Screen</p>
                         </div>
                     </div>
+                    <div className="fullScreen">
+                        <div className="controls">
+                            <div className="key">
+                                <p>Q</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Throw</p>
+                        </div>
+                    </div>
+                    <div className="fullScreen">
+                        <div className="controls">
+                            <div className="key">
+                                <p>E</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Interact</p>
+                        </div>
+                    </div>
+                    <div className="fullScreen">
+                        <div className="controls">
+                            <div className="key">
+                                <p>F</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Take / Drop</p>
+                        </div>
+                    </div>
                 </div>
                 <div className='mode3_containerMiddle'>
                     <div className='mode3_middleTop'>
