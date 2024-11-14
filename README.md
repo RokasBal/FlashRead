@@ -52,6 +52,7 @@ dotnet run
 cd server/server
 export DB_PASSWORD=(DB_PASSWORD)
 export JWT_SECRET=(JWT_SECRET)
+dotnet run
 ```
 
 
@@ -72,6 +73,10 @@ dotnet test
 cd Client
 npm run lint
 npm run test
+```
+##### Check Coverage
+```
+npm run coverage
 ```
 
 <!-- LINKS & IMAGES>
