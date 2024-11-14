@@ -24,10 +24,10 @@ const ActiveHandle: React.FC = () => {
 
     return (
         <div>
-            <ul className='chat_input'>
+            <ul className='active_list'>
                 {activeUsers.map((user, index) => (
                     <li key={index} className='listActive'>
-                        <span>{user}</span>
+                        <span className='activeUser'>{user}</span>
                         <div className='circle'>.</div>
                     </li>
                 ))}

@@ -4,6 +4,7 @@ import "../../boards/css/chat.css";
 
 
 interface Message {
+    username: string;
     chatText: string;
     author: string;
     writtenAt: string;
@@ -63,7 +64,7 @@ const MessageHandle: React.FC = () => {
                 <li key={index} className="message">
                     <div className="message_header">
                         <img className='chat_image' src={byteArrayToBase64(message.profilePic)} />
-                        <span className='message_user'>{message.author}</span>
+                        <span className='message_user'>{message.username}</span>
                         <span className="message_date">{formatDate(message.writtenAt)}</span>
                     </div>
                     <div className="message_body">

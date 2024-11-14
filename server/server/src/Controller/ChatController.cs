@@ -23,19 +23,20 @@ namespace server.Controller {
         }
         [HttpGet("GetGlobalChats")]
         public async Task<IActionResult> GetGlobalChats() {
-            var chats = await _context.GlobalChats.ToListAsync();
-            var last100Chats = chats.OrderByDescending(chat => chat.ChatIndex).Take(100)
-                .Select(chat => new Chat(chat.ChatText, chat.Author, chat.WrittenAt, new byte[0])).ToList();
+            var chats = await (from chat in _context.GlobalChats
+                               join user in _context.Users on chat.Author equals user.Email into userGroup
+                               from user in userGroup.DefaultIfEmpty()
+                               orderby chat.ChatIndex descending
+                               select new {
+                                    chat.ChatText,
+                                    chat.Author,
+                                    chat.WrittenAt,
+                                    Usename = user != null ? user.Name : "Unknown",
+                                    ProfilePic = user != null ? user.ProfilePic : new byte[0]
+                               }).Take(100).ToListAsync();
 
-            var updatedChats = new List<Chat>();
-            foreach (var chat in last100Chats)
-            {
-                var ProfilePic = await _userHandler.GetUserProfilePicByEmailAsync(chat.Author);
-                if (ProfilePic == null) {
-                    ProfilePic = new byte[0];
-                }
-                updatedChats.Add(new Chat(chat.ChatText, chat.Author, chat.WrittenAt, ProfilePic));
-            }
+           var updatedChats = chats.Select(chat => new Chat(chat.Usename, chat.ChatText, chat.Author, chat.WrittenAt, chat.ProfilePic)).ToList();
+
             return Ok(new ChatList { Chats = updatedChats });
         }
         [Authorize]
@@ -53,12 +54,14 @@ namespace server.Controller {
             }
             var lastChat = await _context.GlobalChats.OrderByDescending(c => c.ChatIndex).FirstOrDefaultAsync();
             var newChatIndex = lastChat != null ? lastChat.ChatIndex + 1 : 1;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var username = user != null ? user.Name : "Unknown";
 
             var newChat = new DbGlobalChat {
                 ChatIndex = newChatIndex,
                 ChatText = chat.ChatText,
                 Author = email,
-                WrittenAt = DateTime.UtcNow
+                WrittenAt = DateTime.UtcNow,
             };
             await _context.GlobalChats.AddAsync(newChat);
             await _context.SaveChangesAsync();
@@ -69,6 +72,7 @@ namespace server.Controller {
         string ChatText
     );
     public record Chat(
+        string Username,
         string ChatText,
         string Author,
         DateTime WrittenAt,

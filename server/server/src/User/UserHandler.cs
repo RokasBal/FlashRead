@@ -5,6 +5,7 @@ using server.src;
 using server.UserNamespace;
 using Microsoft.EntityFrameworkCore;
 using server.Services;
+using server.Controller;
 namespace server.UserNamespace {
     public class UserHandler(FlashDbContext _context, TokenProvider tokenProvider, HistoryManager historyManager, SessionManager sessionManager)
     {
@@ -252,6 +253,64 @@ namespace server.UserNamespace {
                 return null;
             }
             return dbUser.ProfilePic ?? Array.Empty<byte>();
+        }
+        public async Task<IEnumerable<UserScore>> GetTotalScoresAsync(int skip, int take) {
+           var usersWithHistories = await _context.Users
+                .ToListAsync();
+
+            var userHistories = usersWithHistories
+                .SelectMany(user => user.HistoryIds.Select(historyId => new { user.Name, historyId }))
+                .Join(_context.UserTaskHistories,
+                    userHistory => userHistory.historyId,
+                    history => history.Id,
+                    (userHistory, history) => new { userHistory.Name, history.Score })
+                .ToList();
+
+            var groupedHistories = userHistories
+                .GroupBy(uh => uh.Name)
+                .Select(g => new {
+                    g.Key,
+                    Score = g.Sum(h => h.Score)
+                })
+                .OrderByDescending(g => g.Score)
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return groupedHistories.Select(g => new UserScore {
+                Name = g.Key,
+                Score = g.Score
+            });
+        }
+        public async Task<IEnumerable<UserScore>> GetHighScoresAsync(int skip, int take) {
+            var usersWithHistories = await _context.Users
+                .ToListAsync();
+
+            var userHistories = usersWithHistories
+                .SelectMany(user => user.HistoryIds.Select(historyId => new { user.Name, historyId }))
+                .Join(_context.UserTaskHistories,
+                    userHistory => userHistory.historyId,
+                    history => history.Id,
+                    (userHistory, history) => new { userHistory.Name, history.TaskId, history.Score })
+                .ToList();
+
+            var groupedHistories = userHistories
+                .GroupBy(uh => new { uh.Name, uh.TaskId })
+                .Select(g => new {
+                    g.Key.Name,
+                    g.Key.TaskId,
+                    Score = g.Max(h => h.Score)
+                })
+                .OrderByDescending(g => g.Score)
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return groupedHistories.Select(g => new UserScore {
+                Name = g.Name,
+                Score = g.Score,   
+                Gamemode = g.TaskId
+            });
         }
     }
 }
