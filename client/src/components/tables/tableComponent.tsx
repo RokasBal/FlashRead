@@ -12,7 +12,7 @@ interface TableContentProps {
 const TableContent: React.FC<TableContentProps> = ({ data, headers, sortConfig, handleSort }) => {
     const sortedData = React.useMemo(() => {
         if (sortConfig !== null) {
-            return [...data].sort((a, b) => {
+            return data ? [...data].sort((a, b) => {
                 const aValue = a[sortConfig.key];
                 const bValue = b[sortConfig.key];
                 if (aValue < bValue) {
@@ -22,7 +22,7 @@ const TableContent: React.FC<TableContentProps> = ({ data, headers, sortConfig, 
                     return sortConfig.direction === 'asc' ? 1 : -1;
                 }
                 return 0;
-            });
+            }): [];
         }
         return data;
     }, [data, sortConfig]);
@@ -44,7 +44,7 @@ const TableContent: React.FC<TableContentProps> = ({ data, headers, sortConfig, 
                     </tr>
                 </thead>
                 <tbody>
-                    {sortedData.length > 0 ? (
+                    {sortedData != null && sortedData.length > 0 ? (
                         sortedData.map((row, index) => (
                             <tr key={index} role='row'>
                                 {headers.map((header) => (
