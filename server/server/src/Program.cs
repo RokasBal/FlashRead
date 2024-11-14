@@ -11,7 +11,7 @@ using System.Text;
 using server.src.Settings;
 using server.Services;
 using server.Exceptions;
-
+using server.Exceptions;
 namespace server
 {
     public class Program
@@ -80,6 +80,7 @@ namespace server
             builder.Services.AddScoped<HistoryManager>();
             builder.Services.AddScoped<UserHandler>();
             builder.Services.AddScoped<Settings>();
+            builder.Services.AddScoped<ExceptionMiddleware>();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGenWithAuth();

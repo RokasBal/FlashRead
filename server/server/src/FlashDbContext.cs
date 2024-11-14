@@ -4,6 +4,7 @@ using server.src.Task1;
 using server.src.Task2;
 using server.UserNamespace;
 using server.src.Settings;
+using server.Exceptions;
 namespace server.src {
     public class FlashDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
@@ -18,6 +19,7 @@ namespace server.src {
         public DbSet<DbSettingsFont> SettingsFonts { get; set; }
         public DbSet<DbUserSessions> UserSessions { get; set; }
         public DbSet<DbUserSingleSession> UserSingleSessions { get; set; }
+        public DbSet<DbLogs> Logs { get; set; }
         public FlashDbContext(DbContextOptions<FlashDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
@@ -111,6 +113,13 @@ namespace server.src {
                 entity.HasKey(e => e.Font).HasName("font_pkey");
                 entity.Property(e => e.Font).HasColumnName("font");
                 entity.Property(e => e.FontFamily).HasColumnName("font_family");
+            });
+            modelBuilder.Entity<DbLogs>(entity => {
+                entity.ToTable("logs", "logs");
+                entity.HasKey(e => e.Id).HasName("logs_pkey");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.LogMessage).HasColumnName("log_message");
+                entity.Property(e => e.LogTime).HasColumnName("log_time");
             });
         }
     }

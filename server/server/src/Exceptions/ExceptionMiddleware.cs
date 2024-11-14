@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace server.Exceptions
 {
-    public class ExceptionMiddleware
+    public class ExceptionMiddleware(FlashDbContext _context)
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
@@ -51,6 +51,13 @@ namespace server.Exceptions
 
             context.Response.StatusCode = (int)statusCode;
             var result = JsonConvert.SerializeObject(new { error = exception.Message });
+            _context.DbLogs.Add(new DbLogs { 
+                Id = Guid.NewGuid().ToString(),
+                LogMessage = exception.Message,
+                LogTime = DateTime.UtcNow
+                }
+            );
+            _context.SaveChanges();
             return context.Response.WriteAsync(result);
         }
     }
