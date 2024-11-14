@@ -77,7 +77,6 @@ const Mode3Page: React.FC = () => {
             taskVersion: taskVersionRef.current,
             data: data
         };
-        console.log("aa", taskVersionRef.current);
         try {
             const axiosResponse = await axios.post("/api/CheckSecretDoorCode", request);
             const data = axiosResponse.data.data as CheckSecretDoorCodeResponse;
@@ -95,12 +94,10 @@ const Mode3Page: React.FC = () => {
             taskVersion: taskVersionRef.current,
             data: data
         };
-        console.log("aa", taskVersionRef.current);
         try {
             const axiosResponse = await axios.post("/api/GetBookHints", request);
             const data = axiosResponse.data as Task3Handler;
             taskVersionRef.current = data.taskVersion;
-            console.log("aa", taskVersionRef.current);
             const hintData = data.data as GetBookHintsResponse;
             return hintData.hints;
         } catch (err) {
@@ -128,8 +125,8 @@ const Mode3Page: React.FC = () => {
             (window as any).getBookHints = (count: number) => {
                 getBookHintsAsync(count).then((hints) => {
                     if (!moduleRef.current) return;
-                    let hintList = new moduleRef.current.StringList();
-                    for (let hint of hints) {
+                    const hintList = new moduleRef.current.StringList();
+                    for (const hint of hints) {
                         hintList.push_back(hint);
                     }
                     moduleRef.current?.setBookHints(hintList);
