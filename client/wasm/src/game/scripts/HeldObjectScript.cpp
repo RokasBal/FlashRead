@@ -27,7 +27,7 @@ void HeldObjectScript::Update(TimeDuration dt) {
 			[&](entt::entity entity, const btRigidBody* body, const glm::vec3& hitPos, const glm::vec3& hitNormal) {
 				if (player.objectCarry.GetCarriedEntity() == entity) return false;
 				const auto& flagComp = scene.registry.get<FlagComponent>(entity);
-				const bool validHit = flagComp.flags & (EntityFlags::PICKABLE | EntityFlags::INTERACTABLE);
+				const bool validHit = flagComp.flags & (EntityFlags::PICKABLE);
 				return validHit;
 			});
 

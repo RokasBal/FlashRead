@@ -5,6 +5,8 @@
 #include <wgleng/io/Input.h>
 #include <wgleng/rendering/Text.h>
 
+#include "../GameComponents.h"
+
 ObjectInteractScript::ObjectInteractScript(GameScene& scene)
 	: Script(scene) {
 	m_listener = scene.actions.Listen(Action::Interact, [&] {
@@ -25,7 +27,7 @@ ObjectInteractScript::ObjectInteractScript(GameScene& scene)
 		// check if object is a hint book
 		const auto tagComp = scene.registry.try_get<TagComponent>(heldObject);
 		if (!tagComp) return;
-		if (tagComp->tag != "hintBook") return;
+		if (tagComp->tag != "hintBook" && tagComp->tag != "goldenBook") return;
 
 		StartReading(heldObject);
 	});
@@ -63,21 +65,32 @@ void ObjectInteractScript::StartReading(entt::entity book) {
 		.scale = {0.7f, 0.7f, 0.7f}
 	});
 
-	std::string testText = "Lorem ipsum dolor sit amet 123456123456123456123456123456123456123456, consectetur adipiscing elit. Aenean id auctor tortor, vel maximus est. Mauris eu pellentesque purus. Mauris neque justo, finibus vitae nunc nec, facilisis bibendum purus. In pulvinar sapien ante, ac tincidunt quam ultrices nec. Sed feugiat libero nec lacus dignissim suscipit. Duis in purus in nisi vestibulum rutrum eget eget purus. Fusce luctus neque nec lorem sollicitudin, nec sollicitudin justo placerat. Morbi condimentum turpis risus. Ut leo erat, luctus eu arcu a, cursus eleifend felis.";
-	std::string testText2 = "abcde $<5>gefgh";
-	std::shared_ptr<DrawableText> text = Text::CreateText("arial", testText, 15);
-	text->useOrtho = false;
-	text->position = {-0.6, 0.55, 0.12};
-	text->scale = glm::vec3{0.05f};
+	// set text
+	if (const auto hintComp = scene.registry.try_get<BookHintComponent>(m_readingData.realBook)) {
+		std::shared_ptr<DrawableText> text = Text::CreateText("arial", hintComp->hint, 15);
+		text->useOrtho = false;
+		text->position = {-0.6, 0.55, 0.12};
+		text->scale = glm::vec3{0.05f};
 
-	std::shared_ptr<DrawableText> text2 = Text::CreateText("arial", testText2, 15);
-	text2->useOrtho = false;
-	text2->position = text->position;
-	text2->position.x = 0.05;
-	text2->scale = text->scale;
-	scene.registry.emplace<TextComponent>(m_readingData.fakeBook, TextComponent{
-		.texts = {text, text2}
-	});
+		// std::shared_ptr<DrawableText> text2 = Text::CreateText("arial", testText2, 15);
+		// text2->useOrtho = false;
+		// text2->position = text->position;
+		// text2->position.x = 0.05;
+		// text2->scale = text->scale;
+		scene.registry.emplace<TextComponent>(m_readingData.fakeBook, TextComponent{
+			.texts = {text}
+		});
+	} else if (const auto hintComp = scene.registry.try_get<GoldenBookComponent>(m_readingData.realBook)) {
+		std::shared_ptr<DrawableText> text = Text::CreateText("arial", "You win!", 15);
+		text->useOrtho = false;
+		text->position = {-0.6, 0.55, 0.12};
+		text->scale = glm::vec3{0.05f};
+
+		scene.registry.emplace<TextComponent>(m_readingData.fakeBook, TextComponent{
+			.texts = {text}
+		});
+	}
+
 
 	scene.player.objectCarry.canDropByItself = false;
 	scene.actions.Disable(Action::PickUp);
