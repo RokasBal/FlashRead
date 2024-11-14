@@ -15,9 +15,30 @@ declare namespace RuntimeExports {
 interface WasmModule {
 }
 
+type EmbindString = ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|string;
+export interface ClassHandle {
+  isAliasOf(other: ClassHandle): boolean;
+  delete(): void;
+  deleteLater(): this;
+  isDeleted(): boolean;
+  clone(): this;
+}
+export interface StringList extends ClassHandle {
+  size(): number;
+  get(_0: number): EmbindString | undefined;
+  push_back(_0: EmbindString): void;
+  resize(_0: number, _1: EmbindString): void;
+  set(_0: number, _1: EmbindString): boolean;
+}
+
 interface EmbindModule {
-  stop(): void;
+  StringList: {
+    new(): StringList;
+  };
+  setBookHints(_0: StringList): void;
+  checkDoorCodeResponse(_0: boolean): void;
   start(): boolean;
+  stop(): void;
   setFocused(_0: boolean): void;
   setHidden(_0: boolean): void;
 }

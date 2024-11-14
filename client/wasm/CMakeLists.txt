@@ -28,6 +28,9 @@ add_subdirectory(${DEPS_LOC}/wgleng)
 target_link_libraries(wasmgame PUBLIC wgleng)
 target_include_directories(wasmgame PUBLIC ${DEPS_LOC}/wgleng/src)
 
+# set extern js
+set(WGLENG_LINK_OPT ${WGLENG_LINK_OPT} --closure-args=--externs=${CMAKE_SOURCE_DIR}/externs.js)
+
 # final
 target_compile_options(wasmgame PRIVATE ${WGLENG_COMP_OPT})
 target_link_options(wasmgame PRIVATE ${WGLENG_LINK_OPT})

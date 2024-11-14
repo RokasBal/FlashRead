@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MainModule } from '../../../wasm/interface/wasmInterface';
 import { loadWasmModule } from './wasmLoader';
 import CustomButton from '../../components/buttons/customButton';
+import axios from '../../components/axiosWrapper';
 import "../../boards/css/mode3.css"
 import "../../boards/css/keyboardControls.css"
 
@@ -43,12 +44,70 @@ function useOnScreen(ref: React.RefObject<HTMLElement>) {
     return isOnScreen && isTabVisible && isWindowFocused;
 }
 
+type CheckSecretDoorCodeRequest = {
+    code: string;
+};
+type CheckSecretDoorCodeResponse = {
+    isCorrect: boolean;
+};
+type GetBookHintsRequest = {
+    count: number;
+};
+type GetBookHintsResponse = {   
+    hints: string[];
+};
+type Task3Handler = {
+    taskVersion: number;
+    data: CheckSecretDoorCodeRequest | CheckSecretDoorCodeResponse | GetBookHintsRequest | GetBookHintsResponse;
+};
+
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
     const [canvasSize, setCanvasSize] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasOnScreen = useOnScreen(canvasRef);
     const moduleRef = useRef<MainModule>();
+    const taskVersionRef = useRef<number>(0);
+
+    const checkDoorCodeAsync = async (code: string) => {
+        const data: CheckSecretDoorCodeRequest = {
+            code: code
+        };
+        const request: Task3Handler = {
+            taskVersion: taskVersionRef.current,
+            data: data
+        };
+        console.log("aa", taskVersionRef.current);
+        try {
+            const axiosResponse = await axios.post("/api/CheckSecretDoorCode", request);
+            const data = axiosResponse.data.data as CheckSecretDoorCodeResponse;
+            return data.isCorrect;
+        } catch (err) {
+            console.error('Error posting task3 doorcode:', err);
+            return false;
+        }
+    };
+    const getBookHintsAsync = async (count: number) => {
+        const data: GetBookHintsRequest = {
+            count: count
+        };
+        const request: Task3Handler = {
+            taskVersion: taskVersionRef.current,
+            data: data
+        };
+        console.log("aa", taskVersionRef.current);
+        try {
+            const axiosResponse = await axios.post("/api/GetBookHints", request);
+            const data = axiosResponse.data as Task3Handler;
+            taskVersionRef.current = data.taskVersion;
+            console.log("aa", taskVersionRef.current);
+            const hintData = data.data as GetBookHintsResponse;
+            return hintData.hints;
+        } catch (err) {
+            console.error('Error posting task3 bookhints:', err);
+            return [];
+        }
+    };
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
@@ -59,7 +118,23 @@ const Mode3Page: React.FC = () => {
             // cast to any to avoid TypeScript error, canvas is not generated in the type definition
             // eslint-disable-next-line
             (moduleRef.current as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
-
+            // eslint-disable-next-line
+            (window as any).checkDoorCode = (code: string) => {
+                checkDoorCodeAsync(code).then((isCorrect) => {
+                    moduleRef.current?.checkDoorCodeResponse(isCorrect);
+                });
+            };
+            // eslint-disable-next-line
+            (window as any).getBookHints = (count: number) => {
+                getBookHintsAsync(count).then((hints) => {
+                    if (!moduleRef.current) return;
+                    let hintList = new moduleRef.current.StringList();
+                    for (let hint of hints) {
+                        hintList.push_back(hint);
+                    }
+                    moduleRef.current?.setBookHints(hintList);
+                });
+            };
             // try-catch is a must because emscripten_set_main_loop() throws to exit the function
             try {
                 moduleRef.current?.start();

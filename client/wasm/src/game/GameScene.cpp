@@ -18,9 +18,9 @@ GameScene::GameScene()
 
     LoadModels(m_sceneBuilder);
 
-    #ifndef SHADER_HOT_RELOAD
+    // #ifndef SHADER_HOT_RELOAD
         m_sceneBuilder.Load(firstmap_stateCount, firstmap_states);
-    #endif
+    // #endif
 
 	mainScript = new MainScript(*this);
 

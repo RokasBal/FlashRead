@@ -16,4 +16,6 @@ private:
 	GameActions::Listener m_listener;
     std::string m_enteredCode;
 	uint8_t m_highlightId = 0;
+	uint8_t m_goldenHighlightId = 0;
+	bool m_initBookHints = true;
 };
