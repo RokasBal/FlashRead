@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axiosWrapper from '../axiosWrapper';
 import "../../boards/css/chat.css";
+
 
 interface Message {
     chatText: string;
@@ -11,6 +12,7 @@ interface Message {
 
 const MessageHandle: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
+    const messagesEndRef = useRef<HTMLUListElement>(null);
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -28,12 +30,18 @@ const MessageHandle: React.FC = () => {
             const message = JSON.parse(event.data);
             setMessages((prevMessages) => [...prevMessages, message]);
         };
-
+        
         return () => {
             socket.close();
         };
 
     }, []);
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     const byteArrayToBase64 = (byteArray: string) => {
         return `data:image/jpeg;base64,${byteArray}`;
@@ -55,8 +63,8 @@ const MessageHandle: React.FC = () => {
                 <li key={index} className="message">
                     <div className="message_header">
                         <img className='chat_image' src={byteArrayToBase64(message.profilePic)} />
-                        <span>{message.author}</span>
-                        <span>{formatDate(message.writtenAt)}</span>
+                        <span className='message_user'>{message.author}</span>
+                        <span className="message_date">{formatDate(message.writtenAt)}</span>
                     </div>
                     <div className="message_body">
                         <p>{message.chatText}</p>

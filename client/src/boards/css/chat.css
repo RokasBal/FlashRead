@@ -13,7 +13,7 @@
     flex-direction: column;
     width: 15%;
     height: 100%;
-    justify-content: center;
+    justify-content: end;
 }
 .chat {
     display: flex;
@@ -35,6 +35,7 @@
     flex-direction: column;
     display: flex;
     flex: 3;
+    overflow-y: auto;
     border: 3px solid var(--borderColor);
     border-radius: 8px;
     background-color: var(--backgroundColor);
@@ -84,6 +85,7 @@
     scrollbar-width: none; /* For Firefox */
     -ms-overflow-style: none;  /* For Internet Explorer and Edge */
     max-height: 30vw;
+    scroll-behavior: smooth;
 }
 
 .chat_messages::-webkit-scrollbar {
@@ -102,6 +104,8 @@
 .chat_input_obj {
     display: flex;
     flex-direction: row;
+    font-size: 1vw;
+    gap: 0.5vw;
 }
 .chat_input input {
     width: 100%;
@@ -110,7 +114,7 @@
     color: var(--textColor);
     font-family: var(--fontStyle);
     font-weight: bold;
-    font-size: 1vw;
+    font-size: 0.7vw;
     border: 0.2vw solid var(--borderColor);
     border-radius: 0.5vw;
     padding: 1%;
@@ -120,7 +124,6 @@
     color: var(--textColor);
     font-family: var(--fontStyle);
     font-weight: bold;
-    font-size: 1vw;
     border: 0.2vw solid var(--borderColor);
     border-radius: 0.5vw;
     padding: 1%;
@@ -128,12 +131,27 @@
 .message_header {
     display: flex;
     gap: 1vw;
+    align-items: center;
+}
+.message_date {
+    font-family: var(--fontStyle);
+    font-size: 0.6vw;
+}
+.message_user {
+    font-family: var(--fontStyle);
+    font-weight: bold;
+    font-size: 0.8vw;
 }
 .message_body {
     display: flex;
+    margin-left: 3%;
+    margin-right: 3%;
+    font-family: var(--fontStyle);
+    font-size: 0.8vw;
     gap: 1vw;
 }
 .message {
+    overflow-y: hidden;
     display: flex;
     flex-direction: column;
     padding: 1%;
@@ -154,4 +172,29 @@
     align-items: center;
     width: 10%;
     aspect-ratio: 1/1;
+}
+.sendButton {
+    transition: transform 0.2s ease;
+    font-family: var(--fontStyle);
+    font-size: 0.8vw;
+}
+
+.sendButton:active {
+    transform: scale(0.9);
+}
+.listActive {
+    display: flex;
+    flex-direction: row;
+    font-size: 0.8vw;
+    gap: 0.5vw;
+}
+.circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    color: rgba(0,0,0,0);
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background-color: green;
 }

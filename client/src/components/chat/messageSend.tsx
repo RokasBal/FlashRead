@@ -27,7 +27,7 @@ const MessageSend: React.FC = () => {
                 onChange={(e) => setChatText(e.target.value)}
                 placeholder="Type your message here..."
             />
-            <button type="submit">Send</button>
+            <button className="sendButton" type="submit">Send</button>
         </form>
     );
 };

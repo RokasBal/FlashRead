@@ -18,6 +18,8 @@ import './boards/css/variables.css';
 import { AuthProvider } from './context/AuthContext';
 import { VisualSettingsProvider } from './context/VisualSettingsContext';
 import { useEffect } from 'react';
+import React from 'react';
+
 const App: React.FC = () => {
     const sendUpdateRequest = async () => {
       try {

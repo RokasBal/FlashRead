@@ -7,6 +7,7 @@ import '../../boards/css/chat.css';
 import { useAuth } from '../../context/AuthContext';
 import MessageHandle from "../../components/chat/messageHandle";
 import MessageSend from "../../components/chat/messageSend";
+import ActiveHandle from "../../components/chat/activeHandle";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const HomePage: React.FC = () => {
                                 <h1>Active Users</h1>
                             </div>
                             <div className="users_list">
-
+                                <ActiveHandle />
                             </div>
                         </div>
                         <div className="chatBox">
