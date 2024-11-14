@@ -20,11 +20,21 @@ jobs:
         id: cache-restore 
         uses: actions/cache@v3
         with: 
-          path: ./src/node_modules 
+          path: | 
+            ./src/node_modules 
+            !./client/wasm
           key: npm-${{ hashFiles('./src/package-lock.json') }} 
       - name: Install dependencies
         working-directory: ./client
         run: npm install
+      - name: 'Run tests with Coverage'
+        working-directory: ./client
+        run: npx vitest --coverage.enabled true
+      - name: 'Upload Coverage'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
       - name: Run linter
         working-directory: ./client
         run: npm run lint

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import playerImgSource from '../../images/player.png';
-import playerLeftImgSource from '../../images/player_left.png';
 
 export type vec2 = {
     x: number;
@@ -24,18 +23,11 @@ export type GameData = {
 
 //image loading
 let imageLoaded = false;
-let imageLoadedLeft = false;
-const playerImgLeft = new Image();
 const playerImg = new Image();
-playerImgLeft.src = playerLeftImgSource;
 playerImg.src = playerImgSource;
 playerImg.onload = () => {
     imageLoaded = true;
     console.log("image loaded");
-};
-playerImgLeft.onload = () => {
-    imageLoadedLeft = true;
-    console.log("image left loaded");
 };
 
 const getCSSVariable = (variableName: string): string => {
@@ -137,8 +129,8 @@ const Canvas: React.FC<{
             if (context && onTick !== undefined) {
                 // draw background
                 // context.fillStyle = 'rgba(255, 255, 255, 0)';
-                // context.fillRect(0, 0, canvasSize.x, canvasSize.y);
-                context.clearRect(0, 0, canvasSize.x, canvasSize.y);
+                context.fillStyle = getCSSVariable('--secondaryColor');
+                context.fillRect(0, 0, canvasSize.x, canvasSize.y);
 
                 const lastTime = lastTimeRef?.current ?? 0;
                 const currentTime = performance.now();
@@ -163,7 +155,7 @@ const Canvas: React.FC<{
         return () => cancelAnimationFrame(frameRef.current);
     }, [canvasSize, onTick, canvasRef]);
 
-    return <canvas ref={canvasRef} style={{ cursor: 'none'}}/>;
+    return <canvas role="img" ref={canvasRef} style={{ cursor: 'none'}}/>;
 }
 
 export default Canvas;

@@ -1,19 +1,18 @@
 # Some controls:
-P - reload shaders
-O - show collision shapes
+CTRL + P - reload shaders
+CTRL + O - show collision shapes
+CTRL + I - show wireframe
+CTRL + U - show frametime
 L - exit editor, start game
 
+# dependencies:
+- wgleng
 
-# To create .cpp files from .obj:
-```
-make
-```
 # To create wasm module and bindings:
-`TARGET` = `debug` or `prod`.  
-`debug` allows shader hot reloading. Needs `shader_provider.py` to be running.
+`Debug` allows shader hot reloading, saving scenes. Needs `debug_api.py` to be running.
 ```
 mkdir build
 cd build
-emcmake cmake ..
-cmake --build . --target TARGET
+emcmake cmake -DCMAKE_BUILD_TYPE=Debug|Release ..
+cmake --build .
 ```

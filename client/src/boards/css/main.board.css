@@ -21,7 +21,7 @@
   width: 100%;
   height: 5%;
   display: flex;
-  justify-content: right;
+  justify-content: space-between;
   align-items: right;
   right: 0;
   min-height: 16px;
@@ -43,18 +43,6 @@
   margin: auto;
 }
 
-.MainBoard_selection {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  position: absolute;
-  opacity: 1;
-  overflow: visible;
-  height: 100%;
-  z-index: 9;
-}
 
 .MainBoard_grid {
   display: flex;
@@ -87,7 +75,6 @@
   box-sizing: border-box;
 }
 
-/* Fix for unequal button stacking in grid */
 @media (max-aspect-ratio: 1150/1080) {
   .MainBoard_grid {
     flex-direction: column;
@@ -97,34 +84,53 @@
   .MainBoard_gridButton {
     flex-basis: 60%;
   }
-
+  
   .MainBoard_gridButton:hover {
     transform: scale(2);
   }
-
+  
 }
 
 .MainBoard_content {
   width: 100%;
   height: 95%;
   position: relative;
+  display: flex;
+  flex-direction: column;
   z-index: 10;
 }
 
-
-/*
-.mode1_innerDiv:nth-child(1) {
-  background-color: yellow;
+.headerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  width: 100%;
+  flex: 2;
+  color: var(--textColor);
+  font-family: var(--fontStyle);
+  font-weight: bold;
+  font-size: clamp(1.5em, 3vw, 3.5em);
 }
 
-.mode1_innerDiv:nth-child(2) {
-  background-color: green;
+.MainBoard_selection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  opacity: 1;
+  overflow: visible;
+  flex: 5;
+  z-index: 9;
 }
 
-.mode1_innerDiv:nth-child(3) {
-  background-color: red;
+.footerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex: 2;
 }
-*/
 
 .MainBoard_mode2 {
   width: 100%;
@@ -143,19 +149,6 @@
   flex-grow: 1;
   box-sizing: border-box;  
 }
-
-/*
-.MainBoard_loginPage{
-  display: none;
-  position: absolute;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  z-index: 50;
-}
-*/
 
 .mode1TextDiv {
   width: 80%;
@@ -191,4 +184,37 @@
   font-size: 16px;
   font-family: var(--fontStyle);
   display: inline;
+}
+
+.headerLinks {
+  margin-left: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+.linksText {
+  font-size: clamp(0.8em, 1vw, 1em);
+  
+  color: var(--textColor);
+  font-family: var(--fontStyle);
+}
+
+.outerLinkContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background-color: yellow; */
+  height: 100%;
+}
+.innerLinkContainer {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease;
+  transform-origin: center;
+}
+.innerLinkContainer:hover {
+  transform: scale(0.9);
 }

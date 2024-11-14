@@ -11,7 +11,7 @@ type Task1Response = {
   text: string;
   questions: question[];
 };
-type Task1AnswerRequest = {
+export type Task1AnswerRequest = {
   session: number;
   selectedVariants: number[];
   timeTaken: number;
@@ -19,7 +19,8 @@ type Task1AnswerRequest = {
 type Task1AnswerStatistics = {
   correct: number;
   total: number;
-  wpm : number;
+  wpm: number;
+  score: number;
 };
 type Task1AnswerResponse = {
   answers: question[];

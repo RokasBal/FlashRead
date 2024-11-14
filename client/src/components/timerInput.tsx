@@ -1,13 +1,14 @@
+import { TextField } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 
 interface TimerInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    onTimeChange: (seconds: number) => void; // New prop to send the input time in seconds
+    onTimeChange: (seconds: number) => void;
 }
 
-const TimerInput: React.FC<TimerInputProps> = ({ className, id, onTimeChange, ...props }) => {
-    const [inputSequence, setInputSequence] = useState<string>('0000');
+const TimerInput: React.FC<TimerInputProps> = ({id, onTimeChange }) => {
+    const [inputSequence, setInputSequence] = useState<string>(''); // Initial state as empty string
+    const [focused, setFocused] = useState<boolean>(false); // Track focus
 
-    // Helper function to format the input sequence into "mm:ss"
     const formatToTimer = (sequence: string) => {
         const paddedSequence = sequence.padStart(4, '0');
         const minutes = paddedSequence.slice(0, 2);
@@ -15,7 +16,6 @@ const TimerInput: React.FC<TimerInputProps> = ({ className, id, onTimeChange, ..
         return `${minutes}:${seconds}`;
     };
 
-    // Convert the input sequence into total seconds
     const convertToSeconds = (sequence: string) => {
         const paddedSequence = sequence.padStart(4, '0');
         const minutes = parseInt(paddedSequence.slice(0, 2), 10);
@@ -23,35 +23,66 @@ const TimerInput: React.FC<TimerInputProps> = ({ className, id, onTimeChange, ..
         return minutes * 60 + seconds;
     };
 
-    // Handler for input change
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.replace(/[^0-9]/g, ''); // Remove any non-digit characters
+        const value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-digit characters
         if (value.length <= 4) {
             setInputSequence(value);
         } else if (value.length > 4) {
-            // Allow typing only up to 4 digits
-            setInputSequence(value.slice(-4)); 
+            setInputSequence(value.slice(-4));
         }
     };
 
-    // Trigger the onTimeChange callback whenever the input sequence changes
     useEffect(() => {
-        const totalSeconds = convertToSeconds(inputSequence);
-        onTimeChange(totalSeconds);
+        if (inputSequence === '' || formatToTimer(inputSequence) === '00:00') {
+            onTimeChange(0); // Reset to 0 seconds if the input is empty or "00:00"
+        } else {
+            const totalSeconds = convertToSeconds(inputSequence);
+            onTimeChange(totalSeconds);
+        }
     }, [inputSequence, onTimeChange]);
 
-    // Construct the display value in "mm:ss" format based on the input sequence
-    const displayValue = formatToTimer(inputSequence);
+    const displayValue = focused || (inputSequence && formatToTimer(inputSequence) !== '00:00')
+        ? formatToTimer(inputSequence)
+        : ''; // Show empty string if not focused and input is "00:00" or empty
 
     return (
-        <input
-            type="text"
+        <TextField
+            variant='outlined'
+            label="Timer:"
+            
             value={displayValue}
             onChange={handleInputChange}
-            className={className}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            sx={{
+                '& .MuiFormLabel-root': {
+                    color: 'var(--textColor)', 
+                    fontFamily: 'var(--fontStyle)',
+                },
+                '& .MuiFormLabel-root.Mui-focused': {
+                    color: '#1976d2',
+                },
+                '& .MuiInputBase-input': {
+                    fontFamily: 'var(--fontStyle)',
+                    color: 'var(--textColor)',
+                },
+                '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                        borderWidth: '3px',
+                        borderColor: 'var(--borderColor)',
+                    },
+                    '&:hover fieldset': {
+                        borderWidth: '3px',
+                        borderColor: 'var(--borderColor)',
+                    },
+                    '&.Mui-focused fieldset': {
+                        borderWidth: '3px',
+                        borderColor: '#1976d2',
+                    },
+                    width: '100%',
+                },
+            }}
             id={id}
-            {...props}
-            style={{ textAlign: 'left' }}
         />
     );
 };

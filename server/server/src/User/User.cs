@@ -19,6 +19,26 @@ namespace server.UserNamespace
             Name = name;
         }
 
+        public string GetEmail()
+        {
+            return Email;
+        }
+
+        public int GetScore()
+        {
+            return Score;
+        }
+
+        public string GetPassword()
+        {
+            return Password;
+        }
+
+        public string GetName()
+        {
+            return Name;
+        }
+
         public int CompareTo(User other)
         {
             return Score.CompareTo(other.Score);
@@ -41,5 +61,16 @@ namespace server.UserNamespace
         {
             return new DbUser { Email = u.Email, Password = u.Password, Name = u.Name };
         }
+    }
+    public class UserDTO
+    {
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+    }
+    public class UserDetailsDTO
+    {
+        public string? Email { get; set; }
+        public string? Name { get; set; }
+        public DateTime? JoinedAt { get; set; }
     }
 }

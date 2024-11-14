@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using server.src.Settings;
 using server.Services;
+using server.Exceptions;
 namespace server
 {
     public class Program
@@ -35,7 +36,7 @@ namespace server
             while (true) {
                 try
                 {
-                    var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionStringBuilder.BuildConnectionString());
+                    var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionStringBuilder.BuildConnectionString("./secrets/config.json"));
                     dataSourceBuilder.MapEnum<Task1.Theme>();
                     dataSourceBuilder.MapEnum<Task2Data.Theme>();
                     var dataSource = dataSourceBuilder.Build();
@@ -52,6 +53,8 @@ namespace server
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Database connection failed: {ex.Message}");
+                    Console.WriteLine("Retrying in 5 seconds...");
+                    System.Threading.Thread.Sleep(5000);
                 }
             }
             
@@ -70,7 +73,6 @@ namespace server
                 });
 
             builder.Services.AddSingleton<TokenProvider>();
-            
             builder.Services.AddSingleton<DbContextFactory>();
             builder.Services.AddSingleton<SessionManager>();
             builder.Services.AddHostedService<SessionBackgroundService>();
@@ -81,6 +83,10 @@ namespace server
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGenWithAuth();
+
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
 
             var app = builder.Build();
 
@@ -95,6 +101,8 @@ namespace server
             
             app.UseHsts();
 
+            app.UseMiddleware<ExceptionMiddleware>();
+            
             app.MapControllers();
 
             app.UseAuthentication();

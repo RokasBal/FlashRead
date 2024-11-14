@@ -11,7 +11,6 @@ import { login } from '../../services/authService';
 
 const LoginPage: React.FC = () => {
     const { checkUserAuth, isAuthenticated } = useAuth();
-    const [error, setError] = useState('');
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,8 +26,8 @@ const LoginPage: React.FC = () => {
         try {
             await login(email, password);
             checkUserAuth();
-        } catch (error) {
-            setError('Login failed. Please try again.');
+        } catch (err) {
+            console.error(err);
         }
     };
     return (
@@ -49,11 +48,13 @@ const LoginPage: React.FC = () => {
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                             '& .MuiOutlinedInput-root': {
@@ -82,11 +83,13 @@ const LoginPage: React.FC = () => {
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                             '& .MuiOutlinedInput-root': {

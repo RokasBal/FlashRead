@@ -1,0 +1,316 @@
+.profilePage {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: var(--backgroundColor);
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    min-height: 160px;
+    overflow: hidden;
+}
+
+.pageContainer {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.profileHeader {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    width: 100%;
+    flex: 3;
+    color: var(--textColor);
+    font-family: var(--fontStyle);
+    font-weight: bold;
+    font-size: 5vh;
+    /* background-color: brown; */
+}
+
+.content {
+    display: flex;
+    /* flex: 1 1 auto; */
+    flex: 25;
+    height: 80%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    /* background-color: aquamarine; */
+    overflow: hidden; 
+}
+
+.footer {
+    display: flex;
+    flex: 1;
+    height: 1%;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 3em;
+    width: 100%;
+    /* background-color: chocolate; */
+}
+
+.profileDetailsContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    /* background-color: cadetblue; */
+}
+
+.gameDetailsContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    overflow: hidden; 
+    /* background-color: blueviolet; */
+}
+
+.detailHeader {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    gap: 2vw;
+    padding: 2vw;
+    margin: 2vw;
+    /* background-color: green; */
+}
+
+.detailContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 90%;
+    padding: 0.5vh;
+    overflow: auto;
+    /* background-color: blue; */
+}
+
+.profileDetails {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 30%;
+    /* background-color: green; */
+}
+
+.restOfProfile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 70%;
+    /* background-color: blue; */
+}
+
+.accountInfoContainer {
+    display: flex;
+    height: 80%;
+    width: 80%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    /* background-color: brown; */
+}
+
+.accountInfoHeader {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 3.5vh;
+    color: var(--textColor);
+    font-family: var(--fontStyle);
+    /* background-color: aquamarine; */
+}
+
+.accountInfoContent {
+    display: flex;
+    flex: 3;
+    width: 100%;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    /* margin-top: 0.5vh; */
+    gap: 3vh;
+    /* background-color: chocolate; */
+}
+
+.accountInfoItem {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 2vh;
+    color: var(--textColor);
+    font-family: var(--fontStyle);
+    /* background-color: blueviolet; */
+}
+
+.textButton {
+    background: none;
+    border: none;
+    color: var(--textColor);
+    cursor: pointer;
+    font-size: inherit;
+    font-family: var(--fontStyle);
+    padding: 0;
+    margin: 0 10px;
+}
+
+.popupOverlay {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popupContent {
+    display: flex;
+    width: 40%;
+    height: 40%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--secondaryColor);
+    border-radius: 2vw;
+    border: 0.2vw solid var(--borderColor);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.popupHeader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+    /* background-color: aquamarine; */
+}
+
+.popupUpload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex: 4;
+    width: 100%;
+    /* background-color: blue; */
+}
+
+.popupFooter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;  
+    width: 100%;
+    gap: 2vh;
+    padding: 3vh;
+    /* background-color: blueviolet; */
+}
+
+.popupTitle {
+    font-family: var(--fontStyle);
+    font-weight: bold;
+    font-size: 1.7vh;
+    color: var(--textColor);
+}
+
+input[type="file"] {
+    display: none;
+}
+  
+.customFileUpload {
+    color: var(--textColor);
+    border: 0.3vh solid var(--borderColor);
+    border-radius: 10px;
+    display: flex;
+    padding: 1vh 2vh;
+    cursor: pointer;
+    font-family: var(--fontStyle);
+    font-size: 1.75vh;
+}
+
+.imagePreview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    max-width: 100%;
+    max-height: 12vh;
+    /* border: 1px solid #ddd; */
+    border-radius: 5px;
+    margin: 2vh;
+}
+
+.styledImage {
+    height: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    border: 1vh solid var(--borderColor);
+    object-fit: cover;
+    background-color: var(--borderColor);
+    position: relative;
+    z-index: 1;
+}
+
+.popupButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 30vw;
+    flex-grow: 1;
+    box-sizing: border-box;
+    outline: none;
+    padding: 1vh 2vh; 
+    border-radius: 12px;
+    border: 0.4vh solid var(--borderColor);
+    background-color: transparent;
+    color: var(--textColor);
+    font-size: 2.5vh;
+    font-family: var(--fontStyle);   
+}
+
+@media (max-width: 800px) {
+    .popupFooter {
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 0.5vh;
+    }
+
+    .popupButton {
+        font-size: 1.25vh;
+        max-width: 100%; /* Ensure buttons take full width */
+    }
+
+    .customFileUpload {
+        font-size: 1.25vh;
+    }
+}

@@ -10,7 +10,6 @@ import { register } from '../../services/authService';
 
 const RegisterPage: React.FC = () => {
     const { checkUserAuth, isAuthenticated } = useAuth();
-    const [error, setError] = useState('');
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -23,11 +22,31 @@ const RegisterPage: React.FC = () => {
     }, [isAuthenticated, navigate]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!username) {
+            alert('Please fill in the username.');
+            return;
+        }
+        if (!email) {
+            alert('Please fill in the email.');
+            return;
+        }
+        if (!password) {
+            alert('Please fill in the password.');
+            return;
+        }
+        if (!repeatPassword) {
+            alert('Please fill in the repeat password.');
+            return;
+        }
+        if (password !== repeatPassword) {
+            alert('Passwords do not match.');
+            return;
+        }
         try {
             await register(email, password, username);
             checkUserAuth();
         } catch (error) {
-            setError('Register failed. Please try again.');
+            console.error('Register failed. Please try again.', error);
         }
     };
     return (
@@ -48,11 +67,13 @@ const RegisterPage: React.FC = () => {
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                             '& .MuiOutlinedInput-root': {
@@ -81,11 +102,13 @@ const RegisterPage: React.FC = () => {
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                         '& .MuiOutlinedInput-root': {
@@ -114,11 +137,13 @@ const RegisterPage: React.FC = () => {
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                         '& .MuiOutlinedInput-root': {
@@ -147,11 +172,13 @@ const RegisterPage: React.FC = () => {
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
+                                fontFamily: 'var(--fontStyle)',
                             },
                             '& .MuiFormLabel-root.Mui-focused': {
                                 color: '#1976d2',
                             },
                             '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
                                 color: 'var(--textColor)',
                             },
                         '& .MuiOutlinedInput-root': {

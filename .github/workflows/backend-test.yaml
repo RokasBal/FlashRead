@@ -19,6 +19,7 @@ jobs:
       - name: Restore dependencies for both main and test projects
         run: |
           dotnet restore ./server/server/server.csproj
+          mkdir ./server/server/secrets && echo {\"DB_HOST\":\"1\",\"DB_PORT\":1,\"DB_NAME\":\"f\",\"DB_USER\":\"a\"} >> server/server/secrets/config.json
           dotnet restore ./server/server.Tests/server.Tests.csproj
       - name: Build the main project
         working-directory: ./server/server/
@@ -27,5 +28,8 @@ jobs:
         working-directory: ./server/server.Tests/
         run: dotnet build --configuration Release --no-restore
       - name: Run tests
+        env:
+          JWT_SECRET: 'supersecretlalalalalalalallalalalalaasasasasasasas'
+          DB_PASSWORD: 'password'
         working-directory: ./server/server.Tests/
         run: dotnet test --no-restore --verbosity normal --configuration Release

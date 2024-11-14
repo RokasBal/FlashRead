@@ -47,8 +47,8 @@ const Mode1Page: React.FC = () => {
                     </div>
                     <div className="mode1_upperDiv_parts" id="mode1_upperDiv_parts">
                         <div className="mode1_timerInput">
-                        <label htmlFor="mode1TimerInput" className="mode1_timerInputLabel">Timer:</label>
-                        <TimerInput onTimeChange={handleTimeChange} className="mode1_timerInputSelect" id="mode1TimerInput"  />
+                        {/* <label htmlFor="mode1TimerInput" className="mode1_timerInputLabel">Timer:</label> */}
+                        <TimerInput onTimeChange={handleTimeChange} id="mode1TimerInput"  />
                         </div>
                     </div>
                 </div>
@@ -86,6 +86,10 @@ const Mode1Page: React.FC = () => {
                         <div className="WPMDisplayDiv">
                             <span className="mode1_Text">Words per minute:  </span>
                             <span className="mode1_Text">{mode1Data?.statistics?.wpm}</span>                            
+                        </div>
+                        <div className="correctAnswersDisplayDiv">
+                            <span className="mode1_Text">Score: </span>
+                            <span className="mode1_Text">{mode1Data?.statistics?.score}</span>
                         </div>
                     </div>
                 </div>
