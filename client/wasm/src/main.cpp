@@ -4,6 +4,8 @@
 #include <wgleng/rendering/Debug.h>
 
 #include "game/GameScene.h"
+#include "game/ModelInit.h"
+#include "wgleng/util/Metrics.h"
 
 WGLENG_INIT_ENGINE
 
@@ -15,35 +17,23 @@ void onDeinit(Context* ctx) {
 }
 void onTick(Context* ctx, TimeDuration dt) {
 	// debug input
-	if (Input::IsHeld(SDL_SCANCODE_LCTRL) && Input::JustPressed(SDL_SCANCODE_O)) {
-		if (DebugDraw::IsEnabled()) DebugDraw::Disable();
-		else DebugDraw::Enable();
-	}
-	if (Input::IsHeld(SDL_SCANCODE_LCTRL) && Input::JustPressed(SDL_SCANCODE_P)) ctx->renderer.ReloadShaders();
+	if (Input::IsHeld(SDL_SCANCODE_LCTRL)) {
+		if (Input::JustPressed(SDL_SCANCODE_P)) {
+			ctx->renderer.ReloadShaders();
+		}
+		if (Input::JustPressed(SDL_SCANCODE_O)) {
+			if (DebugDraw::IsEnabled()) DebugDraw::Disable();
+			else DebugDraw::Enable();
+		}
+		if (Input::JustPressed(SDL_SCANCODE_I)) {
+			const bool show = !ctx->renderer.IsWireframeShown();
+			ctx->renderer.ShowWireframe(show);
+			ReloadModels(show);
+		}
+		if (Input::JustPressed(SDL_SCANCODE_U)) {
+			if (Metrics::IsEnabled(Metric::ALL_METRICS)) Metrics::Disable(Metric::ALL_METRICS);
+			else Metrics::Enable(Metric::ALL_METRICS);
+		}
 
-	// get frametime
-	static bool showFrametime = false;
-	static float frametimeAccum = 0;
-	static float frametime = 0;
-	static TimePoint lastFrametimeUpdate = TimePoint();
-	TimePoint now;
-	static int frames = 0;
-	if (Input::IsHeld(SDL_SCANCODE_LCTRL) && Input::JustPressed(SDL_SCANCODE_U)) showFrametime = !showFrametime;
-	if (showFrametime) {
-		if (now - lastFrametimeUpdate > 250ms) {
-			frametime = frametimeAccum / static_cast<float>(frames);
-			frametimeAccum = 0;
-			frames = 0;
-			lastFrametimeUpdate = now;
-		}
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{0, 0, 0, 0.2});
-		if (ImGui::Begin("Frametime", &showFrametime, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize)) {
-			ImGui::Text("Frametime: %.3f ms", frametime);
-		}
-		ImGui::End();
-		ImGui::PopStyleColor();
-		frametimeAccum += dt.fMilli();
-		frames++;
 	}
 }

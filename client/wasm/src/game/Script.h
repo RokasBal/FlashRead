@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wgleng/util/Timer.h>
+
 #include "GameScene.h"
 
 class Script {
