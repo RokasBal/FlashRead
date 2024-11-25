@@ -90,6 +90,8 @@ namespace server
 
             var app = builder.Build();
 
+            app.UseStaticFiles();
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment()) {
                 app.UseSwagger();
@@ -107,8 +109,18 @@ namespace server
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapFallbackToFile("index.html");
             
-            app.Run();
+            try 
+            {
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Application startup failed: {ex}");
+                throw;
+            }
         }
     }
 }
