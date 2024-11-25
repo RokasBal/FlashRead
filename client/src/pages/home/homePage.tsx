@@ -5,9 +5,7 @@ import '../../boards/css/main.board.css';
 import '../../boards/css/dropdown.css';
 import '../../boards/css/chat.css';
 import { useAuth } from '../../context/AuthContext';
-import MessageHandle from "../../components/chat/messageHandle";
-import MessageSend from "../../components/chat/messageSend";
-import ActiveHandle from "../../components/chat/activeHandle";
+import ChatComponent from "../../components/chat/chatComponet";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -22,27 +20,7 @@ const HomePage: React.FC = () => {
         <div className="MainBoard_main">
             <div className="chat_content"> 
                 <div className="chat_container">
-                    <div className="chat">
-                        <div className="activeUsers">
-                            <div className="users_header">
-                                <h1>Active Users</h1>
-                            </div>
-                            <div className="users_list">
-                                <ActiveHandle />
-                            </div>
-                        </div>
-                        <div className="chatBox">
-                            <div className="chat_header">
-                                <h1>Chat</h1>
-                            </div>
-                            <div className="chat_messages" id="chatMessages">
-                                <MessageHandle />
-                            </div>
-                            <div className="chat_input">
-                                <MessageSend />
-                            </div>
-                        </div>
-                    </div>
+                    <ChatComponent />
                 </div>
             </div>
 
