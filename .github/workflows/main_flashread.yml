@@ -16,6 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: set working directory
+        run: cd server/server
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
