@@ -89,15 +89,11 @@ namespace server.src.Task1 {
             Random generator = new((int)sessionId);
 
             // choose a text
-            var availableTexts = theme == Theme.Any
-                ? _context.Task1Texts
-                    .Select(t => t.Id)
-                    .ToArray()
-                : _context.Task1Texts
-                    .Where(t => t.Theme == theme)
-                    .Select(t => t.Id)
-                    .ToArray();
-            
+            var availableTexts = _context.Task1Texts
+                .Where(t => theme == Theme.Any || t.Theme == theme.ToString().ToLower())
+                .Select(t => t.Id)
+                .ToArray();
+
             if (availableTexts.Length == 0) {
                 return ("", Array.Empty<TaskQuestion>());
             }
