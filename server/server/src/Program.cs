@@ -110,8 +110,6 @@ namespace server
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.MapFallbackToFile("index.html");
             
             try 
             {
