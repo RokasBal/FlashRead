@@ -193,4 +193,9 @@ namespace server.Controller {
     public record ChangeUserNameRequest {
         public string? NewName { get; set; }
     }
+    public record ActivityRequest {
+        public string? Email { get; set; }
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
+    }
 }

@@ -98,6 +98,19 @@ namespace server.Services {
             }
             return connectedUsers;
         }
+
+        public virtual async Task<List<string>> GetConnectedUsernames() {
+            var connectedUsernames = new List<string>();
+            using (var _context = _dbContextFactory.GetDbContext()) {
+                foreach (var session in _sessions) {
+                    var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == session.Key);
+                    if (dbUser != null) {
+                        connectedUsernames.Add(dbUser.Name);
+                    }
+                }
+            }
+            return connectedUsernames;
+        }
         public class UserSession {
             public DateTime SessionStart { get; set; }
             public DateTime LatestTimeAlive { get; set; }

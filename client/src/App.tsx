@@ -13,6 +13,8 @@ import SettingsPage from './pages/settings/settingsPage';
 import ChangePasswordPage from './pages/settings/changePassword';
 import DeleteAccountPage from './pages/settings/deleteAccount';
 import ProfilePage from './pages/profile/profilePage';
+import SearchPage from './pages/userSearch/search';
+import UserPage from './pages/userSearch/userPage';
 import axios from './components/axiosWrapper';
 import './boards/css/variables.css';
 import { AuthProvider } from './context/AuthContext';
@@ -58,6 +60,8 @@ const App: React.FC = () => {
               <Route path="/about" element={<AboutPage />}/>
               <Route path="/contact" element={<ContactPage />}/>
               <Route path="/profile" element={<ProfilePage />}/>
+              <Route path="/search" element={<SearchPage/>}/>
+              <Route path="/user/:username" element={<UserPage/>}/>
           </Routes>
           </BrowserRouter>
         </VisualSettingsProvider>

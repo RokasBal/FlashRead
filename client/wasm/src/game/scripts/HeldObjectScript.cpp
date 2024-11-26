@@ -1,10 +1,10 @@
 #include "HeldObjectScript.h"
 
 #include <wgleng/core/Components.h>
-#include <wgleng/io/Input.h>
 #include <wgleng/rendering/Highlights.h>
 
-HeldObjectScript::HeldObjectScript(GameScene& scene) : Script(scene) {
+HeldObjectScript::HeldObjectScript(GameScene& scene)
+	: Script(scene) {
 	m_highlightId = Highlights::GetHighlightId("white");
 	m_pickupListener = scene.actions.Listen(Action::PickUp, [&] {
 		m_shouldPickup = true;
@@ -38,7 +38,13 @@ void HeldObjectScript::Update(TimeDuration dt) {
 			if (const auto meshComp = scene.registry.try_get<MeshComponent>(firstHit.entity)) {
 				meshComp->highlightId = m_highlightId;
 			}
+			scene.AddControlHint("F - pickup");
 		}
+	}
+
+	if (player.objectCarry.GetCarriedEntity() != entt::null) {
+		if (scene.actions.IsEnabled(Action::PickUp)) scene.AddControlHint("F - drop");
+		if (scene.actions.IsEnabled(Action::Throw)) scene.AddControlHint("Q - throw");
 	}
 
 	// item pickup

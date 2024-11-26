@@ -8,6 +8,7 @@ import ProfileCard from "../../components/profileCard.tsx";
 import HistoryTable from '../../components/tables/historyTable.tsx';
 import LeaderboardTable from '../../components/tables/leaderboardTable.tsx';
 import { useNavigate } from 'react-router-dom';
+// import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import { TableRow } from '../../components/tables/types.ts';
 
@@ -30,12 +31,14 @@ const ProfilePage: React.FC = () => {
     const [joinDate, setJoinDate] = useState<string>("");
     const [gamesPlayed, setGamesPlayed] = useState<number>(0);
     const [totalScore, setTotalScore] = useState<number>(0);
+    // const [activityData, setActivityData] = useState<any[]>([]);
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const taskIdToGameMode: { [key: number]: string } = {
         1: "Q&A",
-        2: "Catch the Word"
+        2: "Catch the Word",
+        3: "BookScape"
     };
 
     const fetchGameHistory = async () => {
@@ -105,6 +108,35 @@ const ProfilePage: React.FC = () => {
             console.error('Error fetching username:', err);
         }
     };
+    // const fetchActivityData = async (startDate: string, endDate: string) => {
+    //     try {
+    //         const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+    //         const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+    //         if (!token) {
+    //             throw new Error('No auth token found');
+    //         }
+
+    //         const emailResponse = await axios.get('/api/User/GetLogins', {
+    //             headers: { Authorization: `Bearer ${token}` }
+    //         });
+
+    //         const email = emailResponse.data.email;
+
+    //         const activityResponse = await axios.post('/api/Users/GetUserActivity', {
+    //             email,
+    //             startDate,
+    //             endDate
+    //         }, {
+    //             headers: { Authorization: `Bearer ${token}` }
+    //         });
+
+    //         setActivityData(activityResponse.data);
+
+    //     } catch (err) {
+    //         console.error('Error fetching activity data:', err);
+    //     }
+    // };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -220,6 +252,20 @@ const ProfilePage: React.FC = () => {
                                         <h2>Join date:</h2>
                                         <p>{joinDate}</p>
                                     </div>
+                                    {/* <div>
+                                        <div className="accountInfoItem">
+                                            <h2>Activity graph:</h2>
+                                            <div className="graphContainer">
+                                                <LineChart width={400} height={300} data={activityData}>
+                                                    <Line type="monotone" dataKey="score" stroke="#8884d8" />
+                                                    <CartesianGrid stroke="#ccc" />
+                                                    <XAxis dataKey="date" />
+                                                    <YAxis />
+                                                    <Tooltip />
+                                                </LineChart>
+                                            </div>
+                                        </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>
