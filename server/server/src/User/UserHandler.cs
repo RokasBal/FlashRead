@@ -162,6 +162,10 @@ namespace server.UserNamespace {
         public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
             await historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
         }
+        public async Task<string?> GetEmailByNameAsync(string name) {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            return dbUser?.Email;
+        }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
            var dbUser = await _context.Users

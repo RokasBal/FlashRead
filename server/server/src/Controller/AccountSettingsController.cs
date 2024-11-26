@@ -106,7 +106,11 @@ namespace server.Controller {
         }
 
         [HttpGet("User/GetUserPageData")]
-        public async Task<IActionResult> GetUserPageData(string email) {
+        public async Task<IActionResult> GetUserPageData(string username) {
+            var email = await _userHandler.GetEmailByNameAsync(username);
+            if (email == null) {
+                throw new NotFoundException("User not found.");
+            }
             var user = await _userHandler.GetUserByEmailAsync(email);
             byte[] defaultProfilePic = await Utility.Utility.getDefaultProfilePic();
             if (user == null) {

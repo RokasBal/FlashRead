@@ -17,14 +17,13 @@ interface GameHistoryItem {
 const UserPage: React.FC = () => {
     const [gameHistory, setGameHistory] = useState<TableRow[]>([]);
     const [detailContent, setDetailContent] = useState<JSX.Element | string>();
-    const [username, setUsername] = useState<string>('');
     const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
     const [joinDate, setJoinDate] = useState<string>("");
     const [gamesPlayed, setGamesPlayed] = useState<number>(0);
     const [totalScore, setTotalScore] = useState<number>(0);
     const navigate = useNavigate();
 
-    const { email } = useParams<{ email: string}>();
+    const { username = '' } = useParams<{ username: string}>();
 
     const taskIdToGameMode: { [key: number]: string } = {
         1: "Q&A",
@@ -35,7 +34,7 @@ const UserPage: React.FC = () => {
     const fetchUserData = async () => {
         try {
             const response = await axios.get('/api/User/GetUserPageData', {
-                params: { email: email }
+                params: { username : username }
             });
             console.log('User data:', response.data);
             // Profile picture
@@ -76,7 +75,6 @@ const UserPage: React.FC = () => {
             // Join date
             const joinedAt = new Date(response.data.joinedAt);
             const formattedDate = `${joinedAt.getFullYear()}-${String(joinedAt.getMonth() + 1).padStart(2, '0')}-${String(joinedAt.getDate()).padStart(2, '0')}`;
-            setUsername(response.data.name);
             setJoinDate(formattedDate);
 
         } catch (err) {
@@ -96,7 +94,7 @@ const UserPage: React.FC = () => {
 
     useEffect(() => {
         fetchUserData();
-    }, [email]);
+    }, [username]);
 
     return (
         <div className="profilePage">
