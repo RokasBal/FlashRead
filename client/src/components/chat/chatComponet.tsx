@@ -25,7 +25,7 @@ const ChatComponent: React.FC = () => {
         try {
             const response = await axiosWrapper.post('/api/GetGlobalChats', chatIndex);
             const data = response.data;
-            console.log('Fetched messages:', data.chats); // Log the fetched data
+            console.log('Fetched messages:', data.chats);
             setMessages(data.chats);
             setChatIndex(data.chatIndex);
         } catch (error) {
@@ -52,9 +52,6 @@ const ChatComponent: React.FC = () => {
 
     }, []);
 
-
-
-
     const byteArrayToBase64 = (byteArray: string) => {
         return `data:image/jpeg;base64,${byteArray}`;
     };
@@ -73,7 +70,7 @@ const ChatComponent: React.FC = () => {
         try {
             const response = await axiosWrapper.get('/api/Session/GetConnectedUsers');
             const data: string[] = response.data;
-            console.log('Fetched active users:', data); // Log the fetched data
+            console.log('Fetched active users:', data);
             if (data) {
                 setActiveUsers(data);
             }
@@ -95,9 +92,8 @@ const ChatComponent: React.FC = () => {
         try {
             const response = await axiosWrapper.post('/api/SendGlobalChat', { chatText });
             console.log('Message sent:', response.data);
-
             
-            setChatText(''); // Clear the input field after sending the message
+            setChatText('');
             fetchMessages();
         } catch (error) {
             console.error('Error sending message:', error);
