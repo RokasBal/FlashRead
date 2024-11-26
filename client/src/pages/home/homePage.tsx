@@ -81,7 +81,7 @@ const HomePage: React.FC = () => {
                             navigate("/mode2");
                         }}/>
 
-                        <CustomButton label= "Temporary 3D Sandbox" className= "squareButton" id="MainBoard_mode3Button" onClick={()=>{
+                        <CustomButton label= "BookScape" className= "squareButton" id="MainBoard_mode3Button" onClick={()=>{
                             console.log("Mode 3 clicked");
                             navigate("/mode3");
                         }}/>

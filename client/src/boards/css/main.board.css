@@ -30,6 +30,10 @@
   border-radius: 0.6vw;
   border: 0.2vw solid var(--borderColor);
   cursor: pointer;
+  transition: transform 0.4s ease;
+}
+.search_button:hover {
+  transform: scale(0.95);
 }
 
 .hidden {
