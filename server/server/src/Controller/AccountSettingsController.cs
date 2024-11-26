@@ -5,6 +5,7 @@ using server.UserNamespace;
 using System.Security.Claims;
 using server.src.Settings;
 using server.Exceptions;
+using server.Utility;
 
 namespace server.Controller {
     [Route("api")]
@@ -102,6 +103,29 @@ namespace server.Controller {
         public async Task<IActionResult> GetAllFonts() {
             var fonts = await _settings.GetAllFontsAsync();
             return Ok(fonts);
+        }
+
+        [HttpGet("User/GetUserPageData")]
+        public async Task<IActionResult> GetUserPageData(string email) {
+            var user = await _userHandler.GetUserByEmailAsync(email);
+            byte[] defaultProfilePic = await Utility.Utility.getDefaultProfilePic();
+            if (user == null) {
+                throw new NotFoundException("User not found.");
+            }
+
+            var profilePic = await _userHandler.GetUserProfilePicByEmailAsync(email);
+            var history = await _userHandler.GetTaskHistoryByEmail(email);
+
+            if (profilePic == null || profilePic.Length == 0) {
+                profilePic = defaultProfilePic;
+            }
+
+            return Ok(new { 
+                Name = user.Name, 
+                JoinedAt = user.JoinedAt, 
+                ProfilePic = profilePic,
+                History = history
+                 });   
         }
 
         [HttpGet("Settings/GetThemeSettingsByTheme")]

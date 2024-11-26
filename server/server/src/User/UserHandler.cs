@@ -164,21 +164,21 @@ namespace server.UserNamespace {
         }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+           var dbUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+
             if (dbUser == null)
             {
                 return new List<DbTaskHistory>();
             }
-            List<DbTaskHistory> taskHistories = new List<DbTaskHistory>();
-            foreach (var historyId in dbUser.HistoryIds)
-            {
-                var taskHistory = await _context.UserTaskHistories.FirstOrDefaultAsync(h => h.Id == historyId);
-                if (taskHistory != null)
-                {
-                    taskHistories.Add(taskHistory);
-                }
-            }
+
+            var taskHistories = await _context.UserTaskHistories
+                .Where(h => dbUser.HistoryIds.Contains(h.Id))
+                .ToListAsync();
+
             return taskHistories;
+
+            //FIX THIS QUERY
         }
 
         public async Task<string?> GetSettingsFontById(string id)

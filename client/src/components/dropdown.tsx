@@ -94,7 +94,7 @@ const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
                 onMouseDown={() => setIsClicked(true)}
                 onMouseUp={() => setIsClicked(false)}
             >
-                &#8801;
+                <i className="fas fa-bars"></i>
             </button>
             <ul style={dropdownMenuStyle}>
                 {['Profile', 'Settings', isAuthenticated ? 'Logout' : 'Login'].map((option, index) => (
