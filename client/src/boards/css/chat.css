@@ -23,6 +23,14 @@
     /* background-color: blue; */
 }
 
+.active_list {
+    display: flex;
+    flex-direction: row;
+    text-wrap: wrap;
+    gap: 1.2vw;
+}
+    
+
 .activeUsers {
     display: flex;
     flex: 1;
@@ -41,6 +49,18 @@
     background-color: var(--backgroundColor);
 }
 /* ACTIVE USERS */
+
+.chatButton {
+    margin-left: 0.4vw;
+    margin-bottom: 0.4vw;
+    background: none;
+    border: none;
+    width: 1.5vw;
+    height: 1.5vw;
+    color: var(--textColor);
+    font-size: 1vw;
+    cursor: pointer;
+}
 
 .users_header {
     display: flex;
@@ -64,6 +84,8 @@
 }
 
 /* CHAT */
+
+
 
 .chat_header {
     display: flex;
