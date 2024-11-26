@@ -1,8 +1,6 @@
 #include "ObjectInteractScript.h"
 
 #include <wgleng/core/Components.h>
-#include <wgleng/core/EntityCreator.h>
-#include <wgleng/io/Input.h>
 #include <wgleng/rendering/Text.h>
 
 #include "../GameComponents.h"
@@ -55,7 +53,7 @@ void ObjectInteractScript::StartReading(entt::entity book) {
 	}
 
 	// create fake book
-	m_readingData.fakeBook = CreateDefaultEntity(scene.registry);
+	m_readingData.fakeBook = scene.registry.create();
 	scene.registry.emplace<MeshComponent>(m_readingData.fakeBook, MeshComponent{
 		.mesh = MeshRegistry::Get("openBook"),
 		.rotation = {90, 90, 0}
@@ -80,7 +78,7 @@ void ObjectInteractScript::StartReading(entt::entity book) {
 		scene.registry.emplace<TextComponent>(m_readingData.fakeBook, TextComponent{
 			.texts = {text}
 		});
-	} else if (const auto hintComp = scene.registry.try_get<GoldenBookComponent>(m_readingData.realBook)) {
+	} else if (scene.registry.try_get<GoldenBookComponent>(m_readingData.realBook)) {
 		std::shared_ptr<DrawableText> text = Text::CreateText("arial", "You win!", 15);
 		text->useOrtho = false;
 		text->position = {-0.6, 0.55, 0.12};

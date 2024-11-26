@@ -1,10 +1,10 @@
 #include "HeldObjectScript.h"
 
 #include <wgleng/core/Components.h>
-#include <wgleng/io/Input.h>
 #include <wgleng/rendering/Highlights.h>
 
-HeldObjectScript::HeldObjectScript(GameScene& scene) : Script(scene) {
+HeldObjectScript::HeldObjectScript(GameScene& scene)
+	: Script(scene) {
 	m_highlightId = Highlights::GetHighlightId("white");
 	m_pickupListener = scene.actions.Listen(Action::PickUp, [&] {
 		m_shouldPickup = true;
