@@ -24,25 +24,33 @@ namespace server.Controller {
             _userHandler = userHandler;
         }
         [HttpPost("GetGlobalChats")]
-        public async Task<IActionResult> GetGlobalChats([FromBody] LastChatIndex lastChatIndex) {
-            int index = lastChatIndex.Index;
+        public async Task<IActionResult> GetGlobalChats([FromQuery] int index) {
             int lastIndexInDb = await _context.GlobalChats.OrderByDescending(c => c.ChatIndex).Select(c => c.ChatIndex).FirstOrDefaultAsync();
-            if (index >= lastIndexInDb) {
+            if (index >= lastIndexInDb && index != 0) {
                 return NoContent();
             }
+            byte[] defaultProfilePic = await Utility.Utility.getDefaultProfilePic();
             var chats = await (from chat in _context.GlobalChats
                                join user in _context.Users on chat.Author equals user.Email into userGroup
                                from user in userGroup.DefaultIfEmpty()
                                orderby chat.ChatIndex descending
-                               select new {
-                                    chat.ChatText,
-                                    chat.Author,
-                                    chat.WrittenAt,
-                                    Usename = user != null ? user.Name : "Unknown",
-                                    ProfilePic = user != null ? user.ProfilePic : Utility.Utility.getDefaultProfilePic().Result
-                               }).Take(100).ToListAsync();
-
-            var updatedChats = chats.Select(chat => new Chat(chat.Usename, chat.ChatText, chat.Author, chat.WrittenAt, chat.ProfilePic)).ToList();
+                                               select new {
+                                                    chat.ChatIndex,
+                                                    chat.ChatText,
+                                                    chat.Author,
+                                                    chat.WrittenAt,
+                                                    Usename = user != null ? user.Name : "Unknown",
+                                                    ProfilePic = user != null ? user.ProfilePic : null
+                                               }).Take(100).ToListAsync();
+                
+            var updatedChats = chats.Select(chat => new Chat(
+                chat.ChatIndex, 
+                chat.Usename, 
+                chat.ChatText, 
+                chat.Author, 
+                chat.WrittenAt, 
+                chat.ProfilePic ?? defaultProfilePic
+            )).ToList();
             return Ok(new ChatList { Chats = updatedChats });
         }
         [Authorize]
@@ -78,6 +86,7 @@ namespace server.Controller {
         string ChatText
     );
     public record Chat(
+        int ChatIndex,
         string Username,
         string ChatText,
         string Author,
@@ -88,7 +97,4 @@ namespace server.Controller {
     {
         public List<Chat> Chats { get; init; } = new List<Chat>();
     }
-    public record LastChatIndex(
-        int Index
-    );
 }

@@ -291,6 +291,16 @@ const Mode3Page: React.FC = () => {
                             <p>- Take / Drop</p>
                         </div>
                     </div>
+                    <div className="fullScreen">
+                        <div className="controls">
+                            <div className="key">
+                                <p>P</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Settings</p>
+                        </div>
+                    </div>
                 </div>
                 <div className='mode3_containerMiddle'>
                     <div className='mode3_middleTop'>

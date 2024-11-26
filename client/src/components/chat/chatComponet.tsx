@@ -1,14 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import axiosWrapper from '../axiosWrapper';
 import "../../boards/css/chat.css";
 
 // Message Interface
 interface Message {
+    chatIndex: number;
     username: string;
     chatText: string;
     author: string;
     writtenAt: string;
     profilePic: string;
+
 }
 
 // ChatComponent
@@ -17,13 +19,15 @@ const ChatComponent: React.FC = () => {
     const [activeUsers, setActiveUsers] = useState<string[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+    const [chatIndex, setChatIndex] = useState<number>(0);
 
     const fetchMessages = async () => {
         try {
-            const response = await axiosWrapper.get('/api/GetGlobalChats');
+            const response = await axiosWrapper.post('/api/GetGlobalChats', chatIndex);
             const data = response.data;
-            console.log('Fetched messages:', data.chats); // Log the fetched data
+            console.log('Fetched messages:', data.chats);
             setMessages(data.chats);
+            setChatIndex(data.chatIndex);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -48,9 +52,6 @@ const ChatComponent: React.FC = () => {
 
     }, []);
 
-
-
-
     const byteArrayToBase64 = (byteArray: string) => {
         return `data:image/jpeg;base64,${byteArray}`;
     };
@@ -67,9 +68,9 @@ const ChatComponent: React.FC = () => {
 
     const fetchActiveUsers = async () => {
         try {
-            const response = await axiosWrapper.get('/api/Session/GetConnectedUsers');
+            const response = await axiosWrapper.get('/api/Session/GetConnectedUsernames');
             const data: string[] = response.data;
-            console.log('Fetched active users:', data); // Log the fetched data
+            console.log('Fetched active users:', data);
             if (data) {
                 setActiveUsers(data);
             }
@@ -91,9 +92,8 @@ const ChatComponent: React.FC = () => {
         try {
             const response = await axiosWrapper.post('/api/SendGlobalChat', { chatText });
             console.log('Message sent:', response.data);
-
             
-            setChatText(''); // Clear the input field after sending the message
+            setChatText('');
             fetchMessages();
         } catch (error) {
             console.error('Error sending message:', error);
@@ -134,8 +134,10 @@ const ChatComponent: React.FC = () => {
                                     {messages.slice().reverse().map((message, index) => (
                                         <li key={index} className="message">
                                             <div className="message_header">
-                                                <img className='chat_image' src={byteArrayToBase64(message.profilePic)} />
-                                                <span className='message_user'>{message.username}</span>
+                                                <div className="message_header_left">
+                                                    <img className='chat_image' src={byteArrayToBase64(message.profilePic)} />
+                                                    <span className='message_user'>{message.username}</span>
+                                                </div>
                                                 <span className="message_date">{formatDate(message.writtenAt)}</span>
                                             </div>
                                             <div className="message_body">

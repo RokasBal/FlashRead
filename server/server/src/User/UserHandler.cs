@@ -15,8 +15,14 @@ namespace server.UserNamespace {
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
             if (existingUser != null)
             {
-                return false;
+                throw new UserAlreadyExistsException("A user with this email already exists.");
             }
+
+            var existingUsername = await _context.Users.FirstOrDefaultAsync(u => u.Name == user.Name);
+            if (existingUsername != null) {
+                throw new UserAlreadyExistsException("A user with this username already exists.");
+            }
+
             var dbUser = convertUserToDbUser(user);
             dbUser.Password = HashPassword(dbUser.Password);
             dbUser.ProfilePic = null;
@@ -162,23 +168,27 @@ namespace server.UserNamespace {
         public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
             await historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
         }
+        public async Task<string?> GetEmailByNameAsync(string name) {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            return dbUser?.Email;
+        }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+           var dbUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+
             if (dbUser == null)
             {
                 return new List<DbTaskHistory>();
             }
-            List<DbTaskHistory> taskHistories = new List<DbTaskHistory>();
-            foreach (var historyId in dbUser.HistoryIds)
-            {
-                var taskHistory = await _context.UserTaskHistories.FirstOrDefaultAsync(h => h.Id == historyId);
-                if (taskHistory != null)
-                {
-                    taskHistories.Add(taskHistory);
-                }
-            }
+
+            var taskHistories = await _context.UserTaskHistories
+                .Where(h => dbUser.HistoryIds.Contains(h.Id))
+                .ToListAsync();
+
             return taskHistories;
+
+            //FIX THIS QUERY
         }
 
         public async Task<string?> GetSettingsFontById(string id)

@@ -19,7 +19,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ imageSrc, name, onEditClick, 
                     </div>
                 </button>
             ) : (
-                <div className="profileImageContainer">
+                <div className="profileImageUneditable">
                     <img src={imageSrc} alt="Profile" className="profileImage" />
                 </div>
             )}
