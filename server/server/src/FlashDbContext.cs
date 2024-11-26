@@ -24,7 +24,6 @@ namespace server.src {
         public FlashDbContext(DbContextOptions<FlashDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.HasPostgresEnum<Task1.Task1.Theme>(schema: "task1", name: "theme");
             modelBuilder.Entity<DbTask1Text>(entity => {
                 entity.ToTable("texts", "task1");
                 entity.HasKey(e => e.Id).HasName("texts_pkey");
