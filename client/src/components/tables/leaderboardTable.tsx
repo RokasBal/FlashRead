@@ -41,10 +41,12 @@ const LeaderboardTable: React.FC = () => {
     const [leaderboardData, setLeaderboadData] = useState<TableRow[]>([]);
     const [page, setPage] = useState<number>(1);
     const [isNextPageBlank, setIsNextPageBlank] = useState<boolean>(false);
+    const [pageUser, setPageUser] = useState<number>(1);
 
     const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'gamemode', 'score'];
 
     const fetchAllLeaderboard = async (pageNumber: number) => {
+        console.log("fetching all leaderboard");
         try {
             const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
             const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
@@ -54,14 +56,18 @@ const LeaderboardTable: React.FC = () => {
                 };
             });
             setLeaderboadData(transformedData);
+            setPageUser(pageNumber);
+            checkNextPage(page+1).then(setIsNextPageBlank);
         } catch (error) {
             console.error("Error fetching leaderboard data:", error);
         }
     };
     
     const fetchHighScoreLeaderboard = async (pageNumber: number) => {
+        console.log("fetching high score leaderboard");
         try {
             const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+            console.log("response", response);
             const transformedData = response.data.map((item: HighScoreLeaderboardItem) => {
                 return {
                     username: item.name,
@@ -69,7 +75,9 @@ const LeaderboardTable: React.FC = () => {
                     gamemode: taskIdToGameMode[Number(item.gamemode)],
                 };
             });
+            setPageUser(pageNumber);
             setLeaderboadData(transformedData);
+            checkNextPage(page+1).then(setIsNextPageBlank);
         } catch (error) {
             console.error("Error fetching leaderboard data:", error);
         }
@@ -132,10 +140,7 @@ const LeaderboardTable: React.FC = () => {
     };
 
     const updatePage = async (pageNumber: number) => {
-        const nextPageBlank = await checkNextPage(pageNumber + 1);
-        setIsNextPageBlank(nextPageBlank);
         setPage(pageNumber);
-        fetchAllLeaderboard(pageNumber);
     }
 
     const handleTypeChoice = (choice: string) => {
@@ -143,11 +148,9 @@ const LeaderboardTable: React.FC = () => {
             if (choice === "All time score") {
                 setType(choice);
                 setPage(1);
-                fetchAllLeaderboard(1);
             } else if (choice === "High score") {
                 setType(choice);
                 setPage(1);
-                fetchHighScoreLeaderboard(1);
             }
         }
     };
@@ -158,9 +161,11 @@ const LeaderboardTable: React.FC = () => {
         } else {
             fetchHighScoreLeaderboard(page);
         }
-        checkNextPage(page + 1).then(setIsNextPageBlank);
     }, [page, type]);
 
+    useEffect(() => {
+        checkNextPage(page + 1).then(setIsNextPageBlank);
+    },[pageUser]);
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
@@ -169,15 +174,17 @@ const LeaderboardTable: React.FC = () => {
                 )}
                 <ChoiceBox choices={leaderboardTypes} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
             </div>
-            <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
+            {/* <div className='containerCenter'> */}
+                <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
+            {/* </div> */}
             <div className="paginationControls">
                 <div className="left">
-                    {page > 1 && (
+                    {pageUser > 1 && (
                         <CustomButton label="Previous" className="wideButton" id="gameHistoryButton" onClick={() => updatePage(Math.max(page - 1, 1))}/>
                     )}
                 </div>
                 <div className="center">
-                    <span className="pageIndicator">Page {page}</span>
+                    <span className="pageIndicator">Page {pageUser}</span>
                 </div>
                 <div className="right">
                     {!isNextPageBlank && (
