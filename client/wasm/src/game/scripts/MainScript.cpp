@@ -1,13 +1,16 @@
 #include "MainScript.h"
 
+#include "ControlHintsScript.h"
 #include "HeldObjectScript.h"
 #include "ObjectInteractScript.h"
 #include "SecretDoorScript.h"
 
-MainScript::MainScript(GameScene& scene) : Script(scene) {
+MainScript::MainScript(GameScene& scene)
+	: Script(scene) {
 	m_scripts.push_back(std::make_unique<HeldObjectScript>(scene));
 	m_scripts.push_back(std::make_unique<ObjectInteractScript>(scene));
 	m_scripts.push_back(std::make_unique<SecretDoorScript>(scene));
+	m_scripts.push_back(std::make_unique<ControlHintsScript>(scene));
 }
 
 void MainScript::Update(TimeDuration dt) {

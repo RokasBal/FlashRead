@@ -38,7 +38,13 @@ void HeldObjectScript::Update(TimeDuration dt) {
 			if (const auto meshComp = scene.registry.try_get<MeshComponent>(firstHit.entity)) {
 				meshComp->highlightId = m_highlightId;
 			}
+			scene.AddControlHint("F - pickup");
 		}
+	}
+
+	if (player.objectCarry.GetCarriedEntity() != entt::null) {
+		if (scene.actions.IsEnabled(Action::PickUp)) scene.AddControlHint("F - drop");
+		if (scene.actions.IsEnabled(Action::Throw)) scene.AddControlHint("Q - throw");
 	}
 
 	// item pickup

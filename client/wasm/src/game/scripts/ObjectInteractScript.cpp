@@ -26,12 +26,27 @@ ObjectInteractScript::ObjectInteractScript(GameScene& scene)
 		const auto tagComp = scene.registry.try_get<TagComponent>(heldObject);
 		if (!tagComp) return;
 		if (tagComp->tag != "hintBook" && tagComp->tag != "goldenBook") return;
+		if (tagComp->tag == "goldenBook") {
+			scene.actions.Trigger(Action::WinGame);
+		}
 
 		StartReading(heldObject);
 	});
 }
 
 void ObjectInteractScript::Update(TimeDuration dt) {
+	const auto heldObject = scene.player.objectCarry.GetCarriedEntity();
+	if (heldObject != entt::null) {
+		const auto& flagComp = scene.registry.get<FlagComponent>(heldObject);
+		const auto tagComp = scene.registry.try_get<TagComponent>(heldObject);
+		if (flagComp.flags & EntityFlags::INTERACTABLE && tagComp) {
+			if (tagComp->tag == "hintBook" || tagComp->tag == "goldenBook") {
+				if (m_readingData.reading) scene.AddControlHint("E - stop reading");
+				else scene.AddControlHint("E - read");
+			}
+		}
+	}
+
 	if (m_readingData.reading) {
 		UpdateReading();
 		return;

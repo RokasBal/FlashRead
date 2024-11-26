@@ -24,6 +24,26 @@ namespace server.Controller {
             req.TaskVersion = new Task3HintGenerator().GenerateTaskVersion();
             return req.GetResponse<Task3BookHintResponse>();
         }
+        [HttpPost("SaveTask3TimeTaken")]
+        public async Task<IActionResult> PostSaveTask3TimeTaken(int seconds) {
+            // calculate score based on time taken
+            int max = 2000;
+            int min = 100;
+            int score = -seconds * 3 + max;
+            score = Math.Max(min, score);
+            score = Math.Min(max, score);
+            score /= 10; // [100, 2000] -> [10, 200]
 
+            // save score
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail) == false) {
+                System.Console.WriteLine("Saving task result");
+                await _userHandler.SaveTaskResult(userEmail, 0, 3, score, null);
+            }
+            else {
+                return NotFound("failure");
+            }
+            return Ok("success");
+        }
     }
 }
