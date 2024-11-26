@@ -1,10 +1,11 @@
 #pragma once
 
+#include <wgleng/core/KeyMapper.h>
 #include <wgleng/core/Scene.h>
 #include <wgleng/util/Timer.h>
+
 #include "GameActions.h"
 #include "Player.h"
-#include <wgleng/core/KeyMapper.h>
 
 class MainScript;
 

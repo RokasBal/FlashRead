@@ -1,13 +1,11 @@
 #include "Player.h"
 
 #include <glm/gtx/norm.hpp>
-
 #include <wgleng/core/Components.h>
-#include <wgleng/core/EntityCreator.h>
 #include <wgleng/io/Input.h>
 
 Player::Player(entt::registry& registry, PhysicsWorld& physicsWorld, const glm::vec3& position)
-	: objectCarry{registry}, m_physicsWorld{physicsWorld}, m_entity{CreateDefaultEntity(registry)}, m_registry{registry} {
+	: objectCarry{registry}, m_physicsWorld{physicsWorld}, m_entity{registry.create()}, m_registry{registry} {
 	m_camera = std::make_shared<Camera>();
 	m_camera->position = position;
 

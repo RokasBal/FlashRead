@@ -1,0 +1,40 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSCRIPTEN_PATH}/cmake/Modules/Platform/Emscripten.cmake"
+      },
+      "environment": {
+        "EMSCRIPTEN_PATH": "C:/emscripten/emsdk/upstream/emscripten"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "windows-clang-x64",
+          "intelliSenseOptions": {
+            "additionalCompilerArgs": ""
+          }
+        }
+      }
+    },
+    {
+      "name": "wasmgame-release",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/wasmgame-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "wasmgame-debug",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/wasmgame-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ]
+}
