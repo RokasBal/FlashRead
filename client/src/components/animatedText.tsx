@@ -11,23 +11,21 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ text }) => {
         const [visibleText, setVisibleText] = useState('');
 
         useEffect(() => {
-                let index = 0;
-                const interval = setInterval(() => {
-                        setVisibleText((prev) => prev + text[index]);
-                        index++;
-                        if (index === text.length-1) {
-                                clearInterval(interval);
-                        }
-                }, 50); // Adjust the delay (in milliseconds) to control the speed of appearance
-
-                return () => clearInterval(interval); // Cleanup interval on unmount
+            let index = 0;
+            const interval = setInterval(() => {
+                if (text === null || text === undefined || text.length === 0 || index > text.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                setVisibleText(text.substring(0, index));
+                index++;
+            }, 5);
+            return () => clearInterval(interval); // Cleanup 
         }, [text]);
 
         return (
             <Typography variant="body1" className="animatedText" component={'span'} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {visibleText.split('').map((char, index) => (
-                    <span key={index}>{char}</span>
-                ))}
+                {visibleText}
             </Typography>
         );
 };

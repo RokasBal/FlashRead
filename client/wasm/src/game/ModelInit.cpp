@@ -13,23 +13,34 @@
 #include "../meshes/table.h"
 #include "../meshes/globe.h"
 
+// DO NOT CHANGE THE ORDER OF MESHES, it will break saved scenes
+#define XFUNC(func) \
+    func(candle); \
+    func(chair); \
+    func(closedBook); \
+    func(emptyBookshelf); \
+    func(fullBookshelf); \
+    func(lectern); \
+    func(openBook); \
+    func(pencil); \
+    func(table); \
+    func(globe);
+
 void LoadModels(SceneBuilder& sceneBuilder) {
     #define LOAD_MESH(name) do { \
         Mesh mesh = MeshRegistry::Create(#name); \
-        mesh->Load(name##_vertexCount, name##_vertices, name##_materialCount, name##_materials); \
+        mesh->Load(name##_vertices, name##_materials, name##_indices); \
         sceneBuilder.AddModel(#name); \
     } while(0)
-    
+
     MeshRegistry::Clear();
-    // DO NOT CHANGE THE ORDER OF MESHES, it will break saved scenes
-    LOAD_MESH(candle);
-    LOAD_MESH(chair);
-    LOAD_MESH(closedBook);
-    LOAD_MESH(emptyBookshelf);
-    LOAD_MESH(fullBookshelf);
-    LOAD_MESH(lectern);
-    LOAD_MESH(openBook);
-    LOAD_MESH(pencil);
-    LOAD_MESH(table);
-    LOAD_MESH(globe);
+	XFUNC(LOAD_MESH)
+}
+void ReloadModels(bool showWireframe) {
+	#define RELOAD_MESH(name) do { \
+        Mesh mesh = MeshRegistry::Get(#name); \
+        mesh->Load(name##_vertices, name##_materials, name##_indices, true, showWireframe); \
+    } while(0)
+
+	XFUNC(RELOAD_MESH)
 }

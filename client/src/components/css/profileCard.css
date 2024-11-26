@@ -30,6 +30,16 @@
     overflow: hidden;
 }
 
+.profileImageUneditable {
+    display: flex;
+    height: 100%;
+    background-color: var(--borderColor);
+    border-radius: 50%;
+    aspect-ratio: 1/1;
+    position: relative;
+    overflow: hidden;    
+}
+
 .profileImageButton:hover .overlay {
     opacity: 1;
 }

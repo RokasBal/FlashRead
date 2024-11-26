@@ -30,6 +30,7 @@ namespace server.src.Task3 {
         }
         public string GetDoorCode(int taskVersion) {
             string[] codes = {"123", "1221", "333", "1112", "1233", "3321", "1321", "2312", "1231", "2121"};
+            System.Console.WriteLine($"Secret door code: {codes[Math.Abs(taskVersion) % codes.Length]}");
             return codes[Math.Abs(taskVersion) % codes.Length];
         }
         public int GenerateTaskVersion() {

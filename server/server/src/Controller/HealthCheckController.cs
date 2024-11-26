@@ -36,5 +36,11 @@ namespace server.Controller {
             var connectedUsers = _sessionManager.GetConnectedUsers();
             return Ok(connectedUsers);
         }
+
+        [HttpGet("Session/GetConnectedUsernames")]
+        public async Task<IActionResult> GetConnectedUsernames() {
+            var connectedUsernames = await _sessionManager.GetConnectedUsernames();
+            return Ok(connectedUsernames);
+        }
     }
 }

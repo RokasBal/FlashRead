@@ -28,8 +28,8 @@ const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
         justifyContent: 'center',
         transition: 'transform 0.4s ease',
         outline: 'none',
-        borderRadius: '12px',
-        border: '3px solid var(--borderColor)',
+        borderRadius: '0.6vw',
+        border: '0.2vw solid var(--borderColor)',
         backgroundColor: 'transparent',
         color: 'var(--textColor)',
         transform: isHovered ? 'scale(0.95)' : 'scale(1)',
@@ -94,7 +94,7 @@ const Dropdown: React.FC<DropdownProps> = ({ onSelect }) => {
                 onMouseDown={() => setIsClicked(true)}
                 onMouseUp={() => setIsClicked(false)}
             >
-                &#8801;
+                <i className="fas fa-bars"></i>
             </button>
             <ul style={dropdownMenuStyle}>
                 {['Profile', 'Settings', isAuthenticated ? 'Logout' : 'Login'].map((option, index) => (

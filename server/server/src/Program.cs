@@ -37,7 +37,6 @@ namespace server
                 try
                 {
                     var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionStringBuilder.BuildConnectionString("./secrets/config.json"));
-                    dataSourceBuilder.MapEnum<Task1.Theme>();
                     dataSourceBuilder.MapEnum<Task2Data.Theme>();
                     var dataSource = dataSourceBuilder.Build();
                     builder.Services.AddDbContext<FlashDbContext>(options => options.UseNpgsql(dataSource));
@@ -106,6 +105,8 @@ namespace server
             app.UseMiddleware<ExceptionMiddleware>();
             
             app.MapControllers();
+
+            app.MapFallbackToFile("index.html");
 
             app.UseAuthentication();
             app.UseAuthorization();

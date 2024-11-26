@@ -1,49 +1,49 @@
 #include <wgleng/core/EntryPoint.h>
-#include <wgleng/vendor/imgui/imgui.h>
 #include <wgleng/io/Input.h>
 #include <wgleng/rendering/Debug.h>
+#include <wgleng/vendor/imgui/imgui.h>
 
 #include "game/GameScene.h"
+#include "game/ModelInit.h"
+#include "game/SettingsScreen.h"
+#include "wgleng/util/Metrics.h"
 
 WGLENG_INIT_ENGINE
 
+SettingsScreen* settingsScreen;
+
 void onInit(Context* ctx) {
+	settingsScreen = new SettingsScreen();
 	ctx->scene = std::make_shared<GameScene>();
 }
 void onDeinit(Context* ctx) {
 	ctx->scene.reset();
+	delete settingsScreen;
+	settingsScreen = nullptr;
 }
 void onTick(Context* ctx, TimeDuration dt) {
 	// debug input
-	if (Input::IsHeld(SDL_SCANCODE_LCTRL) && Input::JustPressed(SDL_SCANCODE_O)) {
-		if (DebugDraw::IsEnabled()) DebugDraw::Disable();
-		else DebugDraw::Enable();
-	}
-	if (Input::IsHeld(SDL_SCANCODE_LCTRL) && Input::JustPressed(SDL_SCANCODE_P)) ctx->renderer.ReloadShaders();
-
-	// get frametime
-	static bool showFrametime = false;
-	static float frametimeAccum = 0;
-	static float frametime = 0;
-	static TimePoint lastFrametimeUpdate = TimePoint();
-	TimePoint now;
-	static int frames = 0;
-	if (Input::IsHeld(SDL_SCANCODE_LCTRL) && Input::JustPressed(SDL_SCANCODE_U)) showFrametime = !showFrametime;
-	if (showFrametime) {
-		if (now - lastFrametimeUpdate > 250ms) {
-			frametime = frametimeAccum / static_cast<float>(frames);
-			frametimeAccum = 0;
-			frames = 0;
-			lastFrametimeUpdate = now;
+	if (Input::IsHeld(SDL_SCANCODE_LCTRL)) {
+		if (Input::JustPressed(SDL_SCANCODE_P)) {
+			ctx->renderer.ReloadShaders();
 		}
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{0, 0, 0, 0.2});
-		if (ImGui::Begin("Frametime", &showFrametime, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize)) {
-			ImGui::Text("Frametime: %.3f ms", frametime);
+		if (Input::JustPressed(SDL_SCANCODE_O)) {
+			if (DebugDraw::IsEnabled()) DebugDraw::Disable();
+			else DebugDraw::Enable();
 		}
-		ImGui::End();
-		ImGui::PopStyleColor();
-		frametimeAccum += dt.fMilli();
-		frames++;
+		if (Input::JustPressed(SDL_SCANCODE_I)) {
+			const bool show = !ctx->renderer.IsWireframeShown();
+			ctx->renderer.ShowWireframe(show);
+			ReloadModels(show);
+		}
+		if (Input::JustPressed(SDL_SCANCODE_U)) {
+			if (Metrics::IsEnabled(Metric::ALL_METRICS)) Metrics::Disable(Metric::ALL_METRICS);
+			else Metrics::Enable(Metric::ALL_METRICS);
+		}
+	} else {
+		if (Input::JustPressed(SDL_SCANCODE_P)) {
+			settingsScreen->SetShown(!settingsScreen->IsShown());
+		}
 	}
+	settingsScreen->Draw(&ctx->renderer);
 }
