@@ -16,6 +16,7 @@ const ChatComponent: React.FC = () => {
     const [chatText, setChatText] = useState<string>('');
     const [activeUsers, setActiveUsers] = useState<string[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
+    const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
 
     const fetchMessages = async () => {
         try {
@@ -38,11 +39,17 @@ const ChatComponent: React.FC = () => {
             setMessages((prevMessages) => [...prevMessages, message]);
         };
         
+        const intervalId = setInterval(fetchMessages, 10000);
+
         return () => {
             socket.close();
+            clearInterval(intervalId);
         };
 
     }, []);
+
+
+
 
     const byteArrayToBase64 = (byteArray: string) => {
         return `data:image/jpeg;base64,${byteArray}`;
@@ -94,56 +101,65 @@ const ChatComponent: React.FC = () => {
     };
 
     return (
-        <div className="chat">
-            <div className="activeUsers">
-                <div className="users_header">
-                    <h1>Active Users</h1>
-                </div>
-                <div className="users_list">
-                    <div>
-                        <ul className='active_list'>
-                            {activeUsers.map((user, index) => (
-                                <li key={index} className='listActive'>
-                                    <span className='activeUser'>{user}</span>
-                                    <div className='circle'>.</div>
-                                </li>
-                            ))}
-                        </ul>
+        <div>
+            <button className='chatButton' onClick={() => setIsPopupVisible(!isPopupVisible)}>
+                <i className="fas fa-comments"></i>
+            </button>
+            {isPopupVisible && (
+                <div className="chat-popup">
+                    <div className="chat">
+                        <div className="activeUsers">
+                            <div className="users_header">
+                                <h1>Active Users</h1>
+                            </div>
+                            <div className="users_list">
+                                <div>
+                                    <ul className='active_list'>
+                                        {activeUsers.map((user, index) => (
+                                            <li key={index} className='listActive'>
+                                                <span className='activeUser'>{user}</span>
+                                                <div className='circle'>.</div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="chatBox">
+                            <div className="chat_header">
+                                <h1>Chat</h1>
+                            </div>
+                            <div className="chat_messages" id="chatMessages">
+                                <ul className='message_list'>
+                                    {messages.slice().reverse().map((message, index) => (
+                                        <li key={index} className="message">
+                                            <div className="message_header">
+                                                <img className='chat_image' src={byteArrayToBase64(message.profilePic)} />
+                                                <span className='message_user'>{message.username}</span>
+                                                <span className="message_date">{formatDate(message.writtenAt)}</span>
+                                            </div>
+                                            <div className="message_body">
+                                                <p>{message.chatText}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="chat_input">
+                                <form onSubmit={handleSubmit} className='chat_input_obj'>
+                                    <input
+                                        type="text"
+                                        value={chatText}
+                                        onChange={(e) => setChatText(e.target.value)}
+                                        placeholder="Type your message here..."
+                                    />
+                                    <button className="sendButton" type="submit">Send</button>
+                                </form>                    
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="chatBox">
-                <div className="chat_header">
-                    <h1>Chat</h1>
-                </div>
-                <div className="chat_messages" id="chatMessages">
-                    <ul className='message_list'>
-                        {messages.slice().reverse().map((message, index) => (
-                            <li key={index} className="message">
-                                <div className="message_header">
-                                    <img className='chat_image' src={byteArrayToBase64(message.profilePic)} />
-                                    <span className='message_user'>{message.username}</span>
-                                    <span className="message_date">{formatDate(message.writtenAt)}</span>
-                                </div>
-                                <div className="message_body">
-                                    <p>{message.chatText}</p>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div className="chat_input">
-                    <form onSubmit={handleSubmit} className='chat_input_obj'>
-                        <input
-                            type="text"
-                            value={chatText}
-                            onChange={(e) => setChatText(e.target.value)}
-                            placeholder="Type your message here..."
-                        />
-                        <button className="sendButton" type="submit">Send</button>
-                    </form>                    
-                </div>
-            </div>
+            )}
         </div>
     )
 };
