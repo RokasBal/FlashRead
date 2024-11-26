@@ -105,6 +105,13 @@ const Mode3Page: React.FC = () => {
             return [];
         }
     };
+    const saveTimeTakenAsync = async (timeTaken: number) => {
+        try {
+            await axios.post('/api/SaveTask3TimeTaken?seconds=' + timeTaken);
+        } catch (err) {
+            console.error('Error posting task3 saveTimeTaken:', err);
+        }
+    };
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
@@ -132,6 +139,11 @@ const Mode3Page: React.FC = () => {
                     moduleRef.current?.setBookHints(hintList);
                 });
             };
+            // eslint-disable-next-line
+            (window as any).winGame = (timeTaken: number) => {
+                saveTimeTakenAsync(Math.floor(timeTaken));
+            };
+
             // try-catch is a must because emscripten_set_main_loop() throws to exit the function
             try {
                 moduleRef.current?.start();

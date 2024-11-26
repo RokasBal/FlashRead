@@ -37,7 +37,8 @@ const ProfilePage: React.FC = () => {
 
     const taskIdToGameMode: { [key: number]: string } = {
         1: "Q&A",
-        2: "Catch the Word"
+        2: "Catch the Word",
+        3: "BookScape"
     };
 
     const fetchGameHistory = async () => {
