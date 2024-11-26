@@ -13,7 +13,6 @@ interface users {
 
 const search: React.FC = () => {
     const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState('');
     const [users, setUsers] = useState<users[]>([]);
 
     useEffect(() => {
@@ -76,9 +75,8 @@ const search: React.FC = () => {
                             }}
                         />
                     )}
-                    onChange={(event, value) => {
+                    onChange={(_, value) => {
                         if (value) {
-                            setSearchQuery(value.name);
                             navigate(`/user/${value.name}`);
                         }
                     }}

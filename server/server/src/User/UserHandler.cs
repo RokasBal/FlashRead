@@ -15,8 +15,14 @@ namespace server.UserNamespace {
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
             if (existingUser != null)
             {
-                return false;
+                throw new UserAlreadyExistsException("A user with this email already exists.");
             }
+
+            var existingUsername = await _context.Users.FirstOrDefaultAsync(u => u.Name == user.Name);
+            if (existingUsername != null) {
+                throw new UserAlreadyExistsException("A user with this username already exists.");
+            }
+
             var dbUser = convertUserToDbUser(user);
             dbUser.Password = HashPassword(dbUser.Password);
             dbUser.ProfilePic = null;
