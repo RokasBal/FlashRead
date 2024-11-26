@@ -15,9 +15,11 @@ GameScene::GameScene()
 
 	LoadModels(m_sceneBuilder);
 
-	// #ifndef SHADER_HOT_RELOAD
+#ifdef SHADER_HOT_RELOAD
+	m_sceneBuilder.Load(firstmap_stateCount, firstmap_states, true);
+#else
 	m_sceneBuilder.Load(firstmap_stateCount, firstmap_states);
-	// #endif
+#endif
 
 	mainScript = new MainScript(*this);
 
@@ -48,6 +50,7 @@ void GameScene::Update(TimeDuration dt) {
 	}
 
 	// scene builder
+#ifdef SHADER_HOT_RELOAD
 	m_sceneBuilder.Update();
 	if (Input::JustPressed(SDL_SCANCODE_L)) {
 		m_sceneBuilder.Play();
@@ -56,22 +59,7 @@ void GameScene::Update(TimeDuration dt) {
 			SetCamera(player.GetCamera());
 		}
 	}
-
-	// for testing purposes create lots of entities
-	if (Input::JustPressed(SDL_SCANCODE_T)) {
-		auto clshape = m_physicsWorld.GetBoxCollider({ 1, 1, 1 });
-		const Mesh meshes[] = {
-			MeshRegistry::Get("candle"),
-			MeshRegistry::Get("globe"),
-		};
-		for (int i = 0; i < 50; i++) {
-			auto entity = registry.create();
-			auto rb = m_physicsWorld.CreateRigidBody(entity, clshape, 100.f,
-				player.GetCamera()->position+glm::vec3{0, 100, 0}, {});
-			registry.emplace<RigidBodyComponent>(entity, rb);
-			registry.emplace<MeshComponent>(entity, meshes[i % 2]);
-		}
-	}
+#endif
 
 	// player movement
 	player.fly = !m_sceneBuilder.IsPlaying();

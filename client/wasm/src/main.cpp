@@ -1,19 +1,25 @@
 #include <wgleng/core/EntryPoint.h>
-#include <wgleng/vendor/imgui/imgui.h>
 #include <wgleng/io/Input.h>
 #include <wgleng/rendering/Debug.h>
+#include <wgleng/vendor/imgui/imgui.h>
 
 #include "game/GameScene.h"
 #include "game/ModelInit.h"
+#include "game/SettingsScreen.h"
 #include "wgleng/util/Metrics.h"
 
 WGLENG_INIT_ENGINE
 
+SettingsScreen* settingsScreen;
+
 void onInit(Context* ctx) {
+	settingsScreen = new SettingsScreen();
 	ctx->scene = std::make_shared<GameScene>();
 }
 void onDeinit(Context* ctx) {
 	ctx->scene.reset();
+	delete settingsScreen;
+	settingsScreen = nullptr;
 }
 void onTick(Context* ctx, TimeDuration dt) {
 	// debug input
@@ -34,6 +40,10 @@ void onTick(Context* ctx, TimeDuration dt) {
 			if (Metrics::IsEnabled(Metric::ALL_METRICS)) Metrics::Disable(Metric::ALL_METRICS);
 			else Metrics::Enable(Metric::ALL_METRICS);
 		}
-
+	} else {
+		if (Input::JustPressed(SDL_SCANCODE_P)) {
+			settingsScreen->SetShown(!settingsScreen->IsShown());
+		}
 	}
+	settingsScreen->Draw(&ctx->renderer);
 }
