@@ -13,11 +13,14 @@ import SettingsPage from './pages/settings/settingsPage';
 import ChangePasswordPage from './pages/settings/changePassword';
 import DeleteAccountPage from './pages/settings/deleteAccount';
 import ProfilePage from './pages/profile/profilePage';
+import SearchPage from './pages/userSearch/search';
 import axios from './components/axiosWrapper';
 import './boards/css/variables.css';
 import { AuthProvider } from './context/AuthContext';
 import { VisualSettingsProvider } from './context/VisualSettingsContext';
 import { useEffect } from 'react';
+import React from 'react';
+
 const App: React.FC = () => {
     const sendUpdateRequest = async () => {
       try {
@@ -56,6 +59,7 @@ const App: React.FC = () => {
               <Route path="/about" element={<AboutPage />}/>
               <Route path="/contact" element={<ContactPage />}/>
               <Route path="/profile" element={<ProfilePage />}/>
+              <Route path="/search" element={<SearchPage/>}/>
           </Routes>
           </BrowserRouter>
         </VisualSettingsProvider>

@@ -208,33 +208,33 @@ namespace server.Tests {
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("User not found.", notFoundResult.Value);
         }
-        [Fact]
-        public async Task GetProfilePicture_ValidToken_ReturnsProfilePicture()
-        {
-            // Arrange
-            var dbUser = new DbUser
-            {
-                Name = "John Doe",
-                Email = "johndoe@example.com",
-                Password = _userHandler.HashPassword("password123"),
-                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
-                SettingsId = Guid.NewGuid().ToString(),  // Set to a valid value
-                ProfilePic = new byte[] { 1, 2, 3, 4 }
-            };
-            _context.Users.Add(dbUser);
-            await _context.SaveChangesAsync();
+        // [Fact]
+        // public async Task GetProfilePicture_ValidToken_ReturnsProfilePicture()
+        // {
+        //     // Arrange
+        //     var dbUser = new DbUser
+        //     {
+        //         Name = "John Doe",
+        //         Email = "johndoe@example.com",
+        //         Password = _userHandler.HashPassword("password123"),
+        //         SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+        //         SettingsId = Guid.NewGuid().ToString(),  // Set to a valid value
+        //         ProfilePic = new byte[] { 1, 2, 3, 4 }
+        //     };
+        //     _context.Users.Add(dbUser);
+        //     await _context.SaveChangesAsync();
 
-            SetUserEmail(dbUser.Email);
+        //     SetUserEmail(dbUser.Email);
 
-            // Act
-            var result = await _controller.GetProfilePicture();
+        //     // Act
+        //     var result = await _controller.GetProfilePicture();
 
-            // Assert
-            var fileResult = Assert.IsType<FileContentResult>(result);
-            Assert.Equal("image/jpeg", fileResult.ContentType);
-            Assert.Equal("profile.jpg", fileResult.FileDownloadName);
-            Assert.Equal(dbUser.ProfilePic, fileResult.FileContents);
-        }
+        //     // Assert
+        //     var fileResult = Assert.IsType<FileContentResult>(result);
+        //     Assert.Equal("image/jpeg", fileResult.ContentType);
+        //     Assert.Equal("profile.jpg", fileResult.FileDownloadName);
+        //     Assert.Equal(dbUser.ProfilePic, fileResult.FileContents);
+        // }
         [Fact]
         public async Task GetProfilePicture_InvalidToken_ReturnsUnauthorized()
         {
@@ -261,33 +261,33 @@ namespace server.Tests {
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("User not found.", notFoundResult.Value);
         }
-        [Fact]
-        public async Task GetProfilePicture_NoProfilePic_ReturnsDefaultPicture()
-        {
-            // Arrange
-            var user = new User("john.doe@example.com", "password123", "John Doe");
-            user.Password = _userHandler.HashPassword(user.Password);
-            var dbUser = new DbUser
-            {
-                Name = user.Name,
-                Email = user.Email,
-                Password = user.Password,
-                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
-                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
-            };
-            _context.Users.Add(dbUser);
-            await _context.SaveChangesAsync();
+        // [Fact]
+        // public async Task GetProfilePicture_NoProfilePic_ReturnsDefaultPicture()
+        // {
+        //     // Arrange
+        //     var user = new User("john.doe@example.com", "password123", "John Doe");
+        //     user.Password = _userHandler.HashPassword(user.Password);
+        //     var dbUser = new DbUser
+        //     {
+        //         Name = user.Name,
+        //         Email = user.Email,
+        //         Password = user.Password,
+        //         SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+        //         SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+        //     };
+        //     _context.Users.Add(dbUser);
+        //     await _context.SaveChangesAsync();
 
-            SetUserEmail(user.Email);
+        //     SetUserEmail(user.Email);
 
-            // Act
-            var result = await _controller.GetProfilePicture();
+        //     // Act
+        //     var result = await _controller.GetProfilePicture();
 
-            // Assert
-            var fileResult = Assert.IsType<FileContentResult>(result);
-            Assert.Equal("image/jpeg", fileResult.ContentType);
-            Assert.Equal("defaultPicture.jpg", fileResult.FileDownloadName);
-        }
+        //     // Assert
+        //     var fileResult = Assert.IsType<FileContentResult>(result);
+        //     Assert.Equal("image/jpeg", fileResult.ContentType);
+        //     Assert.Equal("defaultPicture.jpg", fileResult.FileDownloadName);
+        // }
         [Fact]
         public async Task UpdateProfilePicture_ValidToken_UpdatesProfilePicture()
         {

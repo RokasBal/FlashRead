@@ -3,7 +3,9 @@ import Dropdown from '../../components/dropdown';
 import CustomButton from '../../components/buttons/customButton';
 import '../../boards/css/main.board.css';
 import '../../boards/css/dropdown.css';
+import '../../boards/css/chat.css';
 import { useAuth } from '../../context/AuthContext';
+import ChatComponent from "../../components/chat/chatComponet";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -16,6 +18,13 @@ const HomePage: React.FC = () => {
 
     return (
         <div className="MainBoard_main">
+            <div className="chat_content"> 
+                <div className="chat_container">
+                    <ChatComponent />
+                </div>
+            </div>
+
+
 
             <div className="MainBoard_header" id="headerDiv">
                 <div className="headerLinks">
