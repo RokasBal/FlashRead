@@ -11,7 +11,7 @@ interface users {
     email: string;
 }
 
-const search: React.FC = () => {
+const Search: React.FC = () => {
     const navigate = useNavigate();
     const [users, setUsers] = useState<users[]>([]);
 
@@ -102,4 +102,4 @@ const search: React.FC = () => {
     );
 }
 
-export default search;
+export default Search;
