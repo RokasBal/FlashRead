@@ -24,8 +24,7 @@ namespace server.Controller {
             _userHandler = userHandler;
         }
         [HttpPost("GetGlobalChats")]
-        public async Task<IActionResult> GetGlobalChats([FromBody] LastChatIndex lastChatIndex) {
-            int index = lastChatIndex.Index;
+        public async Task<IActionResult> GetGlobalChats([FromQuery] int index) {
             int lastIndexInDb = await _context.GlobalChats.OrderByDescending(c => c.ChatIndex).Select(c => c.ChatIndex).FirstOrDefaultAsync();
             if (index >= lastIndexInDb) {
                 return NoContent();
@@ -90,7 +89,4 @@ namespace server.Controller {
     {
         public List<Chat> Chats { get; init; } = new List<Chat>();
     }
-    public record LastChatIndex(
-        int Index
-    );
 }
