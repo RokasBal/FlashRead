@@ -106,7 +106,7 @@ const UserPage: React.FC = () => {
                 <div className="content">
                     <div className="profileDetailsContainer">
                         <div className="profileDetails">
-                            <ProfileCard imageSrc={profilePictureUrl} name={username} onEditClick={()=>{}}/>
+                            <ProfileCard imageSrc={profilePictureUrl} name={username} onEditClick={()=>{}} editable={false} />
                         </div>    
                         <div className="restOfProfile">
                             <div className="accountInfoContainer">
