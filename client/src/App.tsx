@@ -61,7 +61,7 @@ const App: React.FC = () => {
               <Route path="/contact" element={<ContactPage />}/>
               <Route path="/profile" element={<ProfilePage />}/>
               <Route path="/search" element={<SearchPage/>}/>
-              <Route path="/user/:email" element={<UserPage/>}/>
+              <Route path="/user/:username" element={<UserPage/>}/>
           </Routes>
           </BrowserRouter>
         </VisualSettingsProvider>

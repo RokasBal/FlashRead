@@ -79,7 +79,7 @@ const search: React.FC = () => {
                     onChange={(event, value) => {
                         if (value) {
                             setSearchQuery(value.name);
-                            navigate(`/user/${value.email}`);
+                            navigate(`/user/${value.name}`);
                         }
                     }}
                     filterOptions={(options, { inputValue }) => 
