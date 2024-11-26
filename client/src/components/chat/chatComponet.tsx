@@ -1,14 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import axiosWrapper from '../axiosWrapper';
 import "../../boards/css/chat.css";
 
 // Message Interface
 interface Message {
+    chatIndex: number;
     username: string;
     chatText: string;
     author: string;
     writtenAt: string;
     profilePic: string;
+
 }
 
 // ChatComponent
@@ -17,13 +19,15 @@ const ChatComponent: React.FC = () => {
     const [activeUsers, setActiveUsers] = useState<string[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+    const [chatIndex, setChatIndex] = useState<number>(0);
 
     const fetchMessages = async () => {
         try {
-            const response = await axiosWrapper.get('/api/GetGlobalChats');
+            const response = await axiosWrapper.post('/api/GetGlobalChats', chatIndex);
             const data = response.data;
             console.log('Fetched messages:', data.chats); // Log the fetched data
             setMessages(data.chats);
+            setChatIndex(data.chatIndex);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }

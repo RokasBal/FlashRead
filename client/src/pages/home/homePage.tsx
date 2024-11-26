@@ -39,20 +39,28 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                <Dropdown onSelect={function (item: string): void {
-                if (item === "Login") {
-                    navigate("/login");
-                }
-                else if (item === "Logout") {
-                    handleLogout();
-                }
-                else if (item === "Settings") {
-                    navigate("/settings");
-                } 
-                else if (item === "Profile") {
-                    navigate("/profile");
-                }
-                } } />
+                
+
+                <div className="header_button_container">
+                    <button className="search_button" onClick={() => navigate("/search")}>
+                        <i className="fas fa-search"></i>
+                    </button>
+                    <Dropdown onSelect={function (item: string): void {
+                    if (item === "Login") {
+                        navigate("/login");
+                    }
+                    else if (item === "Logout") {
+                        handleLogout();
+                    }
+                    else if (item === "Settings") {
+                        navigate("/settings");
+                    } 
+                    else if (item === "Profile") {
+                        navigate("/profile");
+                    }
+                    } } />
+                </div>
+
             </div>
 
             <div className="MainBoard_content" id="contentDiv"> 
@@ -88,20 +96,6 @@ const HomePage: React.FC = () => {
 
         </div>    
 
-        // <div className="flex flex-col h-screen bg-gray-300">
-        //     <h1 className="
-        //         absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2
-        //         text-9xl"
-        //     >FlashRead</h1>
-        //     <div className="m-auto space-x-16 flex items-center">
-        //         <ModeButton label="Mode 1" onClick={() => navigate('/mode1')} />
-        //         <ModeButton label="Mode 2" onClick={() => navigate('/mode2')} />
-        //         <ModeButton label="Mode 3" onClick={() => navigate('/mode3')} />
-        //     </div>
-        //     <div className="absolute top-0 right-0">
-        //         <OptionsButton />
-        //     </div>
-        // </div>
     );
 };
 

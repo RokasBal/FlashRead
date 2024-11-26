@@ -9,6 +9,29 @@
   right: 0px;
   min-height: 160px;
 }
+
+.header_button_container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+
+.search_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--textColor);
+  font-size: 1em;
+  height: 100%;
+  aspect-ratio: 1/1;
+  padding: 0.5em;
+  border-radius: 0.6vw;
+  border: 0.2vw solid var(--borderColor);
+  cursor: pointer;
+}
+
 .hidden {
   display: none;
 }
