@@ -68,7 +68,7 @@ const ChatComponent: React.FC = () => {
 
     const fetchActiveUsers = async () => {
         try {
-            const response = await axiosWrapper.get('/api/Session/GetConnectedUsers');
+            const response = await axiosWrapper.get('/api/Session/GetConnectedUsernames');
             const data: string[] = response.data;
             console.log('Fetched active users:', data);
             if (data) {
