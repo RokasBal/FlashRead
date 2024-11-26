@@ -35,6 +35,7 @@ namespace server.Controller {
                                from user in userGroup.DefaultIfEmpty()
                                orderby chat.ChatIndex descending
                                select new {
+                                    chat.ChatIndex,
                                     chat.ChatText,
                                     chat.Author,
                                     chat.WrittenAt,
@@ -42,7 +43,7 @@ namespace server.Controller {
                                     ProfilePic = user != null ? user.ProfilePic : Utility.Utility.getDefaultProfilePic().Result
                                }).Take(100).ToListAsync();
 
-            var updatedChats = chats.Select(chat => new Chat(chat.Usename, chat.ChatText, chat.Author, chat.WrittenAt, chat.ProfilePic)).ToList();
+            var updatedChats = chats.Select(chat => new Chat(chat.ChatIndex, chat.Usename, chat.ChatText, chat.Author, chat.WrittenAt, chat.ProfilePic)).ToList();
             return Ok(new ChatList { Chats = updatedChats });
         }
         [Authorize]
@@ -78,6 +79,7 @@ namespace server.Controller {
         string ChatText
     );
     public record Chat(
+        int ChatIndex,
         string Username,
         string ChatText,
         string Author,
