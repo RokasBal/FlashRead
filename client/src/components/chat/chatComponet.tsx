@@ -36,7 +36,7 @@ const ChatComponent: React.FC = () => {
     useEffect(() => {
         fetchMessages();
         
-        const socket = new WebSocket('ws://localhost:5173');
+        const socket = new WebSocket('wss://api.flashread.games');
 
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);

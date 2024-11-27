@@ -6,7 +6,7 @@ const getTokenFromCookie = () => {
 };
 
 const axiosWrapper = axios.create({
-    baseURL: 'http://209.38.183.24:8080',
+    baseURL: 'https://api.flashread.games',
     timeout: 10000,
     withCredentials: true,
     headers: {

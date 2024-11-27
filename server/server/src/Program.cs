@@ -25,7 +25,7 @@ namespace server
                 options.AddPolicy(
                     name: MyAllowSpecificOrigins, 
                     policy  => {
-                        policy.WithOrigins("http://157.245.20.69")
+                        policy.WithOrigins("https://flashread.games")
                               .AllowAnyMethod()
                               .AllowAnyHeader()
                               .AllowCredentials();
@@ -37,7 +37,7 @@ namespace server
             try 
             {
                 Console.WriteLine("Attempting database connection...");
-                Console.WriteLine("EEEEE...");
+                Console.WriteLine("AAA...");
                 var connectionString = ConnectionStringBuilder.BuildConnectionString();
                 Console.WriteLine($"Connection String: {connectionString}");
 
@@ -100,12 +100,12 @@ namespace server
 
             // Middleware Pipeline
             // app.UseStaticFiles();
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            // app.UseHsts();
+            // app.UseSwagger();
+            // app.UseSwaggerUI();
+            app.UseHsts();
             app.UseMiddleware<ExceptionMiddleware>();
 
-            // app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseCors(MyAllowSpecificOrigins);
             
             // Authentication & Authorization Middleware
