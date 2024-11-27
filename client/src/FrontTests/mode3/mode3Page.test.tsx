@@ -4,6 +4,7 @@ import Mode3Page from '../../pages/mode3/mode3Page';
 import { vi } from 'vitest';
 import { loadWasmModule } from '../../pages/mode3/wasmLoader';
 import axios from '../../components/axiosWrapper';
+import { checkDoorCodeAsync, getBookHintsAsync, saveTimeTakenAsync } from '../../pages/mode3/mode3Page';
 
 vi.mock('../../pages/mode3/wasmLoader', () => ({
     loadWasmModule: vi.fn().mockResolvedValue({
@@ -52,6 +53,29 @@ describe('Mode3Page', () => {
         });
     });
 
+    test('checkDoorCodeAsync function', async () => {
+        const taskRef = { current: 1 };
+        const code = '1234';
+        const mockResponse = { data: { data: { isCorrect: true } } };
+        axios.post.mockResolvedValue(mockResponse);
+    
+        let result = await checkDoorCodeAsync(taskRef, code);
+        expect(axios.post).toHaveBeenCalledWith('/api/CheckSecretDoorCode', {
+            taskVersion: taskRef.current,
+            data: { code: code },
+        });
+        expect(result).toBe(true);
+    });
+
+    test('getBookHintsAsync function', async () => {
+        const taskRef = { current: 1 };
+        const mockResponse = { data: { data: { hints: ['hint1', 'hint2'] } } };
+        axios.post.mockResolvedValue(mockResponse);
+    
+        let result = await getBookHintsAsync(taskRef, 2);
+        expect(result).toEqual(['hint1', 'hint2']);
+    });
+
     test('saveTimeTakenAsync function', async () => {
         axios.post.mockResolvedValue({});
 
@@ -61,9 +85,18 @@ describe('Mode3Page', () => {
             </MemoryRouter>
         );
 
-        const saveTimeTaken = (window as any).winGame;
-        await saveTimeTaken(120);
+        await saveTimeTakenAsync(120);
         expect(axios.post).toHaveBeenCalledWith('/api/SaveTask3TimeTaken?seconds=120');
+    });
+
+    test('checkDoorCode function', async () => {
+        (window as any).checkDoorCode('1234');
+    });
+    test('getBookHints function', async () => {
+        (window as any).getBookHints(3);
+    });
+    test('winGame function', async () => {
+        (window as any).winGame(42);
     });
 
     test('useOnScreen hook', async () => {

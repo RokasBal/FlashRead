@@ -3,11 +3,12 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ProfilePage from '../pages/profile/profilePage';
 import HomePage from '../pages/home/homePage';
 import { vi } from 'vitest';
-import axios from '../components/axiosWrapper';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import axiosMock from 'axios-mock-adapter';
+import MockAdapter from 'axios-mock-adapter';
+import { fetchGameHistory } from '../pages/profile/profilePage';
 
-const mockAxios = new axiosMock(axios);
+const mockAxios = new MockAdapter(axios);
 
 const mockAuthContext = {
     isAuthenticated: true,
@@ -76,4 +77,19 @@ describe('ProfilePage', () => {
         });
     });
 
+    test('fetchGameHistory function', async () => {
+        document.cookie = 'authToken=token';
+        const mockResponse = {data: [
+            {taskId: 1, score: 100, timePlayed: '2022-01-01T00:00:00Z'},
+            {taskId: 2, score: 200, timePlayed: '2022-01-02T00:00:00Z'},
+        ]};
+        let result;
+        await fetchGameHistory((data) => {result = data}, (data) => {}, (data) => {}, (data) => {
+            return mockResponse;
+        });
+        expect(result).toEqual([
+            {gamemode: "Q&A", score: 100, date: "2022-01-01, 02:00"},
+            {gamemode: "Catch the Word", score: 200, date: "2022-01-02, 02:00"}
+        ]);
+    });
 });
