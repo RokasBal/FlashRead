@@ -6,7 +6,8 @@ import { vi } from 'vitest';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import MockAdapter from 'axios-mock-adapter';
-import { fetchGameHistory } from '../pages/profile/profilePage';
+import { fetchGameHistory, handleFileChange, handleUpload } from '../pages/profile/profilePage';
+import { ChangeEvent } from 'react';
 
 const mockAxios = new MockAdapter(axios);
 
@@ -42,6 +43,10 @@ describe('ProfilePage', () => {
         await waitFor(() => {
             expect(screen.getByText('Profile')).toBeInTheDocument();
         });
+    });
+
+    test('renders popup', async () => {
+        renderWithRouter(<ProfilePage popupVisible={true} defpreviewUrl='wawda' />);
     });
 
     test('renders Account Statistics section', async () => {
@@ -91,5 +96,66 @@ describe('ProfilePage', () => {
             {gamemode: "Q&A", score: 100, date: "2022-01-01, 02:00"},
             {gamemode: "Catch the Word", score: 200, date: "2022-01-02, 02:00"}
         ]);
+    });
+
+    test('handleFileChange function good', async () => {
+        const mockEvent = {
+            target: {
+                files: [
+                    {
+                        name: 'test.jpg',
+                        type: 'image/jpeg',
+                        size: 1000,
+                        slice: () => new Blob()
+                    }
+                ]
+            }
+        } as unknown;
+        await handleFileChange(mockEvent as ChangeEvent<HTMLInputElement>, (data) => {}, (data) => {});
+    });
+    test('handleFileChange function bad 1', async () => {
+        const mockEvent = {
+            target: {
+                files: [
+                    {
+                        name: 'test.jpg',
+                        type: 'image/jpeg',
+                        size: 9999999999999999,
+                    }
+                ]
+            }
+        } as unknown;
+        await handleFileChange(mockEvent as ChangeEvent<HTMLInputElement>, (data) => {}, (data) => {});
+    });
+    test('handleFileChange function bad 2', async () => {
+        const mockEvent = {
+            target: {
+                files: [
+                    {
+                        name: 'test.jpg',
+                        type: 'imagedddd/jpeg',
+                    }
+                ]
+            }
+        } as unknown;
+        await handleFileChange(mockEvent as ChangeEvent<HTMLInputElement>, (data) => {}, (data) => {});
+    });
+    test('handleUpload function good', async () => {
+        document.cookie = 'authToken=token';
+        await handleUpload(new File([], "olga"), (data) => {}, (data) => {}, (data, form) => {
+            return {status: 200};
+        });
+    });
+    test('handleUpload function bad token', async () => {
+        document.cookie = 'aaa';
+        await handleUpload(new File([], "olga"), (data) => {}, (data) => {}, (data, form) => {
+            return {status: 200};
+        });
+    });
+    test('handleUpload function bad response', async () => {
+        document.cookie = 'authToken=token';
+        await handleUpload(new File([], "olga"), (data) => {}, (data) => {}, (data, form) => {
+            return {status: 300};
+        });
     });
 });

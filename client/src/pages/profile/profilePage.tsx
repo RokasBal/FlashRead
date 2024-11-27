@@ -66,13 +66,81 @@ export const fetchGameHistory = async (
     }
 };
 
-const ProfilePage: React.FC = () => {
+export const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setPreviewUrl: React.Dispatch<React.SetStateAction<string | null>>
+) => {
+    const file = event.target.files?.[0];
+    if (file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file.');
+            return;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+            alert('File size exceeds the 2MB limit. Please select a smaller file.');
+            return;
+        }
+        try {
+            const options = {
+                maxSizeMB: 0.3, 
+                maxWidthOrHeight: 360,
+                useWebWorker: true,
+            };
+            const compressedFile = await imageCompression(file, options);
+            setSelectedFile(compressedFile);
+            setPreviewUrl(URL.createObjectURL(compressedFile));
+        } catch (error) {
+            console.error('Error compressing the image:', error);
+        }
+    }
+};
+
+export const handleUpload = async (
+    selectedFile: File | null,
+    setProfilePictureUrl: React.Dispatch<React.SetStateAction<string>>,
+    setIsPopupVisible: React.Dispatch<React.SetStateAction<boolean>>,
+    // eslint-disable-next-line
+    tokenHandler: (token: string, formData: FormData) => any
+) => {
+    if (!selectedFile) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('profilePicture', selectedFile);
+
+        const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+        const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+        if (!token) {
+            throw new Error('No auth token found');
+        }
+
+        const response = await tokenHandler(token, formData);
+
+        if (response.status === 200) {
+            setProfilePictureUrl(URL.createObjectURL(selectedFile));
+        } else {
+            alert('Failed to update profile picture.');
+        }
+    } catch (error) {
+        console.error('Error uploading the profile picture:', error);
+        alert('Error uploading the profile picture.');
+    }
+
+    setIsPopupVisible(false);
+};
+
+const ProfilePage: React.FC<{
+    popupVisible?: boolean;
+    defpreviewUrl?: string;
+}> = ({popupVisible, defpreviewUrl}) => {
     const [gameHistory, setGameHistory] = useState<TableRow[]>([]);
     const [detailContent, setDetailContent] = useState<JSX.Element | string>();
     const [username, setUsername] = useState<string>('');
-    const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+    const [isPopupVisible, setIsPopupVisible] = useState<boolean>(popupVisible ?? false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(defpreviewUrl ?? null);
     const [profilePictureUrl, setProfilePictureUrl] = useState<string>("");
     const [joinDate, setJoinDate] = useState<string>("");
     const [gamesPlayed, setGamesPlayed] = useState<number>(0);
@@ -111,62 +179,6 @@ const ProfilePage: React.FC = () => {
         } catch (err) {
             console.error('Error fetching username:', err);
         }
-    };
-
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please select a valid image file.');
-                return;
-            }
-            if (file.size > MAX_FILE_SIZE) {
-                alert('File size exceeds the 2MB limit. Please select a smaller file.');
-                return;
-            }
-            try {
-                const options = {
-                    maxSizeMB: 0.3, 
-                    maxWidthOrHeight: 360,
-                    useWebWorker: true,
-                };
-                const compressedFile = await imageCompression(file, options);
-                setSelectedFile(compressedFile);
-                setPreviewUrl(URL.createObjectURL(compressedFile));
-            } catch (error) {
-                console.error('Error compressing the image:', error);
-            }
-        }
-    };
-
-    const handleUpload = async () => {
-        if (!selectedFile) return;
-
-        try {
-            const formData = new FormData();
-            formData.append('profilePicture', selectedFile);
-
-            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-
-            const response = await axios.post('/api/Settings/UpdateProfilePicture', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            if (response.status === 200) {
-                setProfilePictureUrl(URL.createObjectURL(selectedFile));
-            } else {
-                alert('Failed to update profile picture.');
-            }
-        } catch (error) {
-            console.error('Error uploading the profile picture:', error);
-            alert('Error uploading the profile picture.');
-        }
-
-        setIsPopupVisible(false);
     };
 
     const handleEditClick = () => {
@@ -276,13 +288,22 @@ const ProfilePage: React.FC = () => {
                                 </div>
                             )}
                             <label className="customFileUpload">
-                                <input type="file" accept="image/*" onChange={handleFileChange} />
+                                <input type="file" accept="image/*" onChange={(ev) => handleFileChange(ev, setSelectedFile, setPreviewUrl)} />
                                 Browse
                             </label>
                         </div>
                         <div className="popupFooter">
                             {previewUrl && (
-                                <CustomButton label="Confirm" className="popupButton" id="popupConfirmButton" onClick={handleUpload} />
+                                <CustomButton label="Confirm" className="popupButton" id="popupConfirmButton" onClick={
+                                    () => handleUpload(selectedFile, setProfilePictureUrl, setIsPopupVisible, async (token: string, formData: FormData) => {
+                                        return axios.post('/api/Settings/UpdateProfilePicture', formData, {
+                                            headers: {
+                                                'Content-Type': 'multipart/form-data',
+                                                Authorization: `Bearer ${token}`
+                                            }
+                                        });
+                                    })
+                                } />
                             )}
                             <CustomButton label="Close" className="popupButton" id="popupCloseButton" onClick={() => setIsPopupVisible(false)} />
                         </div>
