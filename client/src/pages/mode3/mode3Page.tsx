@@ -61,6 +61,52 @@ type Task3Handler = {
     data: CheckSecretDoorCodeRequest | CheckSecretDoorCodeResponse | GetBookHintsRequest | GetBookHintsResponse;
 };
 
+const checkDoorCodeAsync = async (taskRef: React.MutableRefObject<number>, code: string) => {
+    const data: CheckSecretDoorCodeRequest = {
+        code: code
+    };
+    const request: Task3Handler = {
+        taskVersion: taskRef.current,
+        data: data
+    };
+    try {
+        const axiosResponse = await axios.post("/api/CheckSecretDoorCode", request);
+        const data = axiosResponse.data.data as CheckSecretDoorCodeResponse;
+        return data.isCorrect;
+    } catch (err) {
+        console.error('Error posting task3 doorcode:', err);
+        return false;
+    }
+};
+const getBookHintsAsync = async (taskRef: React.MutableRefObject<number>, count: number) => {
+    const data: GetBookHintsRequest = {
+        count: count
+    };
+    const request: Task3Handler = {
+        taskVersion: taskRef.current,
+        data: data
+    };
+    try {
+        const axiosResponse = await axios.post("/api/GetBookHints", request);
+        const data = axiosResponse.data as Task3Handler;
+        taskRef.current = data.taskVersion;
+        const hintData = data.data as GetBookHintsResponse;
+        return hintData.hints;
+    } catch (err) {
+        console.error('Error posting task3 bookhints:', err);
+        return [];
+    }
+};
+const saveTimeTakenAsync = async (timeTaken: number) => {
+    try {
+        await axios.post('/api/SaveTask3TimeTaken?seconds=' + timeTaken);
+    } catch (err) {
+        console.error('Error posting task3 saveTimeTaken:', err);
+    }
+};
+
+export { checkDoorCodeAsync, getBookHintsAsync, saveTimeTakenAsync };
+
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
     const [canvasSize, setCanvasSize] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -68,50 +114,6 @@ const Mode3Page: React.FC = () => {
     const canvasOnScreen = useOnScreen(canvasRef);
     const moduleRef = useRef<MainModule>();
     const taskVersionRef = useRef<number>(0);
-
-    const checkDoorCodeAsync = async (code: string) => {
-        const data: CheckSecretDoorCodeRequest = {
-            code: code
-        };
-        const request: Task3Handler = {
-            taskVersion: taskVersionRef.current,
-            data: data
-        };
-        try {
-            const axiosResponse = await axios.post("/api/CheckSecretDoorCode", request);
-            const data = axiosResponse.data.data as CheckSecretDoorCodeResponse;
-            return data.isCorrect;
-        } catch (err) {
-            console.error('Error posting task3 doorcode:', err);
-            return false;
-        }
-    };
-    const getBookHintsAsync = async (count: number) => {
-        const data: GetBookHintsRequest = {
-            count: count
-        };
-        const request: Task3Handler = {
-            taskVersion: taskVersionRef.current,
-            data: data
-        };
-        try {
-            const axiosResponse = await axios.post("/api/GetBookHints", request);
-            const data = axiosResponse.data as Task3Handler;
-            taskVersionRef.current = data.taskVersion;
-            const hintData = data.data as GetBookHintsResponse;
-            return hintData.hints;
-        } catch (err) {
-            console.error('Error posting task3 bookhints:', err);
-            return [];
-        }
-    };
-    const saveTimeTakenAsync = async (timeTaken: number) => {
-        try {
-            await axios.post('/api/SaveTask3TimeTaken?seconds=' + timeTaken);
-        } catch (err) {
-            console.error('Error posting task3 saveTimeTaken:', err);
-        }
-    };
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
@@ -124,13 +126,13 @@ const Mode3Page: React.FC = () => {
             (moduleRef.current as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
             // eslint-disable-next-line
             (window as any).checkDoorCode = (code: string) => {
-                checkDoorCodeAsync(code).then((isCorrect) => {
+                checkDoorCodeAsync(taskVersionRef, code).then((isCorrect) => {
                     moduleRef.current?.checkDoorCodeResponse(isCorrect);
                 });
             };
             // eslint-disable-next-line
             (window as any).getBookHints = (count: number) => {
-                getBookHintsAsync(count).then((hints) => {
+                getBookHintsAsync(taskVersionRef, count).then((hints) => {
                     if (!moduleRef.current) return;
                     const hintList = new moduleRef.current.StringList();
                     for (const hint of hints) {
