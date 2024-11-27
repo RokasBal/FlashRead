@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 using server.UserNamespace;
-
+using server.Exceptions;
 namespace server.Tests
 {
     public class DbObjectTest
@@ -20,6 +20,21 @@ namespace server.Tests
             Assert.Equal("testId", dbTask1Contribution.Id);
             Assert.Equal(1, dbTask1Contribution.QuestionsId);
             Assert.Equal(DateTime.UtcNow.Date, dbTask1Contribution.TimeContributed.Date);
+        }
+        [Fact]
+        public void DbLogs_ShouldInitializeProperties()
+        {
+            // Arrange
+            var dbLogs = new DbLogs();
+
+            // Act
+            dbLogs.Id = "logId";
+            dbLogs.LogMessage = "This is a log message";
+
+            // Assert
+            Assert.Equal("logId", dbLogs.Id);
+            Assert.Equal("This is a log message", dbLogs.LogMessage);
+            Assert.Equal(DateTime.UtcNow.Date, dbLogs.LogTime.Date);
         }
     }
 }
