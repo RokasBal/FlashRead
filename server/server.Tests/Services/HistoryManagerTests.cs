@@ -29,13 +29,13 @@ namespace server.Tests {
 
         public HistoryManagerTests() {
             var options = new DbContextOptionsBuilder<FlashDbContext>()
-                .UseInMemoryDatabase(databaseName: "History Manager Tests")
+                .UseInMemoryDatabase(databaseName: "History Manager Testss")
                 .Options;
             _context = new FlashDbContext(options);
 
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkInMemoryDatabase()
-                .AddDbContext<FlashDbContext>(options => options.UseInMemoryDatabase("TestDatabaseAuthentication"))
+                .AddDbContext<FlashDbContext>(options => options.UseInMemoryDatabase("TTestDatabaseAuthentication"))
                 .BuildServiceProvider();
 
             var serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();

@@ -69,8 +69,7 @@ const SettingsPage: React.FC = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-
-            setUsername(response.data.name);
+            setUsername(response.data.value);
         } catch (err) {
             console.error('Error fetching username:', err);
         }

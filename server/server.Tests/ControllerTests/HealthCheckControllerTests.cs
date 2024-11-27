@@ -88,6 +88,51 @@ namespace server.Tests {
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal("Invalid token.", unauthorizedResult.Value);
         }
+
+        [Fact] 
+        public async Task StartHealthCheck_WithException_ReturnsInternalServerError() {
+            // Arrange
+            var email = "test@example.com";
+            SetUserEmail(email);
+            _mockSessionManager.Setup(sm => sm.UpdateSession(email)).Returns(Task.FromException(new Exception("Database error")));
+
+            // Act
+            var result = await _controller.StartHealthCheck();
+
+            // Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, internalServerErrorResult.StatusCode);
+        }
+
+        [Fact]
+        public void GetConnectedUsers_ReturnsOkResult() {
+            // Arrange
+            var connectedUsers = new List<string> { "user1", "user2" };
+            _mockSessionManager.Setup(sm => sm.GetConnectedUsers()).Returns(connectedUsers);
+
+            // Act
+            var result = _controller.Get();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(connectedUsers, okResult.Value);
+        }
+
+        [Fact]
+        public async Task GetConnectedUsernames_ReturnsOkResult() {
+            // Arrange
+            var connectedUsernames = new List<string> { "username1", "username2" };
+            _mockSessionManager.Setup(sm => sm.GetConnectedUsernames()).ReturnsAsync(connectedUsernames);
+
+            // Act
+            var result = await _controller.GetConnectedUsernames();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(connectedUsernames, okResult.Value);
+        }
+
+
         public void Dispose()
         {
             _context.Database.EnsureDeleted();

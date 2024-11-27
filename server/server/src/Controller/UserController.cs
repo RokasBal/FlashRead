@@ -58,8 +58,6 @@ namespace server.Controller {
             }
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                Console.WriteLine("defaultPicture: ");
-                Console.WriteLine(user.ProfilePic);
                 if (user.ProfilePic == null || user.ProfilePic.Length == 0) {
                     var defaultPicturePath = Path.Combine(Directory.GetCurrentDirectory(), "src", "images", "defaultPicture.jpg");
                     var defaultPicture = await System.IO.File.ReadAllBytesAsync(defaultPicturePath);

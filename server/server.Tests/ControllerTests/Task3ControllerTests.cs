@@ -15,10 +15,10 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using server.src.Task1;
+using server.src.Task3;
 namespace server.Tests {
-    public class TaskControllerTests : IDisposable {
-        private readonly TaskController _controller;
+    public class Task3ControllerTests : IDisposable {
+        private readonly Task3Controller _controller;
         private readonly FlashDbContext _context;
         private readonly UserHandler _userHandler;
         private readonly SessionManager _sessionManager;
@@ -26,10 +26,10 @@ namespace server.Tests {
         private readonly HistoryManager _historyManager;
         private readonly DbContextFactory _dbContextFactory;
 
-        public TaskControllerTests()
+        public Task3ControllerTests()
         {
             var options = new DbContextOptionsBuilder<FlashDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabaseaaa")
+            .UseInMemoryDatabase(databaseName: "TestDatabasebbb")
             .Options;
             _context = new FlashDbContext(options);
 
@@ -45,7 +45,7 @@ namespace server.Tests {
             _historyManager = new HistoryManager(_context);
             _sessionManager = new SessionManager(_dbContextFactory);
             _userHandler = new UserHandler(_context, _tokenProvider, _historyManager, _sessionManager);
-            _controller = new TaskController(_context, _userHandler);
+            _controller = new Task3Controller(_context, _userHandler);
         }
 
         private void SetUserEmail(string? email) {
@@ -59,73 +59,42 @@ namespace server.Tests {
             };
         }
         [Fact]
-        public void PostGetTask_ReturnsTaskResponse()
+        public void PostGetTask_ReturnsDoorCodeTaskResponse()
         {
-            var request = new TaskRequest { TaskId = 1 };
+            Task3DoorCodeRequest requestData = new Task3DoorCodeRequest(){Code = "123"};
+            var request = new Task3EndpointHandler<Task3DoorCodeRequest>() { Data = requestData, TaskVersion = 1 };
             var response = _controller.PostGetTask(request);
-            Assert.IsType<Task1.TaskResponse>(response);
-        }
-        [Fact]
-        public async Task PostGetTaskAnswer_ReturnsTaskNotFound()
-        {
-            SetUserEmail("test@example.com");
-            var request = new TaskAnswerRequest { Session = 123, SelectedVariants = new int[] { 1, 2 } };
-            var exception = await Assert.ThrowsAsync<Exception>(async () => await _controller.PostGetTaskAnswer(request));
-            Assert.Equal("Task not found", exception.Message);
-        }
-        [Fact]
-        public async Task PostGetTaskAnswer_ReturnsNotImplemented()
-        {
-            SetUserEmail("test@example.com");
-            uint session = ITask.GenerateSessionBase(2);
-            var request = new TaskAnswerRequest { Session = session, SelectedVariants = new int[] { 1, 2 } };
-            var exception = await Assert.ThrowsAsync<NotImplementedException>(async () => await _controller.PostGetTaskAnswer(request));
-        }
-        [Fact]
-        public async Task PostGetTaskAnswer_ReturnsCorrectAnswer()
-        {
-            // Arrange
-            SetUserEmail("test@example.com");
 
-            var taskText = new DbTask1Text { Id = 1, Theme = "Anime", Text = "Sample Text" };
-            var taskQuestion = new DbTask1Question
-            {
-                Id = 1,
-                TextId = taskText.Id,
-                Question = "Sample Question",
-                Variants = new[] { "Option 1", "Option 2", "Option 3" },
-                AnswerId = 1
-            };
-            _context.Task1Texts.Add(taskText);
-            _context.Task1Questions.Add(taskQuestion);
-            await _context.SaveChangesAsync();
-
-            uint session = ITask.GenerateSessionBase(1);
-            var request = new TaskAnswerRequest { Session = session, SelectedVariants = new int[] { 1 } };
-
-            var ans = _controller.PostGetTaskAnswer(request);
-            Assert.IsType<Task1.TaskAnswerResponse>(ans.Result);
-            System.Console.WriteLine(ans);
+            Assert.Equal(response.Data.IsCorrect, false);
         }
         [Fact]
-        public async Task PostGetTask2Score_UserNotFound()
+        public void PostGetTask_ReturnsBookHintTaskResponse()
+        {
+            Task3BookHintRequest requestData = new Task3BookHintRequest(){Count = 2};
+            var request = new Task3EndpointHandler<Task3BookHintRequest>() { Data = requestData, TaskVersion = 1 };
+            var response = _controller.PostGetTask(request);
+
+            Assert.Equal(response.Data.Hints.Length, 2);
+        }
+        [Fact]
+        public async Task PostSaveTask3TimeTaken_UserNotFound()
         {
             // Arrange
             SetUserEmail(null);
 
-            var ans = _controller.GetTask2Score(50);
+            var ans = _controller.PostSaveTask3TimeTaken(50);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(ans.Result);
-            Assert.Equal("User not found.", notFoundResult.Value);
+            Assert.Equal("failure", notFoundResult.Value);
         }
         [Fact]
-        public async Task PostGetTask2Score_SavesScore()
+        public async Task PostSaveTask3TimeTaken_SavesScore()
         {
             // Arrange
             SetUserEmail("test@example.com");
 
-            var ans = _controller.GetTask2Score(50);
+            var ans = _controller.PostSaveTask3TimeTaken(50);
             var OkResult = Assert.IsType<OkObjectResult>(ans.Result);
-            Assert.Equal("Mode 2 score saved", OkResult.Value);
+            Assert.Equal("success", OkResult.Value);
         }
             
         public void Dispose()

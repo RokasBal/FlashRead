@@ -42,16 +42,8 @@ namespace server.UserNamespace {
             dbUser.ProfilePic = null;
             await createSettingsId(dbUser);
             await createSessionsId(dbUser);
-            try
-            {
-                _context.Users.Add(dbUser);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -80,16 +72,8 @@ namespace server.UserNamespace {
             {
                 return false;
             }
-            try
-            {
-                _context.Users.Remove(dbUser);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            _context.Users.Remove(dbUser);
+            await _context.SaveChangesAsync();
             return true;
         }
 
@@ -211,7 +195,6 @@ namespace server.UserNamespace {
             {
                 return new List<DbTaskHistory>();
             }
-
             var taskHistories = await _context.UserTaskHistories
                 .Where(h => dbUser.HistoryIds.Contains(h.Id))
                 .ToListAsync();
@@ -355,6 +338,14 @@ namespace server.UserNamespace {
                 Score = g.Score,   
                 Gamemode = g.TaskId
             });
+        }
+        public async Task<DbUser?> GetUserByNameAsync(string name) {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            if (dbUser == null)
+            {
+                return null;
+            }
+            return dbUser;
         }
     }
 }

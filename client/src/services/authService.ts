@@ -1,5 +1,5 @@
 // src/services/authService.ts
-import axiosWrapper from '../components/axiosWrapper';
+import axiosWrapper, {isAxiosError} from '../components/axiosWrapper';
 
 const deleteCookie = (name: string) => {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Secure; SameSite=Strict`;
@@ -17,7 +17,12 @@ export const login = async (email: string, password: string) => {
         return response.data;
     } catch (error) {
         console.error('Login error:', error);
-        return null;
+        if (isAxiosError(error) && error.response) {
+            const errorMessage = (error.response.data as  string );
+            throw new Error(errorMessage);
+        } else {
+            throw new Error('An unknown error occurred.');
+        }
     }
 };
 
@@ -31,7 +36,12 @@ export const register = async (email: string, password: string, username: string
         return response.data;
     } catch (error) {
         console.error('Register error:', error);
-        return null;
+        if (isAxiosError(error) && error.response) {
+            const errorMessage = (error.response.data as string );
+            throw new Error(errorMessage);
+        } else {
+            throw new Error('An unknown error occurred.');
+        }
     }
 }
 

@@ -20,6 +20,52 @@ interface GameHistoryItem {
     timePlayed: string;
 }
 
+const taskIdToGameMode: { [key: number]: string } = {
+    1: "Q&A",
+    2: "Catch the Word",
+    3: "BookScape"
+};
+
+export const fetchGameHistory = async (
+    setGameHistory: React.Dispatch<React.SetStateAction<TableRow[]>>,
+    setGamesPlayed: React.Dispatch<React.SetStateAction<number>>,
+    setTotalScore: React.Dispatch<React.SetStateAction<number>>,
+    // eslint-disable-next-line
+    tokenHandler: (token: string) => any
+) => {
+    try {
+        const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+        const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+        if (!token) {
+            throw new Error('No auth token found');
+        }
+
+        const response = await tokenHandler(token);
+
+        let totalScore = 0;
+        const transformedData = response.data.map((item: GameHistoryItem) => {
+            const date = new Date(item.timePlayed);
+            const formattedDate = date.toLocaleDateString('en-CA');
+            const formattedTime = date.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+            totalScore += item.score;
+
+            return {
+                gamemode: taskIdToGameMode[item.taskId] || "Unknown",
+                score: item.score,
+                date: `${formattedDate}, ${formattedTime}`
+            };
+        });
+
+        setGamesPlayed(transformedData.length);
+        setGameHistory(transformedData);
+        setTotalScore(totalScore);
+    } catch (err) {
+        console.error('Error fetching game history:', err);
+    }
+};
+
 const ProfilePage: React.FC = () => {
     const [gameHistory, setGameHistory] = useState<TableRow[]>([]);
     const [detailContent, setDetailContent] = useState<JSX.Element | string>();
@@ -34,48 +80,6 @@ const ProfilePage: React.FC = () => {
     // const [activityData, setActivityData] = useState<any[]>([]);
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
-
-    const taskIdToGameMode: { [key: number]: string } = {
-        1: "Q&A",
-        2: "Catch the Word",
-        3: "BookScape"
-    };
-
-    const fetchGameHistory = async () => {
-        try {
-            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-
-            if (!token) {
-                throw new Error('No auth token found');
-            }
-
-            const response = await axios.get('/api/Users/GetUserHistory', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            let totalScore = 0;
-            const transformedData = response.data.map((item: GameHistoryItem) => {
-                const date = new Date(item.timePlayed);
-                const formattedDate = date.toLocaleDateString('en-CA');
-                const formattedTime = date.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false });
-
-                totalScore += item.score;
-
-                return {
-                    gamemode: taskIdToGameMode[item.taskId] || "Unknown",
-                    score: item.score,
-                    date: `${formattedDate}, ${formattedTime}`
-                };
-            });
-
-            setGamesPlayed(transformedData.length);
-            setGameHistory(transformedData);
-            setTotalScore(totalScore);
-        } catch (err) {
-            console.error('Error fetching game history:', err);
-        }
-    };
 
     const fetchProfilePicture = async () => {
         try {
@@ -108,35 +112,6 @@ const ProfilePage: React.FC = () => {
             console.error('Error fetching username:', err);
         }
     };
-    // const fetchActivityData = async (startDate: string, endDate: string) => {
-    //     try {
-    //         const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-    //         const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-
-    //         if (!token) {
-    //             throw new Error('No auth token found');
-    //         }
-
-    //         const emailResponse = await axios.get('/api/User/GetLogins', {
-    //             headers: { Authorization: `Bearer ${token}` }
-    //         });
-
-    //         const email = emailResponse.data.email;
-
-    //         const activityResponse = await axios.post('/api/Users/GetUserActivity', {
-    //             email,
-    //             startDate,
-    //             endDate
-    //         }, {
-    //             headers: { Authorization: `Bearer ${token}` }
-    //         });
-
-    //         setActivityData(activityResponse.data);
-
-    //     } catch (err) {
-    //         console.error('Error fetching activity data:', err);
-    //     }
-    // };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -158,8 +133,6 @@ const ProfilePage: React.FC = () => {
                 const compressedFile = await imageCompression(file, options);
                 setSelectedFile(compressedFile);
                 setPreviewUrl(URL.createObjectURL(compressedFile));
-                // console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
-                // console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
             } catch (error) {
                 console.error('Error compressing the image:', error);
             }
@@ -211,7 +184,11 @@ const ProfilePage: React.FC = () => {
 
         fetchUsername();
         fetchProfilePicture();
-        fetchGameHistory();
+        fetchGameHistory(setGameHistory, setGamesPlayed, setTotalScore, async (token: string) => {
+            return axios.get('/api/Users/GetUserHistory', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        });
     }, [isAuthenticated, navigate]);
 
     useEffect(() => {

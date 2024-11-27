@@ -108,8 +108,7 @@ namespace server.Tests {
             SetUserEmail(user.Email);
 
             // Assert
-            var exception = await Assert.ThrowsAsync<Exception>(async () => await _controller.PostLogin(userAPI));
-            Assert.Equal("Invalid password", exception.Message);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(await _controller.PostLogin(userAPI));
         }
         [Fact]
         public async Task PostLogin_InvalidModel_ReturnsBadRequestResult()
@@ -166,6 +165,33 @@ namespace server.Tests {
             var okResult = Assert.IsType<OkObjectResult>(result);
             var statusCodeResult = Assert.IsType<ObjectResult>(result2);
             Assert.Equal(500, statusCodeResult.StatusCode);
+        }
+        [Fact]
+        public void CheckAuth_ValidToken_ReturnsOkResult()
+        {
+            // Arrange
+            SetUserEmail("test@example.com");
+
+            // Act
+            var result = _controller.CheckAuth();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Token is valid.", okResult.Value);
+        }
+
+        [Fact]
+        public void CheckAuth_InvalidToken_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Act
+            var result = _controller.CheckAuth();
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
         }
         public void Dispose()
         {

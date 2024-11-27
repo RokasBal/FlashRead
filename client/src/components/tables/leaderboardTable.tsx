@@ -21,7 +21,7 @@ const gameModes = [
     'All', 
     'Q&A', 
     'Catch the Word', 
-    // 'Mode 3'
+    'BookScape'
 ];
 
 const leaderboardTypes = [
@@ -31,7 +31,8 @@ const leaderboardTypes = [
 
 const taskIdToGameMode: { [key: number]: string } = {
     1: "Q&A",
-    2: "Catch the Word"
+    2: "Catch the Word",
+    3: "BookScape"
 };
 
 const LeaderboardTable: React.FC = () => {

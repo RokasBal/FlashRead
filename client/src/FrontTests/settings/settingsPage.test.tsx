@@ -99,4 +99,71 @@ describe('SettingsPage', () => {
         });
     });
 
+    test('changes profile name', async () => {
+        mockAuthContext.isAuthenticated = true; // Ensure the user is authenticated
+    
+        mockAxios.onGet('/api/Settings/GetAllThemes').reply(200, ['theme1', 'theme2']);
+        mockAxios.onGet('/api/Settings/GetAllFonts').reply(200, ['font1', 'font2']);
+        mockAxios.onGet('/api/User/GetCurrentUserName').reply(200, { name: 'testuser' });
+    
+        render(
+            <AuthContext.Provider value={mockAuthContext}>
+                <VisualSettingsContext.Provider value={mockVisualSettingsContext}>
+                    <MemoryRouter>
+                        <SettingsPage />
+                    </MemoryRouter>
+                </VisualSettingsContext.Provider>
+            </AuthContext.Provider>
+        );
+    
+        // Click the "Edit" button to enable editing the profile name
+        fireEvent.click(screen.getByText('Edit'));
+    
+        expect(screen.getByText('Confirm')).toBeInTheDocument();
+    });
+
+    test('navigates to change password page on button click', async () => {
+        mockAuthContext.isAuthenticated = true; // Ensure the user is authenticated
+    
+        render(
+            <AuthContext.Provider value={mockAuthContext}>
+                <VisualSettingsContext.Provider value={mockVisualSettingsContext}>
+                    <MemoryRouter initialEntries={['/settings']}>
+                        <Routes>
+                            <Route path="/settings" element={<SettingsPage />} />
+                            <Route path="/changePassword" element={<div>Change Password Page</div>} />
+                        </Routes>
+                    </MemoryRouter>
+                </VisualSettingsContext.Provider>
+            </AuthContext.Provider>
+        );
+    
+        fireEvent.click(screen.getByText('Change Password'));
+        await waitFor(() => {
+            expect(screen.getByText('Change Password Page')).toBeInTheDocument();
+        });
+    });
+
+    test('navigates to delete account page on button click', async () => {
+        mockAuthContext.isAuthenticated = true; // Ensure the user is authenticated
+    
+        render(
+            <AuthContext.Provider value={mockAuthContext}>
+                <VisualSettingsContext.Provider value={mockVisualSettingsContext}>
+                    <MemoryRouter initialEntries={['/settings']}>
+                        <Routes>
+                            <Route path="/settings" element={<SettingsPage />} />
+                            <Route path="/deleteAccount" element={<div>Delete Account Page</div>} />
+                        </Routes>
+                    </MemoryRouter>
+                </VisualSettingsContext.Provider>
+            </AuthContext.Provider>
+        );
+    
+        fireEvent.click(screen.getByText('Delete Account'));
+        await waitFor(() => {
+            expect(screen.getByText('Delete Account Page')).toBeInTheDocument();
+        });
+    });
+
 });
