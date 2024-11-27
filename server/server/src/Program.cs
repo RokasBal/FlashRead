@@ -19,42 +19,35 @@ namespace server
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-            builder.Services.AddCors(options => {
-                options.AddPolicy(
-                    name: MyAllowSpecificOrigins, 
-                    policy  => {
-                        policy.WithOrigins("http://localhost:5173")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                        }
-                    );
-                }
-            );
+            // var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            // builder.Services.AddCors(options => {
+            //     options.AddPolicy(
+            //         name: MyAllowSpecificOrigins, 
+            //         policy  => {
+            //             policy.WithOrigins("http://localhost:8080")
+            //                 .AllowAnyMethod()
+            //                 .AllowAnyHeader()
+            //                 .AllowCredentials();
+            //             }
+            //         );
+            //     }
+            // );
 
-            while (true) {
-                try
-                {
-                    var dataSourceBuilder = new NpgsqlDataSourceBuilder(ConnectionStringBuilder.BuildConnectionString("./secrets/config.json"));
-                    dataSourceBuilder.MapEnum<Task2Data.Theme>();
-                    var dataSource = dataSourceBuilder.Build();
-                    builder.Services.AddDbContext<FlashDbContext>(options => options.UseNpgsql(dataSource));
-                    
-                    // Test the connection
-                    using (var connection = dataSource.CreateConnection())
-                    {
-                        connection.Open();
-                        Console.WriteLine("Database connection successful.");
-                    }
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Database connection failed: {ex.Message}");
-                    Console.WriteLine("Retrying in 5 seconds...");
-                    System.Threading.Thread.Sleep(5000);
-                }
+            try 
+            {
+                Console.WriteLine("Attempting database connection...");
+                var connectionString = ConnectionStringBuilder.BuildConnectionString();
+                Console.WriteLine($"Connection String: {connectionString}");
+
+                // Existing database connection code
+                Console.WriteLine("Database connection successful!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"FATAL: Database Connection Failed");
+                Console.WriteLine($"Error Details: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                throw;
             }
             
             builder.Services.AddAuthorization();
@@ -92,13 +85,13 @@ namespace server
             app.UseStaticFiles();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment()) {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            // if (app.Environment.IsDevelopment()) {
+            //     app.UseSwagger();
+            //     app.UseSwaggerUI();
+            // }
 
-            app.UseHttpsRedirection();
-            app.UseCors(MyAllowSpecificOrigins);
+            // app.UseHttpsRedirection();
+            // app.UseCors(MyAllowSpecificOrigins);
             
             app.UseHsts();
 
@@ -106,7 +99,7 @@ namespace server
             
             app.MapControllers();
 
-            app.MapFallbackToFile("index.html");
+            // app.MapFallbackToFile("index.html");
 
             app.UseAuthentication();
             app.UseAuthorization();

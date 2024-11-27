@@ -6,33 +6,31 @@ namespace server
 {
     public static class ConnectionStringBuilder
     {
-        public static string BuildConnectionString(string configPath)
+        public static string BuildConnectionString()
         {
-            string password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? throw new InvalidOperationException("Environment variable DB_PASSWORD is not set.");
+            Console.WriteLine("Validating Connection Parameters:");
+            var host = Environment.GetEnvironmentVariable("DB_HOST");
+            var port = Environment.GetEnvironmentVariable("DB_PORT");
+            var database = Environment.GetEnvironmentVariable("DB_NAME");
+            var username = Environment.GetEnvironmentVariable("DB_USER");
+            var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-            if (!File.Exists(configPath))
+            Console.WriteLine($"DB_HOST: {host ?? "NOT SET"}");
+            Console.WriteLine($"DB_PORT: {port ?? "NOT SET"}");
+            Console.WriteLine($"DB_NAME: {database ?? "NOT SET"}");
+            Console.WriteLine($"DB_USER: {username ?? "NOT SET"}");
+            Console.WriteLine($"DB_PASSWORD: {(password != null ? "SET" : "NOT SET")}");
+
+            if (string.IsNullOrEmpty(host) || 
+                string.IsNullOrEmpty(port) || 
+                string.IsNullOrEmpty(database) || 
+                string.IsNullOrEmpty(username) || 
+                string.IsNullOrEmpty(password))
             {
-            throw new FileNotFoundException($"Configuration file not found: {configPath}");
+                throw new InvalidOperationException("One or more database connection parameters are missing!");
             }
 
-            string host, port, database, username;
-
-            using (var stream = new FileStream(configPath, FileMode.Open, FileAccess.Read))
-            using (var reader = new StreamReader(stream))
-            {
-            var configJson = JObject.Parse(reader.ReadToEnd());
-            host = configJson["DB_HOST"]?.ToString() ?? string.Empty;
-            port = configJson["DB_PORT"]?.ToString() ?? string.Empty;
-            database = configJson["DB_NAME"]?.ToString() ?? string.Empty;
-            username = configJson["DB_USER"]?.ToString() ?? string.Empty;
-            }
-
-            if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-            throw new InvalidOperationException("Configuration is incomplete.");
-            }
-
-            return $"Host={host};Port={port};Database={database};Username={username};Password={password};";
+            return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
         }
     }
 }
