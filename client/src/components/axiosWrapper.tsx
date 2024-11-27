@@ -26,7 +26,7 @@ axiosWrapper.interceptors.request.use(
         return Promise.reject(error);
     }
 );
-
+// eslint-disable-next-line
 export function isAxiosError(error: any): error is AxiosError {
     return error.isAxiosError === true;
 }

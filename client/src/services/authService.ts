@@ -36,7 +36,14 @@ export const register = async (email: string, password: string, username: string
         return response.data;
     } catch (error) {
         console.error('Register error:', error);
-        return null;
+        if (isAxiosError(error) && error.response) {
+            console.log('Error response:', error.response);
+            const errorMessage = (error.response.data as { error: string }).error;
+            console.log('Error message:', errorMessage);
+            throw new Error(errorMessage);
+        } else {
+            throw new Error('An unknown error occurred.');
+        }
     }
 }
 

@@ -15,6 +15,11 @@ const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [repeatPasswordError, setRepeatPasswordError] = useState('');
+
     useEffect(() => {
         if (isAuthenticated) {
             navigate('/home');
@@ -22,31 +27,56 @@ const RegisterPage: React.FC = () => {
     }, [isAuthenticated, navigate]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        let valid = true;
+
         if (!username) {
-            alert('Please fill in the username.');
-            return;
+            setUsernameError('Please fill in the username.');
+            valid = false;
+        } else {
+            setUsernameError('');
         }
+
         if (!email) {
-            alert('Please fill in the email.');
-            return;
+            setEmailError('Please fill in the email.');
+            valid = false;
+        } else {
+            setEmailError('');
         }
+
         if (!password) {
-            alert('Please fill in the password.');
-            return;
+            setPasswordError('Please fill in the password.');
+            valid = false;
+        } else {
+            setPasswordError('');
         }
+
         if (!repeatPassword) {
-            alert('Please fill in the repeat password.');
-            return;
+            setRepeatPasswordError('Please fill in the repeat password.');
+            valid = false;
+        } else if (password !== repeatPassword) {
+            setRepeatPasswordError('Passwords do not match.');
+            valid = false;
+        } else {
+            setRepeatPasswordError('');
         }
-        if (password !== repeatPassword) {
-            alert('Passwords do not match.');
-            return;
-        }
-        try {
-            await register(email, password, username);
-            checkUserAuth();
-        } catch (error) {
-            console.error('Register failed. Please try again.', error);
+
+
+        if (valid) {
+            try {
+                await register(email, password, username);
+                checkUserAuth();
+            } catch (error) {
+                console.error('Register failed. Please try again.', error);
+                if (error instanceof Error) {
+                    if (error.message.includes('A user with this username already exists.')) {
+                        setUsernameError('User already exists.');
+                    } else if (error.message.includes('A user with this email already exists.')) {
+                        setEmailError('Email already in use.');
+                    }
+                } else {
+                    setUsernameError('An unknown error occurred.');
+                }
+            }
         }
     };
     return (
@@ -64,6 +94,8 @@ const RegisterPage: React.FC = () => {
                         label="Username"
                         value={username}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+                        error={!!usernameError}
+                        helperText={usernameError}
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -99,6 +131,8 @@ const RegisterPage: React.FC = () => {
                     label="Email"
                     value={email}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    error={!!emailError}
+                    helperText={emailError}
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -134,6 +168,8 @@ const RegisterPage: React.FC = () => {
                     value={password}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     type="password"
+                    error={!!passwordError}
+                    helperText={passwordError}
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -169,6 +205,8 @@ const RegisterPage: React.FC = () => {
                     value={repeatPassword}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRepeatPassword(e.target.value)}
                     type="password"
+                    error={!!repeatPasswordError}
+                    helperText={repeatPasswordError}
                     sx={{
                         '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -205,21 +243,7 @@ const RegisterPage: React.FC = () => {
                     id="registerPage_registerButton" 
                     onClick={() => {
                         console.log('Form submitted:', { username, email, password, repeatPassword });
-                        if (!username || !email || !password || !repeatPassword) {
-                            if (!username) {
-                                alert('Please fill in the username.');
-                            } else if (!email) {
-                                alert('Please fill in the email.');
-                            } else if (!password) {
-                                alert('Please fill in the password.');
-                            } else if (!repeatPassword) {
-                                alert('Please fill in the repeat password.');
-                            }
-                        } else if (password !== repeatPassword) {
-                            alert('Passwords do not match.');
-                        } else {
-                            handleSubmit(new Event('submit') as unknown as React.FormEvent);
-                        }
+                        handleSubmit(new Event('submit') as unknown as React.FormEvent);
                     }}
                 />
             </div>
