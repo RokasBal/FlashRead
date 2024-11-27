@@ -323,7 +323,22 @@ const Mode3Page: React.FC = () => {
                     </div>
                 </div>
                 <div className='containerRight'>
+                        <div className='manualHeader'>Explanation</div>
+                        <div className='textOfExplanation'>
+                            <div className='manualText'>
+                                You are a detective in a mysterious mansion.
+                                You have to find the secret door code to find the golden book. 
+                                You can find hints in the books around the place.
+                            </div>
+                            <div className="manualText">
+                                <p><b>Hint 1:</b> Books might contains two numbers.</p>
+                                <p><b>Hint 2:</b> First number refers to position in the code.</p> 
+                                <p><b>Hint 3:</b> Second number refers to the digit at the position.</p>
+                                <p><b>Hint 4:</b> Code length is 3-4 digits.</p>
+                            </div>
+                                <b>Good Luck!</b>
 
+                        </div>
                 </div>
             </div>
         </div>

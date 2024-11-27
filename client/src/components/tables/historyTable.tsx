@@ -11,8 +11,8 @@ interface CustomTableProps {
 const gameModes = [
     'All', 
     'Q&A', 
-    'Catch the Word', 
-    // 'Mode 3'
+    'Catch the Word',
+    'BookScape'
 ];
 
 const HistoryTable: React.FC<CustomTableProps> = ({ data }) => {

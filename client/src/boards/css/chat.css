@@ -83,17 +83,17 @@
 }
 .users_list {
     display: flex;
-    flex: 9;
     color: var(--textColor);
     font-family: var(--fontStyle);
     flex-direction: column;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+    height: 10vh;
     padding: 5%;
 }
 
 /* CHAT */
-
-
 
 .chat_header {
     display: flex;
