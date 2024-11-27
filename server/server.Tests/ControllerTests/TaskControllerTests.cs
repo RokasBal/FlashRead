@@ -79,7 +79,7 @@ namespace server.Tests {
             // Arrange
             SetUserEmail("test@example.com");
 
-            var taskText = new DbTask1Text { Id = 1, Theme = Task1.Theme.Anime, Text = "Sample Text" };
+            var taskText = new DbTask1Text { Id = 1, Theme = "Anime", Text = "Sample Text" };
             var taskQuestion = new DbTask1Question
             {
                 Id = 1,

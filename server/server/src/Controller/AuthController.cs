@@ -19,13 +19,20 @@ namespace server.Controller {
             {
                 return BadRequest("Invalid user data.");
             }
-            var result = await _userHandler.RegisterUserAsync(user);
-            var token = await _userHandler.LoginUserAsync(user);
-            if (result)
+            try 
             {
-                return Ok(new { Token = token});
+                var result = await _userHandler.RegisterUserAsync(user);
+                var token = await _userHandler.LoginUserAsync(user);
+                if (result)
+                {
+                    return Ok(new { Token = token});
+                }
+                return StatusCode(500, "An error occurred while adding the user.");
             }
-            return StatusCode(500, "An error occurred while adding the user.");
+            catch (UserAlreadyExistsException e)
+            {
+                return StatusCode(500, e.Message);
+            }
         }
         [HttpPost("Users/Login")]
         public async Task<IActionResult> PostLogin([FromBody] UserFromAPI userAPI) {

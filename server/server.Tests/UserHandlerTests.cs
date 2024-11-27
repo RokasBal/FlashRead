@@ -78,7 +78,7 @@ namespace server.Tests {
             }
         }
         [Fact]
-        public async Task RegisterUserAsync_ShouldReturnFalse_WhenUserAlreadyExists()
+        public async Task RegisterUserAsync_ShouldThrow_WhenUserAlreadyExists()
         {
             // Arrange
             var user = new User { Email = "test@example.com", Password = "password123", Name = "Test User"};
@@ -94,11 +94,8 @@ namespace server.Tests {
             _context.Users.Add(dbUser);
             await _context.SaveChangesAsync();
 
-            // Act
-            var result = await _userHandler.RegisterUserAsync(user);
-
-            // Assert
-            Assert.False(result);
+            // Act & Assert
+            await Assert.ThrowsAsync<UserAlreadyExistsException>(() => _userHandler.RegisterUserAsync(user));
         }
 
         [Fact]

@@ -62,7 +62,7 @@ namespace server.Tests {
             };
         }
         [Fact]
-        public async Task GetGlobalChats_ReturnsLast100Chats()
+        public async Task GetGlobalChats_ReturnsLast100Chats_GivenStartIndex()
         {
             // Arrange
             for (int i = 0; i < 150; i++)
@@ -78,13 +78,58 @@ namespace server.Tests {
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _controller.GetGlobalChats();
+            var result = await _controller.GetGlobalChats(0);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var chatList = Assert.IsType<ChatList>(okResult.Value);
             Assert.Equal(100, chatList.Chats.Count);
             Assert.Equal("Chat 150", chatList.Chats.First().ChatText);
+        }
+        
+        [Fact]
+        public async Task GetGlobalChats_ReturnsLast100Chats_GivenNoNewChatsIndex()
+        {
+            // Arrange
+            for (int i = 0; i < 150; i++)
+            {
+            _context.GlobalChats.Add(new DbGlobalChat
+            {
+                ChatIndex = i + 1,
+                ChatText = $"Chat {i + 1}",
+                Author = "test@example.com",
+                WrittenAt = DateTime.UtcNow
+            });
+            }
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.GetGlobalChats(150);
+
+            // Assert
+            var noContentResult = Assert.IsType<NoContentResult>(result);
+        }
+        [Fact]
+        public async Task GetGlobalChats_ReturnsLast100Chats_GivenIndexOfNonExistingChats()
+        {
+            // Arrange
+            for (int i = 0; i < 150; i++)
+            {
+            _context.GlobalChats.Add(new DbGlobalChat
+            {
+                ChatIndex = i + 1,
+                ChatText = $"Chat {i + 1}",
+                Author = "test@example.com",
+                WrittenAt = DateTime.UtcNow
+            });
+            }
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.GetGlobalChats(151);
+
+            // Assert
+            var noContentResult = Assert.IsType<NoContentResult>(result);
         }
         [Fact]
         public async Task SendGlobalChat_ValidUser_ReturnsOkResult()
@@ -122,6 +167,20 @@ namespace server.Tests {
         public async Task SendGlobalChat_InvalidUser_ReturnsUnauthorizedResult()
         {
             // Arrange
+            var chat = new incomingChat("Hello, world!");
+
+            // Act
+            var result = await _controller.SendGlobalChat(chat);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid token.", unauthorizedResult.Value);
+        }
+        [Fact]
+        public async Task SendGlobalChat_NullOrEmptyEmailInToken_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            SetUserEmail(null);
             var chat = new incomingChat("Hello, world!");
 
             // Act
