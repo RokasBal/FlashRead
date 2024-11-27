@@ -27,18 +27,12 @@ namespace server.Controller {
 
             ITask task = ITask.GetTaskFromTaskId(taskId, _context);
             var checkAns = task.CheckAnswer(req);
-            score = checkAns switch {
-                Task1.TaskAnswerResponse task1 => task1.Statistics.Score,
-                _ => throw new Exception("Task not found")
-            };
+            score = ((Task1.TaskAnswerResponse)checkAns).Statistics.Score;
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail) == false)
             {
                 System.Console.WriteLine("Saving task result");
                 await _userHandler.SaveTaskResult(userEmail, req.Session, taskId, score, req.SelectedVariants);
-            }
-            else {
-                System.Console.WriteLine("User not found");
             }
             return checkAns;
         }

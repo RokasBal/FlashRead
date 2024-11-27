@@ -28,7 +28,7 @@ const AboutPage: React.FC = () => {
                         </div>
                         <div className="contact_info">
                             <p className='biggerText'>Chat to us </p>
-                            <p className='contactText' >contact@flashread.com</p>
+                            <p className='contactText' >contact@flashread.games</p>
                         </div>
                     </div>
                     <div className="contact_right">

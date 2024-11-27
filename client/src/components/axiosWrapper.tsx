@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
 
 const getTokenFromCookie = () => {
     const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
@@ -26,5 +26,9 @@ axiosWrapper.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+// eslint-disable-next-line
+export function isAxiosError(error: any): error is AxiosError {
+    return error.isAxiosError === true;
+}
 
 export default axiosWrapper;

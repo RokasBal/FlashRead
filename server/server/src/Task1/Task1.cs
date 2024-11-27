@@ -8,7 +8,7 @@ namespace server.src.Task1 {
         public enum Theme {
             Any, History, Technology, Anime, Politics
         }
-        private enum Difficulty {
+        public enum Difficulty {
             Any, Easy, Medium, Hard, Extreme
         }
         public record TaskQuestion {
@@ -84,7 +84,7 @@ namespace server.src.Task1 {
                 }
             };
         }
-        private (string, TaskQuestion[]) GenerateData(uint sessionId, Theme theme, Difficulty difficulty,
+        public (string, TaskQuestion[]) GenerateData(uint sessionId, Theme theme, Difficulty difficulty,
                                                              bool queryText = true, bool queryAnswers = true) {
             Random generator = new((int)sessionId);
 
@@ -137,7 +137,7 @@ namespace server.src.Task1 {
             }
             return (text, questions.ToArray());
         }
-        private static int GetQuestionCountFromDifficulty(Random generator, Difficulty difficulty) {
+        public static int GetQuestionCountFromDifficulty(Random generator, Difficulty difficulty) {
             int countMin;
             int countMax;
             switch (difficulty) {
