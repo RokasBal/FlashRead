@@ -7,7 +7,7 @@ import '../../boards/css/buttons.css';
 import '../../boards/css/settings.css'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axios, {isAxiosError} from '../../components/axiosWrapper'
+import axios from '../../components/axiosWrapper'
 
 const ChangePassword: React.FC = () => {
     const isAuthenticated = useAuth();
