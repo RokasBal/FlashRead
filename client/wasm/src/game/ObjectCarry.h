@@ -1,8 +1,8 @@
 #pragma once
 
+#include <btBulletDynamicsCommon.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
-#include <btBulletDynamicsCommon.h>
 
 class ObjectCarry {
 public:
@@ -15,12 +15,13 @@ public:
 	void Update(const glm::vec3& holderPos, const glm::vec3& holderFront);
 
 	bool canDropByItself = true;
+
 private:
 	entt::registry& m_registry;
 	float m_dropDistance;
 
-	entt::entity m_carriedEntity{ entt::null };
-	btRigidBody* m_body{ nullptr };
+	entt::entity m_carriedEntity{entt::null};
+	btRigidBody* m_body{nullptr};
 
-	float m_pickupDistance{ 0 };
+	float m_pickupDistance{0};
 };

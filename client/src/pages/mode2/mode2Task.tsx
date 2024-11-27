@@ -15,6 +15,36 @@ interface Mode2TaskProps {
     difficulty: string;
 }
 
+export const getMaxHealth = (difficulty: string) => {
+    switch (difficulty) {
+        case 'Easy':
+            return 10;
+        case 'Medium':
+            return 5;
+        case 'Hard':
+            return 3;
+        case 'EXTREME':
+            return 1;
+        default:
+            return 5;
+    }
+};
+export const handleResize = (setCanvasSize: React.Dispatch<React.SetStateAction<vec2>>) => {
+    const gamePageElement = document.getElementById("mainGameMode2");
+    if (gamePageElement) {
+        const { width, height } = gamePageElement.getBoundingClientRect();
+        setCanvasSize({ x: width, y: height });
+    }
+};
+
+export const getCanvasOffset = (canvasRef: React.MutableRefObject<HTMLCanvasElement | null>) => {
+    if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        const offsetX =  rect.left; // Mouse position relative to the canvas
+        return offsetX;
+    }
+    return 0;
+};
 
 const Mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStarted, setPoints, setCombo, setHealth, setCorrectWords, difficulty }) => {
     const [canvasSize, setCanvasSize] = useState<vec2>({ x: 600, y: 300 });
@@ -28,61 +58,36 @@ const Mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
     let combo = 0;
     let correctWords = 0;
 
-    const getMaxHealth = (difficulty: string) => {
-        switch (difficulty) {
-            case 'Easy':
-                return 10;
-            case 'Medium':
-                return 5;
-            case 'Hard':
-                return 3;
-            case 'EXTREME':
-                return 1;
-            default:
-                return 5;
-        }
-    };
 
     const [healthState, setHealthState] = useState<number>(getMaxHealth(difficulty));
 
     useEffect(() => {
         const maxHealth = getMaxHealth(difficulty);
         setHealthState(maxHealth);
+        setPoints(0);
+        setCombo(0);
+        setCorrectWords(0);
         setHealth(maxHealth);
-    }, [difficulty, setHealth]);
+    }, [difficulty, setHealth, setPoints, setCombo, setCorrectWords]);
 
     let health = healthState;
-    const getCanvasOffset = () => {
-        if (canvasRef.current) {
-            const rect = canvasRef.current.getBoundingClientRect();
-            const offsetX =  rect.left; // Mouse position relative to the canvas
-            return offsetX;
-        }
-        return 0;
-    };
 
     const handleMouseMove = (e: MouseEvent) => {
 
-        const pos = { x: e.clientX / canvasSize.x - getCanvasOffset(), y: 0.1 };
+        const pos = { x: e.clientX / canvasSize.x - getCanvasOffset(canvasRef), y: 0.1 };
         setPlayerPos(pos);
+        setPoints(points);
     };
 
     //CANVAS RESIZE CIA REIK FIXINT
 
     useEffect(() => {
-        const handleResize = () => {
-            const gamePageElement = document.getElementById("mainGameMode2");
-            if (gamePageElement) {
-                const { width, height } = gamePageElement.getBoundingClientRect();
-                setCanvasSize({ x: width, y: height });
-            }
-        };
 
-        window.addEventListener('resize', handleResize);
-        handleResize();
+        window.addEventListener('resize', () => handleResize(setCanvasSize));
+        handleResize(setCanvasSize);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', () => handleResize(setCanvasSize));
         };
     }, []);
 

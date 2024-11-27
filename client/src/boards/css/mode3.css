@@ -33,8 +33,37 @@
 }
 .containerRight {
     display: flex;
+    color: var(--textColor);
     flex: 1;
+    align-items: center;
+    font-family: var(--fontStyle);
+    flex-direction: column;
+    gap: 1vw;
 }
+
+.manualHeader {
+    display: flex;
+    font-weight: bold;
+    font-size: 1.5vw;
+    justify-content: center;
+    align-items: center;
+}
+.manualText {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.textOfExplanation {
+    display: flex;
+    width: 80%;
+    align-items: center;
+    flex-direction: column;
+    gap: 1vw;
+}
+
+
+
 .mode3_middleTop {
     display: flex;
     flex: 7;

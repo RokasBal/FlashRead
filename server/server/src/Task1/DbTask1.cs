@@ -1,7 +1,7 @@
 namespace server.src.Task1 {
     public class DbTask1Text {
         public int Id { get; set; }
-        public Task1.Theme Theme { get; set; }
+        public string Theme { get; set; } = null!;
         public string Text { get; set; } = null!;
     }
     public class DbTask1Question {

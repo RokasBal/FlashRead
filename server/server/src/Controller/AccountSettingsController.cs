@@ -5,6 +5,8 @@ using server.UserNamespace;
 using System.Security.Claims;
 using server.src.Settings;
 using server.Exceptions;
+using server.Utility;
+using Microsoft.AspNetCore.Identity;
 
 namespace server.Controller {
     [Route("api")]
@@ -45,7 +47,7 @@ namespace server.Controller {
             if (user == null) {
                 throw new NotFoundException("User not found.");
             }
-            return Ok(new { Name = user.Name, JoinedAt = user.JoinedAt });   
+            return Ok(new UserInfo{ Name = user.Name, JoinedAt = user.JoinedAt });   
         }
 
         [Authorize]
@@ -104,6 +106,29 @@ namespace server.Controller {
             return Ok(fonts);
         }
 
+        [HttpGet("User/GetUserPageData")]
+        public async Task<IActionResult> GetUserPageData(string username) {
+            var user = await _userHandler.GetUserByNameAsync(username);
+            if (user == null) {
+                throw new NotFoundException("User not found.");
+            }
+            byte[] defaultProfilePic = await Utility.Utility.getDefaultProfilePic();
+
+            var profilePic = await _userHandler.GetUserProfilePicByEmailAsync(user.Email);
+            var history = await _userHandler.GetTaskHistoryByEmail(user.Email);
+
+            if (profilePic == null || profilePic.Length == 0) {
+                profilePic = defaultProfilePic;
+            }
+
+            return Ok(new UserPageData{ 
+                Name = user.Name, 
+                JoinedAt = user.JoinedAt, 
+                ProfilePic = profilePic,
+                History = history
+                });
+        }
+
         [HttpGet("Settings/GetThemeSettingsByTheme")]
         public async Task<IActionResult> GetThemeSettingsByTheme(string theme) {
             var settings = await _settings.GetSettingsByThemeAsync(theme);
@@ -149,5 +174,17 @@ namespace server.Controller {
     public record Name
     {
         public string? Value { get; init; }
+    }
+    public record UserInfo
+    {
+        public string? Name { get; init; }
+        public DateTime? JoinedAt { get; init; }
+    }
+    public record UserPageData
+    {
+        public string? Name { get; init; }
+        public DateTime? JoinedAt { get; init; }
+        public byte[]? ProfilePic { get; init; }
+        public IEnumerable<DbTaskHistory>? History { get; init; }
     }
 }

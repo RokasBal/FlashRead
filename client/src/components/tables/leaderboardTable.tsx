@@ -21,7 +21,7 @@ const gameModes = [
     'All', 
     'Q&A', 
     'Catch the Word', 
-    // 'Mode 3'
+    'BookScape'
 ];
 
 const leaderboardTypes = [
@@ -31,7 +31,101 @@ const leaderboardTypes = [
 
 const taskIdToGameMode: { [key: number]: string } = {
     1: "Q&A",
-    2: "Catch the Word"
+    2: "Catch the Word",
+    3: "BookScape"
+};
+
+export const checkNextPage = async (pageNumber: number, type: string): Promise<boolean> => {
+    try {
+        if (type === "All time score") {
+            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+            return response.data.length === 0;
+        } else if (type === "High score") {
+            const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+            return response.data.length === 0;
+        }
+    } catch (error) {
+        console.error("Error checking next page:", error);
+        return true;
+    }
+    return true;
+};
+
+export const handleTypeChoice = (choice: string, type: string,
+    setType: React.Dispatch<React.SetStateAction<string>>,
+    setPage: React.Dispatch<React.SetStateAction<number>>
+) => {
+    if (choice !== type) {
+        if (choice === "All time score") {
+            setType(choice);
+            setPage(1);
+        } else if (choice === "High score") {
+            setType(choice);
+            setPage(1);
+        }
+    }
+};
+
+export const fetchHighScoreLeaderboard = async (pageNumber: number,
+    setPageUser: React.Dispatch<React.SetStateAction<number>>,
+    setLeaderboadData: React.Dispatch<React.SetStateAction<TableRow[]>>,
+    type: string,
+    page: number,
+    setIsNextPageBlank: React.Dispatch<React.SetStateAction<boolean>>
+    ) => {
+    console.log("fetching high score leaderboard");
+    try {
+        const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
+        console.log("response", response);
+        const transformedData = response.data.map((item: HighScoreLeaderboardItem) => {
+            return {
+                username: item.name,
+                score: item.score,
+                gamemode: taskIdToGameMode[Number(item.gamemode)],
+            };
+        });
+        setPageUser(pageNumber);
+        setLeaderboadData(transformedData);
+        checkNextPage(page+1, type).then(setIsNextPageBlank);
+    } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+    }
+};
+
+export const handleSort = (key: keyof TableRow, setSortConfig: React.Dispatch<React.SetStateAction<{
+    key: keyof TableRow;
+    direction: "asc" | "desc";
+} | null>>) => {
+    setSortConfig((prevConfig) => {
+        if (prevConfig && prevConfig.key === key) {
+            return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
+        }
+        return { key, direction: 'asc' };
+    });
+};
+
+export const fetchAllLeaderboard = async (pageNumber: number,
+    setLeaderboadData: React.Dispatch<React.SetStateAction<TableRow[]>>,
+    setPageUser: React.Dispatch<React.SetStateAction<number>>,
+    page: number,
+    type: string,
+    setIsNextPageBlank: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+    console.log("fetching all leaderboard");
+    try {
+        const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
+        const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
+            return {
+                username: item.name,
+                score: item.score,
+            };
+        });
+        setLeaderboadData(transformedData);
+        setPageUser(pageNumber);
+        checkNextPage(page+1, type).then(setIsNextPageBlank);
+    } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+    }
 };
 
 const LeaderboardTable: React.FC = () => {
@@ -41,39 +135,9 @@ const LeaderboardTable: React.FC = () => {
     const [leaderboardData, setLeaderboadData] = useState<TableRow[]>([]);
     const [page, setPage] = useState<number>(1);
     const [isNextPageBlank, setIsNextPageBlank] = useState<boolean>(false);
+    const [pageUser, setPageUser] = useState<number>(1);
 
     const headers = type === 'All time score' ? ['username', 'score'] : ['username', 'gamemode', 'score'];
-
-    const fetchAllLeaderboard = async (pageNumber: number) => {
-        try {
-            const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-            const transformedData = response.data.map((item: AllTimeLeaderboardItem) => {
-                return {
-                    username: item.name,
-                    score: item.score,
-                };
-            });
-            setLeaderboadData(transformedData);
-        } catch (error) {
-            console.error("Error fetching leaderboard data:", error);
-        }
-    };
-    
-    const fetchHighScoreLeaderboard = async (pageNumber: number) => {
-        try {
-            const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
-            const transformedData = response.data.map((item: HighScoreLeaderboardItem) => {
-                return {
-                    username: item.name,
-                    score: item.score,
-                    gamemode: taskIdToGameMode[Number(item.gamemode)],
-                };
-            });
-            setLeaderboadData(transformedData);
-        } catch (error) {
-            console.error("Error fetching leaderboard data:", error);
-        }
-    };
 
     const filteredData = React.useMemo(() => {
         if (mode === 'All') {
@@ -106,78 +170,41 @@ const LeaderboardTable: React.FC = () => {
         return [...sortedData, ...Array(emptyRows).fill(emptyRow)];
     }, [sortedData]);
 
-    const handleSort = (key: keyof TableRow) => {
-        setSortConfig((prevConfig) => {
-            if (prevConfig && prevConfig.key === key) {
-                return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
-            }
-            return { key, direction: 'asc' };
-        });
-    };
-
-    const checkNextPage = async (pageNumber: number): Promise<boolean> => {
-        try {
-            if (type === "All time score") {
-                const response = await axios.post('/api/Users/TotalScoreLeaderboard?page=' + pageNumber);
-                return response.data.length === 0;
-            } else if (type === "High score") {
-                const response = await axios.post('/api/Users/HighScoreLeaderboard?page=' + pageNumber);
-                return response.data.length === 0;
-            }
-        } catch (error) {
-            console.error("Error checking next page:", error);
-            return true;
-        }
-        return true;
-    };
-
     const updatePage = async (pageNumber: number) => {
-        const nextPageBlank = await checkNextPage(pageNumber + 1);
-        setIsNextPageBlank(nextPageBlank);
         setPage(pageNumber);
-        fetchAllLeaderboard(pageNumber);
     }
-
-    const handleTypeChoice = (choice: string) => {
-        if (choice !== type) {
-            if (choice === "All time score") {
-                setType(choice);
-                setPage(1);
-                fetchAllLeaderboard(1);
-            } else if (choice === "High score") {
-                setType(choice);
-                setPage(1);
-                fetchHighScoreLeaderboard(1);
-            }
-        }
-    };
-
+    const handleTypeChoiceCall = () => (choice: string) => handleTypeChoice(choice, type, setType, setPage);
+    const handleSortCall = (key: keyof TableRow) => handleSort(key, setSortConfig);
     useEffect(() => {
         if (type === "All time score") {
-            fetchAllLeaderboard(page);
+            fetchAllLeaderboard(page, setLeaderboadData, setPageUser, page, type, setIsNextPageBlank);
         } else {
-            fetchHighScoreLeaderboard(page);
+            fetchHighScoreLeaderboard(page, setPageUser, setLeaderboadData, type, page, setIsNextPageBlank);
         }
-        checkNextPage(page + 1).then(setIsNextPageBlank);
     }, [page, type]);
 
+    useEffect(() => {
+        checkNextPage(page + 1, type).then(setIsNextPageBlank);
+    },[pageUser]);
     return (
         <div className="customTableContainer">
             <div className="tableFilter">
                 {type !== "All time score" && (
                     <ChoiceBox choices={gameModes} prompt='Modes:' onSelect={(choice: string) => setMode(choice)} label="Mode" defaultValue={mode} />
                 )}
-                <ChoiceBox choices={leaderboardTypes} prompt='Type:' onSelect={handleTypeChoice} label="Type" defaultValue={type} />
+                <ChoiceBox choices={leaderboardTypes} prompt='Type:' onSelect={handleTypeChoiceCall()} label="Type" defaultValue={type} />
             </div>
-            <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSort} />
+            {/* <div className='containerCenter'> */}
+                <TableContent data={filledData} headers={headers} sortConfig={sortConfig} handleSort={handleSortCall} />
+            {/* </div> */}
             <div className="paginationControls">
                 <div className="left">
-                    {page > 1 && (
+                    {pageUser > 1 && (
                         <CustomButton label="Previous" className="wideButton" id="gameHistoryButton" onClick={() => updatePage(Math.max(page - 1, 1))}/>
                     )}
                 </div>
                 <div className="center">
-                    <span className="pageIndicator">Page {page}</span>
+                    <span className="pageIndicator">Page {pageUser}</span>
                 </div>
                 <div className="right">
                     {!isNextPageBlank && (

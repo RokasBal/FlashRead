@@ -61,6 +61,52 @@ type Task3Handler = {
     data: CheckSecretDoorCodeRequest | CheckSecretDoorCodeResponse | GetBookHintsRequest | GetBookHintsResponse;
 };
 
+const checkDoorCodeAsync = async (taskRef: React.MutableRefObject<number>, code: string) => {
+    const data: CheckSecretDoorCodeRequest = {
+        code: code
+    };
+    const request: Task3Handler = {
+        taskVersion: taskRef.current,
+        data: data
+    };
+    try {
+        const axiosResponse = await axios.post("/api/CheckSecretDoorCode", request);
+        const data = axiosResponse.data.data as CheckSecretDoorCodeResponse;
+        return data.isCorrect;
+    } catch (err) {
+        console.error('Error posting task3 doorcode:', err);
+        return false;
+    }
+};
+const getBookHintsAsync = async (taskRef: React.MutableRefObject<number>, count: number) => {
+    const data: GetBookHintsRequest = {
+        count: count
+    };
+    const request: Task3Handler = {
+        taskVersion: taskRef.current,
+        data: data
+    };
+    try {
+        const axiosResponse = await axios.post("/api/GetBookHints", request);
+        const data = axiosResponse.data as Task3Handler;
+        taskRef.current = data.taskVersion;
+        const hintData = data.data as GetBookHintsResponse;
+        return hintData.hints;
+    } catch (err) {
+        console.error('Error posting task3 bookhints:', err);
+        return [];
+    }
+};
+const saveTimeTakenAsync = async (timeTaken: number) => {
+    try {
+        await axios.post('/api/SaveTask3TimeTaken?seconds=' + timeTaken);
+    } catch (err) {
+        console.error('Error posting task3 saveTimeTaken:', err);
+    }
+};
+
+export { checkDoorCodeAsync, getBookHintsAsync, saveTimeTakenAsync };
+
 const Mode3Page: React.FC = () => {
     const navigate = useNavigate();
     const [canvasSize, setCanvasSize] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -68,43 +114,6 @@ const Mode3Page: React.FC = () => {
     const canvasOnScreen = useOnScreen(canvasRef);
     const moduleRef = useRef<MainModule>();
     const taskVersionRef = useRef<number>(0);
-
-    const checkDoorCodeAsync = async (code: string) => {
-        const data: CheckSecretDoorCodeRequest = {
-            code: code
-        };
-        const request: Task3Handler = {
-            taskVersion: taskVersionRef.current,
-            data: data
-        };
-        try {
-            const axiosResponse = await axios.post("/api/CheckSecretDoorCode", request);
-            const data = axiosResponse.data.data as CheckSecretDoorCodeResponse;
-            return data.isCorrect;
-        } catch (err) {
-            console.error('Error posting task3 doorcode:', err);
-            return false;
-        }
-    };
-    const getBookHintsAsync = async (count: number) => {
-        const data: GetBookHintsRequest = {
-            count: count
-        };
-        const request: Task3Handler = {
-            taskVersion: taskVersionRef.current,
-            data: data
-        };
-        try {
-            const axiosResponse = await axios.post("/api/GetBookHints", request);
-            const data = axiosResponse.data as Task3Handler;
-            taskVersionRef.current = data.taskVersion;
-            const hintData = data.data as GetBookHintsResponse;
-            return hintData.hints;
-        } catch (err) {
-            console.error('Error posting task3 bookhints:', err);
-            return [];
-        }
-    };
 
     useEffect(() => {
         console.log("Loading mode3 wasm module ...");
@@ -117,13 +126,13 @@ const Mode3Page: React.FC = () => {
             (moduleRef.current as any)['canvas'] = document.getElementById('canvas') as HTMLCanvasElement;
             // eslint-disable-next-line
             (window as any).checkDoorCode = (code: string) => {
-                checkDoorCodeAsync(code).then((isCorrect) => {
+                checkDoorCodeAsync(taskVersionRef, code).then((isCorrect) => {
                     moduleRef.current?.checkDoorCodeResponse(isCorrect);
                 });
             };
             // eslint-disable-next-line
             (window as any).getBookHints = (count: number) => {
-                getBookHintsAsync(count).then((hints) => {
+                getBookHintsAsync(taskVersionRef, count).then((hints) => {
                     if (!moduleRef.current) return;
                     const hintList = new moduleRef.current.StringList();
                     for (const hint of hints) {
@@ -132,6 +141,11 @@ const Mode3Page: React.FC = () => {
                     moduleRef.current?.setBookHints(hintList);
                 });
             };
+            // eslint-disable-next-line
+            (window as any).winGame = (timeTaken: number) => {
+                saveTimeTakenAsync(Math.floor(timeTaken));
+            };
+
             // try-catch is a must because emscripten_set_main_loop() throws to exit the function
             try {
                 moduleRef.current?.start();
@@ -279,6 +293,16 @@ const Mode3Page: React.FC = () => {
                             <p>- Take / Drop</p>
                         </div>
                     </div>
+                    <div className="fullScreen">
+                        <div className="controls">
+                            <div className="key">
+                                <p>P</p>
+                            </div>
+                        </div>
+                        <div className="controlsText">
+                            <p>- Settings</p>
+                        </div>
+                    </div>
                 </div>
                 <div className='mode3_containerMiddle'>
                     <div className='mode3_middleTop'>
@@ -301,7 +325,22 @@ const Mode3Page: React.FC = () => {
                     </div>
                 </div>
                 <div className='containerRight'>
+                        <div className='manualHeader'>Explanation</div>
+                        <div className='textOfExplanation'>
+                            <div className='manualText'>
+                                You are a detective in a mysterious mansion.
+                                You have to find the secret door code to find the golden book. 
+                                You can find hints in the books around the place.
+                            </div>
+                            <div className="manualText">
+                                <p><b>Hint 1:</b> Books might contains two numbers.</p>
+                                <p><b>Hint 2:</b> First number refers to position in the code.</p> 
+                                <p><b>Hint 3:</b> Second number refers to the digit at the position.</p>
+                                <p><b>Hint 4:</b> Code length is 3-4 digits.</p>
+                            </div>
+                                <b>Good Luck!</b>
 
+                        </div>
                 </div>
             </div>
         </div>

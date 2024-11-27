@@ -113,6 +113,56 @@ namespace server.Tests {
             Assert.Equal("Invalid token.", exception.Message);
         }
         [Fact]
+        public async Task GetUserInfo_ReturnsOkResult_WithUserInfo()
+        {
+            // Arrange
+            var user = new User("jane.doe@example.com", "password123", "Jane Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString(),
+                JoinedAt = DateTime.Now
+            };
+            
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+            SetUserEmail(user.Email);
+
+            // Act
+            var result = await _controller.GetUserInfo();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnValue = Assert.IsType<UserInfo>(okResult.Value);
+            Assert.Equal("Jane Doe", returnValue.Name);
+            Assert.Equal(dbUser.JoinedAt, returnValue.JoinedAt);
+        }
+        [Fact]
+        public async Task GetUserInfo_ReturnsNotFound_WhenUserNotFound()
+        {
+            // Arrange
+            var userEmail = "nonexistent@example.com";
+            SetUserEmail(userEmail);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetUserInfo());
+            Assert.Equal("User not found.", exception.Message);
+        }
+        [Fact]
+        public async Task GetUserInfo_ReturnsUnauthorized_WhenEmailClaimIsMissing()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            // Assert
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () => await _controller.GetUserInfo());
+            Assert.Equal("Invalid token.", exception.Message);
+        }
+        [Fact]
         public async Task GetThemeSettings_ReturnsOkResult_WithThemeSettings()
         {
             // Arrange
@@ -152,6 +202,45 @@ namespace server.Tests {
             var returnValue = Assert.IsType<DbSettingsTheme>(okResult.Value);
             Assert.Equal("dark", returnValue.Theme);
         }
+        [Fact]
+        public async Task GetThemeSettings_ReturnsNotFoundException_SettingsIdIsNull()
+        {
+            // Arrange
+            var user = new User("jane.doe@example.com", "password123", "Jane Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString()
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+            SetUserEmail(user.Email); 
+
+            var themeSettings = new DbSettingsTheme { Theme = "dark" };
+            themeSettings.MainBackground = "#000000";
+            themeSettings.SecondaryBackground = "#111111";
+            themeSettings.PrimaryColor = "#222222";
+            themeSettings.AccentColor = "#333333";
+            themeSettings.TextColor = "#444444";
+            themeSettings.BorderColor = "#555555";
+            _context.SettingsThemes.Add(themeSettings);
+            await _context.SaveChangesAsync();
+
+            var userSettings = new DbUserSettings { Id = dbUser.SettingsId, Theme = "dark", Font = "Arial" };
+            _context.UserSettings.Add(userSettings);
+            await _context.SaveChangesAsync();
+
+            await _context.Users.Where(u => u.Email == user.Email).ForEachAsync(u => u.SettingsId = null);
+
+            // Assert & Act
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetThemeSettings());
+            Assert.Equal("Settings not found.", exception.Message);
+        }
+
         [Fact]
         public async Task GetThemeSettings_ReturnsNotFound_WhenSettingsNotFound()
         {
@@ -254,6 +343,38 @@ namespace server.Tests {
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnValue = Assert.IsType<DbSettingsFont>(okResult.Value);
             Assert.Equal("Arial", returnValue.Font);
+        }
+        [Fact]
+        public async Task GetFontSettings_ReturnsNotFoundException_WhenSettingsIdIsNull()
+        {
+            // Arrange
+            var user = new User("jane.doe@example.com", "password123", "Jane Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString()
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+            SetUserEmail(user.Email);
+
+            var fontSettings = new DbSettingsFont { Font = "Arial", FontFamily = "Arial, sans-serif" };
+            _context.SettingsFonts.Add(fontSettings);
+            await _context.SaveChangesAsync();
+
+            var userSettings = new DbUserSettings { Id = dbUser.SettingsId, Theme = "Dark", Font = "Arial" };
+            _context.UserSettings.Add(userSettings);
+            await _context.SaveChangesAsync();
+
+            await _context.Users.Where(u => u.Email == user.Email).ForEachAsync(u => u.SettingsId = null);
+
+            // Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetFontSettings());
+            Assert.Equal("Settings not found.", exception.Message);
         }
         [Fact]
         public async Task GetFontSettings_ReturnsUnauthorized_WhenEmailClaimIsMissing()
@@ -430,6 +551,44 @@ namespace server.Tests {
             Assert.Equal("Font updated successfully.", okResult.Value);
         }
 
+        [Fact]
+        public async Task GetUserPageData_ReturnsNotFound_WhenEmailNotFound()
+        {
+            // Arrange
+            var username = "john.doe";
+            var email = "john.doe@example.com";
+            
+            
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetUserPageData(username));
+            Assert.Equal("User not found.", exception.Message);
+        }
+        // [Fact]
+        // public async Task GetUserPageData_ReturnsOkResult_WithUserData()
+        // {
+        //     // Arrange
+        //     var user = new User("jane.doe@example.com", "password123", "Jane Doe");
+        //     user.Password = _userHandler.HashPassword(user.Password);
+        //     var dbUser = new DbUser
+        //     {
+        //         Name = user.Name,
+        //         Email = user.Email,
+        //         Password = user.Password,
+        //         SessionsId = Guid.NewGuid().ToString(),
+        //         SettingsId = Guid.NewGuid().ToString(),
+        //         JoinedAt = DateTime.Now,
+        //         HistoryIds = new string[0],
+        //         ProfilePic = new byte[0]
+        //     };
+        //     _context.Users.Add(dbUser);
+        //     await _context.SaveChangesAsync();
+        //     SetUserEmail(user.Email);
+
+        //     // Act
+        //     var result = await _controller.GetUserPageData("Jane Doe");
+        //     var okResult = Assert.IsType<OkObjectResult>(result);
+        //     var returnValue = Assert.IsType<UserPageData>(okResult.Value);
+        // }
         [Fact]
         public async Task UpdateSelectedFont_ReturnsNotFound_WhenSettingsNotFound()
         {

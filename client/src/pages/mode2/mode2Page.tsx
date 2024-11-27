@@ -83,7 +83,7 @@ const Mode2Page: React.FC = () => {
     }, [gameEnded]);
 
     const hearts = Array.from({length: health}, (_, i) => (
-        <img src={fullHeart}
+        <img role='img' src={fullHeart}
         key={i} 
         className="heart"
         />

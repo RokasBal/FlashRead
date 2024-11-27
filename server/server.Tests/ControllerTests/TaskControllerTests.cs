@@ -29,7 +29,7 @@ namespace server.Tests {
         public TaskControllerTests()
         {
             var options = new DbContextOptionsBuilder<FlashDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabaseaaa")
             .Options;
             _context = new FlashDbContext(options);
 
@@ -74,12 +74,20 @@ namespace server.Tests {
             Assert.Equal("Task not found", exception.Message);
         }
         [Fact]
-        public async Task PostGetTaskAnswer_ReturnsCorrectResponse()
+        public async Task PostGetTaskAnswer_ReturnsNotImplemented()
+        {
+            SetUserEmail("test@example.com");
+            uint session = ITask.GenerateSessionBase(2);
+            var request = new TaskAnswerRequest { Session = session, SelectedVariants = new int[] { 1, 2 } };
+            var exception = await Assert.ThrowsAsync<NotImplementedException>(async () => await _controller.PostGetTaskAnswer(request));
+        }
+        [Fact]
+        public async Task PostGetTaskAnswer_ReturnsCorrectAnswer()
         {
             // Arrange
             SetUserEmail("test@example.com");
 
-            var taskText = new DbTask1Text { Id = 1, Theme = Task1.Theme.Anime, Text = "Sample Text" };
+            var taskText = new DbTask1Text { Id = 1, Theme = "Anime", Text = "Sample Text" };
             var taskQuestion = new DbTask1Question
             {
                 Id = 1,
@@ -92,16 +100,34 @@ namespace server.Tests {
             _context.Task1Questions.Add(taskQuestion);
             await _context.SaveChangesAsync();
 
-            // var request = new TaskAnswerRequest { Session = 123, SelectedVariants = new int[] { 1, 2 } };
-            // var result = await _controller.PostGetTaskAnswer(request);
+            uint session = ITask.GenerateSessionBase(1);
+            var request = new TaskAnswerRequest { Session = session, SelectedVariants = new int[] { 1 } };
 
-            // Assert
-            // var okResult = Assert.IsType<OkObjectResult>(result);
-            // var response = Assert.IsType<Task1.TaskAnswerResponse>(okResult.Value);
-            // Assert.NotNull(response);
-            // Assert.Equal(2, response.Answers.Length);
-            // Assert.Equal(1, response.Statistics.Correct);
+            var ans = _controller.PostGetTaskAnswer(request);
+            Assert.IsType<Task1.TaskAnswerResponse>(ans.Result);
+            System.Console.WriteLine(ans);
         }
+        [Fact]
+        public async Task PostGetTask2Score_UserNotFound()
+        {
+            // Arrange
+            SetUserEmail(null);
+
+            var ans = _controller.GetTask2Score(50);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(ans.Result);
+            Assert.Equal("User not found.", notFoundResult.Value);
+        }
+        [Fact]
+        public async Task PostGetTask2Score_SavesScore()
+        {
+            // Arrange
+            SetUserEmail("test@example.com");
+
+            var ans = _controller.GetTask2Score(50);
+            var OkResult = Assert.IsType<OkObjectResult>(ans.Result);
+            Assert.Equal("Mode 2 score saved", OkResult.Value);
+        }
+            
         public void Dispose()
         {
             _context.Database.EnsureDeleted();

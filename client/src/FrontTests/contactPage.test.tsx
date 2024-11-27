@@ -28,7 +28,7 @@ describe('ContactPage', () => {
         expect(screen.getByText('Edvinas')).toBeInTheDocument();
         expect(screen.getByText('Aurelijus')).toBeInTheDocument();
         expect(screen.getByText('Chat to us')).toBeInTheDocument();
-        expect(screen.getByText('contact@flashread.com')).toBeInTheDocument();
+        expect(screen.getByText('contact@flashread.games')).toBeInTheDocument();
     });
 
     test('renders form fields', () => {

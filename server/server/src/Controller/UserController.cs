@@ -58,8 +58,6 @@ namespace server.Controller {
             }
             var user = await _userHandler.GetUserByEmailAsync(userEmail);
             if (user != null) {
-                Console.WriteLine("defaultPicture: ");
-                Console.WriteLine(user.ProfilePic);
                 if (user.ProfilePic == null || user.ProfilePic.Length == 0) {
                     var defaultPicturePath = Path.Combine(Directory.GetCurrentDirectory(), "src", "images", "defaultPicture.jpg");
                     var defaultPicture = await System.IO.File.ReadAllBytesAsync(defaultPicturePath);
@@ -159,18 +157,11 @@ namespace server.Controller {
             if (page < 1) {
                 return BadRequest("Invalid page number.");
             }
-            var users = await _userHandler.GetAllUsersAsync();
-            
-            var updatedUsers = new List<UserScore>();
-            foreach (var user in users) {
-                var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
-                var totalScore = userHistory.Sum(history => history.Score);
-                updatedUsers.Add(new UserScore { Name = user.Name, Score = totalScore });
-            }
-
-            var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
             var pageSize = 10;
-            var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
+            var skip = (page - 1) * pageSize;
+            
+            var pagedResult = await _userHandler.GetTotalScoresAsync(skip, pageSize);
+            
             return Ok(pagedResult);
         }
 
@@ -179,28 +170,13 @@ namespace server.Controller {
             if (page < 1) {
                 return BadRequest("Invalid page number.");
             }
-            var users = await _userHandler.GetAllUsersAsync();
             
-            var updatedUsers = new List<UserScore>();
-            foreach (var user in users) {
-                var userHistory = await _userHandler.GetTaskHistoryByEmail(user.Email);
-                if (userHistory.Any()) {
-                    var highestScores = userHistory
-                        .GroupBy(history => history.TaskId)
-                        .Select(group => group
-                            .OrderByDescending(history => history.Score)
-                            .First()
-                        )
-                        .Select(history => new UserScore { Name = user.Name, Score = history.Score, Gamemode = history.TaskId });
-
-                    updatedUsers.AddRange(highestScores);
-                }
-            }
-
-            var sortedResult = updatedUsers.OrderByDescending(user => user.Score);
             var pageSize = 10;
-            var pagedResult = sortedResult.Skip((page - 1) * pageSize).Take(pageSize);
-            return Ok(pagedResult);
+            var skip = (page - 1) * pageSize;
+
+            var highScores = await _userHandler.GetHighScoresAsync(skip, pageSize);
+
+            return Ok(highScores);
         }
     }
     public record UserScore {
@@ -214,5 +190,10 @@ namespace server.Controller {
     }
     public record ChangeUserNameRequest {
         public string? NewName { get; set; }
+    }
+    public record ActivityRequest {
+        public string? Email { get; set; }
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
     }
 }

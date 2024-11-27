@@ -30,8 +30,8 @@ describe('BulletPoints', () => {
         render(<BulletPoints choices={choices} correctVariant={1} selectedVariant={0} />)
         const correctBullet = screen.getByText('Choice 2')
         const incorrectBullet = screen.getByText('Choice 1')
-        expect(correctBullet).toHaveStyle('color: #0000FF')
-        expect(incorrectBullet).toHaveStyle('color: #FF0000')
+        expect(correctBullet).toHaveStyle('color: #00A7CC')
+        expect(incorrectBullet).toHaveStyle('color: #D61F34')
     })
 
     it('does not allow selection when correctVariant is defined', () => {
@@ -40,4 +40,22 @@ describe('BulletPoints', () => {
         const selectedBullet = screen.getByText('Choice 1')
         expect(selectedBullet).toHaveStyle('list-style-type: circle')
     })
+
+    it('displays green color for the correct and selected bullet', () => {
+        render(<BulletPoints choices={choices} correctVariant={1} selectedVariant={1} />);
+        const correctSelectedBullet = screen.getByText('Choice 2');
+        expect(correctSelectedBullet).toHaveStyle('color: #46C36C');
+    });
+
+    it('displays default color for unselected bullets when no correctVariant is defined', () => {
+        render(<BulletPoints choices={choices} />);
+        const unselectedBullet = screen.getByText('Choice 1');
+        expect(unselectedBullet).toHaveStyle('color: var(--textColor)');
+    });
+
+    it('displays default color for unselected bullets when correctVariant is defined but not selected', () => {
+        render(<BulletPoints choices={choices} correctVariant={1} />);
+        const unselectedBullet = screen.getByText('Choice 3');
+        expect(unselectedBullet).toHaveStyle('color: var(--textColor)');
+    });
 })

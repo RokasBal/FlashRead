@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "../Script.h"
 
@@ -11,6 +11,7 @@ public:
 	~MainScript() override = default;
 
 	void Update(TimeDuration dt) override;
+
 private:
 	std::vector<std::unique_ptr<Script>> m_scripts;
 };

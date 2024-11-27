@@ -5,6 +5,7 @@ using server.src;
 using server.UserNamespace;
 using Microsoft.EntityFrameworkCore;
 using server.Services;
+using server.Controller;
 namespace server.UserNamespace {
     public class UserHandler(FlashDbContext _context, TokenProvider tokenProvider, HistoryManager historyManager, SessionManager sessionManager)
     {
@@ -14,23 +15,21 @@ namespace server.UserNamespace {
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
             if (existingUser != null)
             {
-                return false;
+                throw new UserAlreadyExistsException("A user with this email already exists.");
             }
+
+            var existingUsername = await _context.Users.FirstOrDefaultAsync(u => u.Name == user.Name);
+            if (existingUsername != null) {
+                throw new UserAlreadyExistsException("A user with this username already exists.");
+            }
+
             var dbUser = convertUserToDbUser(user);
             dbUser.Password = HashPassword(dbUser.Password);
             dbUser.ProfilePic = null;
             await createSettingsId(dbUser);
             await createSessionsId(dbUser);
-            try
-            {
-                _context.Users.Add(dbUser);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
             return true;
         }
         public async Task<string> LoginUserAsync(User user)
@@ -57,16 +56,8 @@ namespace server.UserNamespace {
             {
                 return false;
             }
-            try
-            {
-                _context.Users.Remove(dbUser);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            _context.Users.Remove(dbUser);
+            await _context.SaveChangesAsync();
             return true;
         }
         public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -163,21 +154,20 @@ namespace server.UserNamespace {
         }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+           var dbUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+
             if (dbUser == null)
             {
                 return new List<DbTaskHistory>();
             }
-            List<DbTaskHistory> taskHistories = new List<DbTaskHistory>();
-            foreach (var historyId in dbUser.HistoryIds)
-            {
-                var taskHistory = await _context.UserTaskHistories.FirstOrDefaultAsync(h => h.Id == historyId);
-                if (taskHistory != null)
-                {
-                    taskHistories.Add(taskHistory);
-                }
-            }
+            var taskHistories = await _context.UserTaskHistories
+                .Where(h => dbUser.HistoryIds.Contains(h.Id))
+                .ToListAsync();
+
             return taskHistories;
+
+            //FIX THIS QUERY
         }
 
         public async Task<string?> GetSettingsFontById(string id)
@@ -243,6 +233,81 @@ namespace server.UserNamespace {
             }
             _context.Users.Remove(dbUser);
             await _context.SaveChangesAsync();
+        }
+        public async Task<Byte[]?> GetUserProfilePicByEmailAsync(string email)
+        {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (dbUser == null)
+            {
+                return null;
+            }
+            return dbUser.ProfilePic ?? Array.Empty<byte>();
+        }
+        public async Task<IEnumerable<UserScore>> GetTotalScoresAsync(int skip, int take) {
+           var usersWithHistories = await _context.Users
+                .ToListAsync();
+
+            var userHistories = usersWithHistories
+                .SelectMany(user => user.HistoryIds.Select(historyId => new { user.Name, historyId }))
+                .Join(_context.UserTaskHistories,
+                    userHistory => userHistory.historyId,
+                    history => history.Id,
+                    (userHistory, history) => new { userHistory.Name, history.Score })
+                .ToList();
+
+            var groupedHistories = userHistories
+                .GroupBy(uh => uh.Name)
+                .Select(g => new {
+                    g.Key,
+                    Score = g.Sum(h => h.Score)
+                })
+                .OrderByDescending(g => g.Score)
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return groupedHistories.Select(g => new UserScore {
+                Name = g.Key,
+                Score = g.Score
+            });
+        }
+        public async Task<IEnumerable<UserScore>> GetHighScoresAsync(int skip, int take) {
+            var usersWithHistories = await _context.Users
+                .ToListAsync();
+
+            var userHistories = usersWithHistories
+                .SelectMany(user => user.HistoryIds.Select(historyId => new { user.Name, historyId }))
+                .Join(_context.UserTaskHistories,
+                    userHistory => userHistory.historyId,
+                    history => history.Id,
+                    (userHistory, history) => new { userHistory.Name, history.TaskId, history.Score })
+                .ToList();
+
+            var groupedHistories = userHistories
+                .GroupBy(uh => new { uh.Name, uh.TaskId })
+                .Select(g => new {
+                    g.Key.Name,
+                    g.Key.TaskId,
+                    Score = g.Max(h => h.Score)
+                })
+                .OrderByDescending(g => g.Score)
+                .Skip(skip)
+                .Take(take)
+                .ToList();
+
+            return groupedHistories.Select(g => new UserScore {
+                Name = g.Name,
+                Score = g.Score,   
+                Gamemode = g.TaskId
+            });
+        }
+        public async Task<DbUser?> GetUserByNameAsync(string name) {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            if (dbUser == null)
+            {
+                return null;
+            }
+            return dbUser;
         }
     }
 }

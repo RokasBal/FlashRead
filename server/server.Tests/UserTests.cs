@@ -52,5 +52,31 @@ namespace server.Tests {
             Assert.Equal(user.Password, dbUser.Password);
             Assert.Equal(user.Name, dbUser.Name);
         }
+
+        [Fact]
+        public void GetScoreTest()
+        {
+            // Arrange
+            var user = new User("test@example.com", "password123", "Test User", 10);
+
+            // Act
+            var score = user.GetScore();
+
+            // Assert
+            Assert.Equal(10, score);
+        }
+
+        [Fact]
+        public void GetPasswordTest()
+        {
+            // Arrange
+            var user = new User("test@example.com", "password123", "Test User", 10);
+
+            // Act
+            var password = user.GetPassword();
+
+            // Assert
+            Assert.Equal("password123", password);
+        }
     }
 }

@@ -20,15 +20,15 @@ namespace server.src {
         public DbSet<DbUserSessions> UserSessions { get; set; }
         public DbSet<DbUserSingleSession> UserSingleSessions { get; set; }
         public DbSet<DbLogs> Logs { get; set; }
+        public DbSet<DbGlobalChat> GlobalChats { get; set; }
         public FlashDbContext(DbContextOptions<FlashDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.HasPostgresEnum<Task1.Task1.Theme>(schema: "task1", name: "theme");
             modelBuilder.Entity<DbTask1Text>(entity => {
                 entity.ToTable("texts", "task1");
                 entity.HasKey(e => e.Id).HasName("texts_pkey");
                 entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.Theme).HasColumnName("theme");
+                entity.Property(e => e.Theme).HasColumnName("theme").HasColumnType("task1.theme");
                 entity.Property(e => e.Text).HasColumnName("text");
             });
             modelBuilder.Entity<DbTask1Question>(entity => {
@@ -87,7 +87,7 @@ namespace server.src {
                 entity.ToTable("texts", "task2");
                 entity.HasKey(e => e.Id).HasName("texts_pkey");
                 entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.Theme).HasColumnName("theme");
+                entity.Property(e => e.Theme).HasColumnName("theme").HasColumnType("task2.theme");
                 entity.Property(e => e.Text).HasColumnName("text");
             });
             modelBuilder.Entity<DbUserSettings>(entity => {
@@ -120,6 +120,14 @@ namespace server.src {
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.LogMessage).HasColumnName("log_message");
                 entity.Property(e => e.LogTime).HasColumnName("log_time");
+            });
+            modelBuilder.Entity<DbGlobalChat>(entity => {
+                entity.ToTable("global_chat", "chats");
+                entity.HasKey(e => e.ChatIndex).HasName("global_chat_pkey");
+                entity.Property(e => e.ChatIndex).HasColumnName("chat_index");
+                entity.Property(e => e.ChatText).HasColumnName("chat_text");
+                entity.Property(e => e.Author).HasColumnName("author");
+                entity.Property(e => e.WrittenAt).HasColumnName("written_at");
             });
         }
     }
