@@ -19,13 +19,16 @@ namespace server.Controller {
             {
                 return BadRequest("Invalid user data.");
             }
-            var result = await _userHandler.RegisterUserAsync(user);
-            var token = await _userHandler.LoginUserAsync(user);
-            if (result)
+            try 
             {
+                var result = await _userHandler.RegisterUserAsync(user);
+                var token = await _userHandler.LoginUserAsync(user);
                 return Ok(new { Token = token});
             }
-            return StatusCode(500, "An error occurred while adding the user.");
+            catch (UserAlreadyExistsException e)
+            {
+                return StatusCode(500, e.Message);
+            }
         }
         [HttpPost("Users/Login")]
         public async Task<IActionResult> PostLogin([FromBody] UserFromAPI userAPI) {
@@ -34,12 +37,14 @@ namespace server.Controller {
             {
                 return BadRequest("Invalid user data.");
             }
-            var result = await _userHandler.LoginUserAsync(user);
-            if (result != null)
-            {
+            try {
+                var result = await _userHandler.LoginUserAsync(user);
                 return Ok(new { Token = result });
             }
-            return Unauthorized("Invalid email or password.");
+            catch (Exception e)
+            {
+                return Unauthorized(e.Message);
+            }
         }
         [Authorize]
         [HttpPost("Users/CheckAuth")]

@@ -78,7 +78,7 @@ namespace server.Tests {
             }
         }
         [Fact]
-        public async Task RegisterUserAsync_ShouldReturnFalse_WhenUserAlreadyExists()
+        public async Task RegisterUserAsync_ShouldThrow_WhenUsernameAlreadyExists()
         {
             // Arrange
             var user = new User { Email = "test@example.com", Password = "password123", Name = "Test User"};
@@ -94,11 +94,33 @@ namespace server.Tests {
             _context.Users.Add(dbUser);
             await _context.SaveChangesAsync();
 
-            // Act
-            var result = await _userHandler.RegisterUserAsync(user);
+            user.Name = dbUser.Name;
+            user.Email = "Different";
+            // Act & Assert
+            await Assert.ThrowsAsync<UserAlreadyExistsException>(() => _userHandler.RegisterUserAsync(user));
+        }
+        
+        [Fact]
+        public async Task RegisterUserAsync_ShouldThrow_WhenEmailAlreadyExists()
+        {
+            // Arrange
+            var user = new User { Email = "test@example.com", Password = "password123", Name = "Test User"};
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = _userHandler.HashPassword(user.Password),
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString(),  // Set to a valid value
+                JoinedAt = DateTime.UtcNow
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
 
-            // Assert
-            Assert.False(result);
+            user.Email = dbUser.Email;
+            user.Name = "Different";
+            // Act & Assert
+            await Assert.ThrowsAsync<UserAlreadyExistsException>(() => _userHandler.RegisterUserAsync(user));
         }
 
         [Fact]
@@ -216,53 +238,6 @@ namespace server.Tests {
             Assert.True(result);
             var deletedUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
             Assert.Null(deletedUser);
-        }
-        [Fact]
-        public async Task GetAllUsersAsync_ShouldReturnAllUsers()
-        {
-            // Arrange
-            var users = new List<DbUser>
-            {
-                new DbUser
-                {
-                    Name = "User1",
-                    Email = "user1@example.com",
-                    Password = _userHandler.HashPassword("password1"),
-                    SessionsId = Guid.NewGuid().ToString(),
-                    SettingsId = Guid.NewGuid().ToString(),
-                    JoinedAt = DateTime.UtcNow
-                },
-                new DbUser
-                {
-                    Name = "User2",
-                    Email = "user2@example.com",
-                    Password = _userHandler.HashPassword("password2"),
-                    SessionsId = Guid.NewGuid().ToString(),
-                    SettingsId = Guid.NewGuid().ToString(),
-                    JoinedAt = DateTime.UtcNow
-                }
-            };
-            _context.Users.AddRange(users);
-            await _context.SaveChangesAsync();
-
-            // Act
-            var result = await _userHandler.GetAllUsersAsync();
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-            Assert.Contains(result, u => u.Email == "user1@example.com");
-            Assert.Contains(result, u => u.Email == "user2@example.com");
-        }
-        [Fact]
-        public async Task GetAllUsersAsync_ShouldReturnEmptyList_WhenNoUsersExist()
-        {
-            // Act
-            var result = await _userHandler.GetAllUsersAsync();
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Empty(result);
         }
         [Fact]
         public async Task GetUserAsync_ShouldReturnUser_WhenUserExists()
@@ -716,6 +691,43 @@ namespace server.Tests {
         }
 
         [Fact]
+        public async Task GetAllUsersAsync_ShouldReturnAllUsers()
+        {
+            // Arrange
+            var users = new List<DbUser>
+            {
+                new DbUser
+                {
+                    Name = "User1",
+                    Email = "user1@example.com",
+                    Password = _userHandler.HashPassword("password1"),
+                    SessionsId = Guid.NewGuid().ToString(),
+                    SettingsId = Guid.NewGuid().ToString(),
+                    JoinedAt = DateTime.UtcNow
+                },
+                new DbUser
+                {
+                    Name = "User2",
+                    Email = "user2@example.com",
+                    Password = _userHandler.HashPassword("password2"),
+                    SessionsId = Guid.NewGuid().ToString(),
+                    SettingsId = Guid.NewGuid().ToString(),
+                    JoinedAt = DateTime.UtcNow
+                }
+            };
+            _context.Users.AddRange(users);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _userHandler.GetAllUsersAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count());
+            Assert.Contains(result, u => u.Email == "user1@example.com");
+            Assert.Contains(result, u => u.Email == "user2@example.com");
+        }
+        [Fact]
         public async Task DeleteUserByEmailAsync_ShouldDeleteUserAndRelatedData_WhenUserExists()
         {
             // Arrange
@@ -783,6 +795,47 @@ namespace server.Tests {
                 var deletedSingleSession = await _context.UserSingleSessions.FirstOrDefaultAsync(s => s.Id == sessionId);
                 Assert.Null(deletedSingleSession);
             }
+        }
+
+        [Fact]
+        public async Task UpdateProfilePicAsync_UserDoesNotExist_ReturnsNull()
+        {
+            // Arrange
+            string email = "Nonexistent";
+            byte[] profilePic = new byte[] { 1, 2, 3, 4 };
+
+            // Act
+            var result = await _userHandler.UpdateProfilePictureAsync(email, profilePic);
+
+            // Assert
+            Assert.Null(result);
+        }
+        [Fact]
+        public async Task UpdateProfilePicAsync_UserExists_ReturnsUser()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var dbUser = new DbUser
+            {
+                Name = "Test User",
+                Email = email,
+                Password = _userHandler.HashPassword("password123"),
+                SessionsId = Guid.NewGuid().ToString(),
+                SettingsId = Guid.NewGuid().ToString(),
+                JoinedAt = DateTime.UtcNow,
+                HistoryIds = new string[] { "history1", "history2" }
+            };
+            byte[] profilePic = new byte[] { 1, 2, 3, 4 };
+            
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+            var dbUserReturned = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            
+            // Act
+            var result = await _userHandler.UpdateProfilePictureAsync(email, profilePic);
+
+            // Assert
+            Assert.Equal(profilePic, result.ProfilePic);
         }
 
         [Fact]

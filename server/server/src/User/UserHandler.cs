@@ -28,16 +28,8 @@ namespace server.UserNamespace {
             dbUser.ProfilePic = null;
             await createSettingsId(dbUser);
             await createSessionsId(dbUser);
-            try
-            {
-                _context.Users.Add(dbUser);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
             return true;
         }
         public async Task<string> LoginUserAsync(User user)
@@ -64,16 +56,8 @@ namespace server.UserNamespace {
             {
                 return false;
             }
-            try
-            {
-                _context.Users.Remove(dbUser);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
+            _context.Users.Remove(dbUser);
+            await _context.SaveChangesAsync();
             return true;
         }
         public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -168,10 +152,6 @@ namespace server.UserNamespace {
         public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
             await historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
         }
-        public async Task<string?> GetEmailByNameAsync(string name) {
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
-            return dbUser?.Email;
-        }
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
            var dbUser = await _context.Users
@@ -181,7 +161,6 @@ namespace server.UserNamespace {
             {
                 return new List<DbTaskHistory>();
             }
-
             var taskHistories = await _context.UserTaskHistories
                 .Where(h => dbUser.HistoryIds.Contains(h.Id))
                 .ToListAsync();
@@ -321,6 +300,14 @@ namespace server.UserNamespace {
                 Score = g.Score,   
                 Gamemode = g.TaskId
             });
+        }
+        public async Task<DbUser?> GetUserByNameAsync(string name) {
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            if (dbUser == null)
+            {
+                return null;
+            }
+            return dbUser;
         }
     }
 }
