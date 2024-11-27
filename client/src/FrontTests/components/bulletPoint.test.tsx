@@ -30,8 +30,8 @@ describe('BulletPoints', () => {
         render(<BulletPoints choices={choices} correctVariant={1} selectedVariant={0} />)
         const correctBullet = screen.getByText('Choice 2')
         const incorrectBullet = screen.getByText('Choice 1')
-        expect(correctBullet).toHaveStyle('color: #0000FF')
-        expect(incorrectBullet).toHaveStyle('color: #FF0000')
+        expect(correctBullet).toHaveStyle('color: #00A7CC')
+        expect(incorrectBullet).toHaveStyle('color: #D61F34')
     })
 
     it('does not allow selection when correctVariant is defined', () => {

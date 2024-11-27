@@ -102,7 +102,7 @@ const ChatComponent: React.FC = () => {
 
     return (
         <div>
-            <button className='chatButton' onClick={() => setIsPopupVisible(!isPopupVisible)}>
+            <button role='button' className='chatButton' onClick={() => setIsPopupVisible(!isPopupVisible)}>
                 <i className="fas fa-comments"></i>
             </button>
             {isPopupVisible && (
@@ -131,7 +131,7 @@ const ChatComponent: React.FC = () => {
                             </div>
                             <div className="chat_messages" id="chatMessages">
                                 <ul className='message_list'>
-                                    {messages.slice().reverse().map((message, index) => (
+                                    {messages && messages.slice().reverse().map((message, index) => (
                                         <li key={index} className="message">
                                             <div className="message_header">
                                                 <div className="message_header_left">
@@ -155,7 +155,7 @@ const ChatComponent: React.FC = () => {
                                         onChange={(e) => setChatText(e.target.value)}
                                         placeholder="Type your message here..."
                                     />
-                                    <button className="sendButton" type="submit">Send</button>
+                                    <button role='button' className="sendButton" type="submit">Send</button>
                                 </form>                    
                             </div>
                         </div>

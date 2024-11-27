@@ -31,11 +31,12 @@ const Search: React.FC = () => {
     return (
         <div className="searchContainer">
             <div className="searchHeader">
-                <h1 className="searchHeaderText">Search users</h1>
+                <h1 role='heading' className="searchHeaderText">Search users</h1>
             </div>
             <div className="searchContent">
             <Autocomplete
                     options={users}
+                    role='option'
                     getOptionLabel={(option) => `${option.name}`}
                     renderInput={(params) => (
                         <TextField

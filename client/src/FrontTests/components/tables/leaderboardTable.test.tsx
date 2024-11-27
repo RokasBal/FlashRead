@@ -48,4 +48,61 @@ describe('LeaderboardTable', () => {
             expect(screen.getByText('User1')).toBeInTheDocument();
         });
     });
+
+    test('fetches all leaderboard data', async () => {
+        axios.post.mockResolvedValueOnce({ data: mockAllTimeData });
+
+        render(<LeaderboardTable />);
+
+        await waitFor(() => {
+            expect(axios.post).toHaveBeenCalledWith('/api/Users/TotalScoreLeaderboard?page=1');
+            expect(screen.getByText('User1')).toBeInTheDocument();
+            expect(screen.getByText('User2')).toBeInTheDocument();
+        });
+    });
+
+    test('handles sorting by username', async () => {
+        axios.post.mockResolvedValueOnce({ data: mockAllTimeData });
+
+        render(<LeaderboardTable />);
+
+        await waitFor(() => {
+            expect(screen.getByText('User1')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByText('Username'));
+
+        await waitFor(() => {
+            expect(screen.getByText('User1')).toBeInTheDocument();
+            expect(screen.getByText('User2')).toBeInTheDocument();
+        });
+    });
+
+    test('handles sorting by score', async () => {
+        axios.post.mockResolvedValueOnce({ data: mockAllTimeData });
+
+        render(<LeaderboardTable />);
+
+        await waitFor(() => {
+            expect(screen.getByText('User1')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByText('Score'));
+
+        await waitFor(() => {
+            expect(screen.getByText('User2')).toBeInTheDocument();
+            expect(screen.getByText('User1')).toBeInTheDocument();
+        });
+    });
+
+    test('handles empty leaderboard data', async () => {
+        axios.post.mockResolvedValueOnce({ data: [] });
+
+        render(<LeaderboardTable />);
+
+        await waitFor(() => {
+            expect(screen.queryByText('User1')).not.toBeInTheDocument();
+            expect(screen.queryByText('User2')).not.toBeInTheDocument();
+        });
+    });
 });

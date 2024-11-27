@@ -108,35 +108,6 @@ const ProfilePage: React.FC = () => {
             console.error('Error fetching username:', err);
         }
     };
-    // const fetchActivityData = async (startDate: string, endDate: string) => {
-    //     try {
-    //         const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-    //         const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-
-    //         if (!token) {
-    //             throw new Error('No auth token found');
-    //         }
-
-    //         const emailResponse = await axios.get('/api/User/GetLogins', {
-    //             headers: { Authorization: `Bearer ${token}` }
-    //         });
-
-    //         const email = emailResponse.data.email;
-
-    //         const activityResponse = await axios.post('/api/Users/GetUserActivity', {
-    //             email,
-    //             startDate,
-    //             endDate
-    //         }, {
-    //             headers: { Authorization: `Bearer ${token}` }
-    //         });
-
-    //         setActivityData(activityResponse.data);
-
-    //     } catch (err) {
-    //         console.error('Error fetching activity data:', err);
-    //     }
-    // };
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -158,8 +129,6 @@ const ProfilePage: React.FC = () => {
                 const compressedFile = await imageCompression(file, options);
                 setSelectedFile(compressedFile);
                 setPreviewUrl(URL.createObjectURL(compressedFile));
-                // console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
-                // console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
             } catch (error) {
                 console.error('Error compressing the image:', error);
             }

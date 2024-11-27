@@ -58,7 +58,7 @@ describe('HomePage', () => {
     });
 
     test('renders mode 3 and navigates on click', async () => {
-        fireEvent.click(screen.getByText('Temporary 3D Sandbox'));
+        fireEvent.click(screen.getByText('BookScape'));
         expect(await screen.findByText('Mode 3 Page')).toBeInTheDocument();
     });
 

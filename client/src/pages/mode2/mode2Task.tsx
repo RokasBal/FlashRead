@@ -15,6 +15,20 @@ interface Mode2TaskProps {
     difficulty: string;
 }
 
+export const getMaxHealth = (difficulty: string) => {
+    switch (difficulty) {
+        case 'Easy':
+            return 10;
+        case 'Medium':
+            return 5;
+        case 'Hard':
+            return 3;
+        case 'EXTREME':
+            return 1;
+        default:
+            return 5;
+    }
+};
 
 const Mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStarted, setPoints, setCombo, setHealth, setCorrectWords, difficulty }) => {
     const [canvasSize, setCanvasSize] = useState<vec2>({ x: 600, y: 300 });
@@ -28,28 +42,17 @@ const Mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
     let combo = 0;
     let correctWords = 0;
 
-    const getMaxHealth = (difficulty: string) => {
-        switch (difficulty) {
-            case 'Easy':
-                return 10;
-            case 'Medium':
-                return 5;
-            case 'Hard':
-                return 3;
-            case 'EXTREME':
-                return 1;
-            default:
-                return 5;
-        }
-    };
 
     const [healthState, setHealthState] = useState<number>(getMaxHealth(difficulty));
 
     useEffect(() => {
         const maxHealth = getMaxHealth(difficulty);
         setHealthState(maxHealth);
+        setPoints(0);
+        setCombo(0);
+        setCorrectWords(0);
         setHealth(maxHealth);
-    }, [difficulty, setHealth]);
+    }, [difficulty, setHealth, setPoints, setCombo, setCorrectWords]);
 
     let health = healthState;
     const getCanvasOffset = () => {
@@ -65,6 +68,7 @@ const Mode2Task: React.FC <Mode2TaskProps> = ({ wordArray, fillerArray, gameStar
 
         const pos = { x: e.clientX / canvasSize.x - getCanvasOffset(), y: 0.1 };
         setPlayerPos(pos);
+        setPoints(points);
     };
 
     //CANVAS RESIZE CIA REIK FIXINT
