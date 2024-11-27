@@ -30,10 +30,56 @@ playerImg.onload = () => {
     console.log("image loaded");
 };
 
-const getCSSVariable = (variableName: string): string => {
+export const getCSSVariable = (variableName: string): string => {
     return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
 };
 
+export const toScreenPos = (pos: vec2, canvasSize: vec2) => {
+
+    return {
+        x: pos.x * canvasSize.x,
+        y: canvasSize.y - pos.y * canvasSize.y,
+    };
+};
+
+export const drawPlayer = (context: CanvasRenderingContext2D, gameData: GameData, canvasSize: vec2 ) => {
+    context.beginPath();
+    context.imageSmoothingEnabled = false;
+    const player = toScreenPos(gameData.playerPos, canvasSize);
+        // HitBox ---------------------------------------------------
+        // context.arc(player.x, player.y, 0.05 * canvasSize.x, 0, 2 * Math.PI);
+    context.stroke();
+
+    if (imageLoaded ) { // && imageLoadedLeft
+            context.drawImage(playerImg, player.x - 0.057 * canvasSize.x, player.y - 0.07 * canvasSize.x, 0.12 * canvasSize.x, 0.12 * canvasSize.x);
+    }
+};
+
+export const getCanvasOffset = (canvasRef: React.RefObject<HTMLCanvasElement> ) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) {
+        return { x: 0, y: 0 };
+    }
+    return { x: rect.left, y: rect.top };
+}
+
+export const drawText = (context: CanvasRenderingContext2D, gameData: GameData, canvasSize: vec2) => {
+
+
+    for (const text of gameData.textArray) {
+        const textColor = getCSSVariable('--textColor');
+        const fontStyle = getCSSVariable('--fontStyle');
+        context.font = `${text.size}px ${fontStyle}`;
+        context.fillStyle = textColor;
+        const pos = toScreenPos(text.pos, canvasSize);
+        context.save();
+        context.translate(pos.x, pos.y);
+        context.rotate(text.angle);
+        context.textAlign = "center";
+        context.fillText(text.text, 0, 0);
+        context.restore();
+    }
+};
 
 const Canvas: React.FC<{
     canvasSize: vec2;
@@ -45,58 +91,6 @@ const Canvas: React.FC<{
     const [lastTime, setLastTime] = useState(0);
     const lastTimeRef = useRef<number>(); lastTimeRef.current = lastTime;
     const [prevMousePos, setPrevMousePos] = useState<{x: number, y: number } | null>(null);
-    const [direction, setDirection] = useState<string | null>(null);
-
-    const getCanvasOffset = () => {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) {
-            return { x: 0, y: 0 };
-        }
-        return { x: rect.left, y: rect.top };
-    }
-
-    const toScreenPos = (pos: vec2) => {
-
-        return {
-            x: pos.x * canvasSize.x,
-            y: canvasSize.y - pos.y * canvasSize.y,
-        };
-    };
-
-    const drawPlayer = (context: CanvasRenderingContext2D, gameData: GameData) => {
-        context.beginPath();
-        context.imageSmoothingEnabled = false;
-        const player = toScreenPos(gameData.playerPos);
-            // HitBox ---------------------------------------------------
-            // context.arc(player.x, player.y, 0.05 * canvasSize.x, 0, 2 * Math.PI);
-        context.stroke();
-
-        if (imageLoaded ) { // && imageLoadedLeft
-            if (direction === 'right') {
-                context.drawImage(playerImg, player.x - 0.057 * canvasSize.x, player.y - 0.07 * canvasSize.x, 0.12 * canvasSize.x, 0.12 * canvasSize.x);
-            } else if (direction === 'left') {
-                context.drawImage(playerImg, player.x - 0.057 * canvasSize.x, player.y - 0.07 * canvasSize.x, -0.12 * canvasSize.x, 0.12 * canvasSize.x);
-            }
-        }
-    };
-
-    const drawText = (context: CanvasRenderingContext2D, gameData: GameData) => {
-
-
-        for (const text of gameData.textArray) {
-            const textColor = getCSSVariable('--textColor');
-            const fontStyle = getCSSVariable('--fontStyle');
-            context.font = `${text.size}px ${fontStyle}`;
-            context.fillStyle = textColor;
-            const pos = toScreenPos(text.pos);
-            context.save();
-            context.translate(pos.x, pos.y);
-            context.rotate(text.angle);
-            context.textAlign = "center";
-            context.fillText(text.text, 0, 0);
-            context.restore();
-        }
-    };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -104,12 +98,10 @@ const Canvas: React.FC<{
             const handleMouseMove = (event: MouseEvent) => {
                 const adjustedEvent = {
                     ...event,
-                    clientX: event.clientX - getCanvasOffset().x,
-                    clientY: event.clientY - getCanvasOffset().y,
+                    clientX: event.clientX - getCanvasOffset(canvasRef).x,
+                    clientY: event.clientY - getCanvasOffset(canvasRef).y,
                 };
                 if (prevMousePos) {
-                    const newDirection = adjustedEvent.clientX > prevMousePos.x ? 'right' : 'left';
-                    setDirection(newDirection);
                     // TO DO set direction
                 }
                 setPrevMousePos({ x: adjustedEvent.clientX, y: adjustedEvent.clientY });
@@ -137,8 +129,8 @@ const Canvas: React.FC<{
                 const gameData = onTick(context, currentTime - lastTime);
                 if (gameData !== undefined) {
                     setLastTime(currentTime);
-                    drawText(context, gameData);
-                    drawPlayer(context, gameData);
+                    drawText(context, gameData, canvasSize);
+                    drawPlayer(context, gameData, canvasSize);
                 }
                 frameRef.current = requestAnimationFrame(() => draw(context));
             }
