@@ -6,9 +6,23 @@ using server.UserNamespace;
 using Microsoft.EntityFrameworkCore;
 using server.Services;
 using server.Controller;
+
 namespace server.UserNamespace {
-    public class UserHandler(FlashDbContext _context, TokenProvider tokenProvider, HistoryManager historyManager, SessionManager sessionManager)
+    public class UserHandler
     {
+        private readonly FlashDbContext _context;
+        private readonly TokenProvider _tokenProvider;
+        private readonly HistoryManager _historyManager;
+        private readonly SessionManager _sessionManager;
+
+        public UserHandler(FlashDbContext context, TokenProvider tokenProvider, HistoryManager historyManager, SessionManager sessionManager)
+        {
+            _context = context;
+            _tokenProvider = tokenProvider;
+            _historyManager = historyManager;
+            _sessionManager = sessionManager;
+        }
+
         public async Task<bool> RegisterUserAsync(User user)
         {
             // Check if user already exists
@@ -40,6 +54,7 @@ namespace server.UserNamespace {
             }
             return true;
         }
+
         public async Task<string> LoginUserAsync(User user)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
@@ -53,10 +68,11 @@ namespace server.UserNamespace {
                 throw new Exception("Invalid password");
             }
 
-            string token = tokenProvider.Create(user);
-            await sessionManager.AddSessionToDictionary(user.Email);
+            string token = _tokenProvider.Create(user);
+            await _sessionManager.AddSessionToDictionary(user.Email);
             return token;
         }
+
         public async Task<bool> DeleteUserAsync(User user)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
@@ -76,6 +92,7 @@ namespace server.UserNamespace {
             }
             return true;
         }
+
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             UserCollection users = new UserCollection();
@@ -86,6 +103,7 @@ namespace server.UserNamespace {
             }
             return users;
         }
+
         public async Task<User?> GetUserAsync(User user)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
@@ -95,6 +113,7 @@ namespace server.UserNamespace {
             }
             return (User)dbUser;
         }
+
         public async Task<DbUser?> UpdateProfilePictureAsync(string email, byte[] profilePic)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -107,6 +126,7 @@ namespace server.UserNamespace {
             await _context.SaveChangesAsync();
             return dbUser;
         }
+
         public async Task<DbUser?> GetUserByEmailAsync(string email)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -116,18 +136,22 @@ namespace server.UserNamespace {
             }
             return dbUser;
         }
+
         public string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
+
         public bool VerifyPassword(string password, string hash)
         {
             return BCrypt.Net.BCrypt.Verify(password, hash) ? true : false;
         }
+
         private DbUser convertUserToDbUser(User user)
         {
             return (DbUser)user;
         }
+
         public async Task<string?> GetSettingsIdByEmailAsync(string email) {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (dbUser == null)
@@ -136,6 +160,7 @@ namespace server.UserNamespace {
             }
             return dbUser.SettingsId;
         }
+
         private async Task createSettingsId(DbUser dbUser)
         {
             DbUserSettings userSettings = new DbUserSettings();
@@ -148,6 +173,7 @@ namespace server.UserNamespace {
             dbUser.SettingsId = userSettings.Id;
             await _context.SaveChangesAsync();
         }
+
         private async Task createSessionsId(DbUser dbUser)
         {
             DbUserSessions userSessions = new DbUserSessions();
@@ -156,6 +182,7 @@ namespace server.UserNamespace {
             dbUser.SessionsId = userSessions.Id;
             await _context.SaveChangesAsync();
         }
+
         public async Task<string?> GetSettingsThemeById(string id)
         {
             var userSettings = await _context.UserSettings.FirstOrDefaultAsync(s => s.Id == id);
@@ -165,13 +192,16 @@ namespace server.UserNamespace {
             }
             return userSettings.Theme;
         }
+
         public async Task SaveTaskResult(string email, uint sessionId, int taskId, int score, int[]? selectedVariants = null) {
-            await historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
+            await _historyManager.SaveTaskResult(email, sessionId, taskId, score, selectedVariants);
         }
+
         public async Task<string?> GetEmailByNameAsync(string name) {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
             return dbUser?.Email;
         }
+
         public async Task<IEnumerable<DbTaskHistory>> GetTaskHistoryByEmail(string email)
         {
            var dbUser = await _context.Users
@@ -187,8 +217,6 @@ namespace server.UserNamespace {
                 .ToListAsync();
 
             return taskHistories;
-
-            //FIX THIS QUERY
         }
 
         public async Task<string?> GetSettingsFontById(string id)
@@ -200,6 +228,7 @@ namespace server.UserNamespace {
             }
             return userSettings.Font;
         }
+
         public async Task ChangeUserPasswordAsync(string email, string newPassword) {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (dbUser == null)
@@ -210,6 +239,7 @@ namespace server.UserNamespace {
             _context.Users.Update(dbUser);
             await _context.SaveChangesAsync();
         }
+
         public async Task ChangeUserNameAsync(string email, string newUsername) {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (dbUser == null)
@@ -220,6 +250,7 @@ namespace server.UserNamespace {
             _context.Users.Update(dbUser);
             await _context.SaveChangesAsync();
         } 
+
         public async Task DeleteUserByEmailAsync(string email) {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (dbUser == null)
@@ -255,6 +286,7 @@ namespace server.UserNamespace {
             _context.Users.Remove(dbUser);
             await _context.SaveChangesAsync();
         }
+
         public async Task<Byte[]?> GetUserProfilePicByEmailAsync(string email)
         {
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -264,6 +296,7 @@ namespace server.UserNamespace {
             }
             return dbUser.ProfilePic ?? Array.Empty<byte>();
         }
+
         public async Task<IEnumerable<UserScore>> GetTotalScoresAsync(int skip, int take) {
            var usersWithHistories = await _context.Users
                 .ToListAsync();
@@ -292,6 +325,7 @@ namespace server.UserNamespace {
                 Score = g.Score
             });
         }
+
         public async Task<IEnumerable<UserScore>> GetHighScoresAsync(int skip, int take) {
             var usersWithHistories = await _context.Users
                 .ToListAsync();

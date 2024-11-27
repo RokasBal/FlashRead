@@ -6,7 +6,7 @@ const getTokenFromCookie = () => {
 };
 
 const axiosWrapper = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://209.38.183.24:8080',
     timeout: 10000,
     withCredentials: true,
     headers: {
