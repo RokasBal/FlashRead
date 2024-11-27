@@ -27,11 +27,11 @@ const BulletPoints: React.FC<{
             // if bullet is correct and selected, show green
             // if bullet is correct and not selected, show blue
             if (index === correctVariant) {
-                return selectedVariant === correctVariant ? '#00FF00' : '#0000FF';
+                return selectedVariant === correctVariant ? '#46C36C' : '#00A7CC';
             }
             // if bullet is selected and incorrect, show red
             if (index === selectedBullet && index !== correctVariant) {
-                return '#FF0000';
+                return '#D61F34';
             }
         }
         // otherwise, show default

@@ -14,6 +14,9 @@ const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
     useEffect(() => {
         if (isAuthenticated) {
             navigate('/home');
@@ -23,11 +26,40 @@ const LoginPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            await login(email, password);
-            checkUserAuth();
-        } catch (err) {
-            console.error(err);
+        let valid = true;
+        if (!email) {
+            setEmailError('Please fill in the email.');
+            valid = false;
+        } else {
+            setEmailError('');
+        }
+        if (!password) {
+            setPasswordError('Please fill in the password.');
+            valid = false;
+        } else {
+            setPasswordError('');
+        }
+        if (valid) {
+            try {
+                await login(email, password);
+                checkUserAuth();
+            } catch (err) {
+                console.error(err);
+
+                if (err instanceof Error) {
+                    console.log("Error message:", err);
+                    if (err.message === 'User not found') {
+                        setEmailError('User not found.');
+                    } else if (err.message === 'Invalid password') {
+                        setPasswordError('Incorrect password.');
+                    } else {
+                        setPasswordError('An unknown error occurred.');
+                    }
+                } else {
+                    console.log('Error is not an instance of Error:', err);
+                    setPasswordError('An unknown error occurred.');
+                }
+            }
         }
     };
     return (
@@ -45,6 +77,8 @@ const LoginPage: React.FC = () => {
                         label="Email"
                         value={email}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                        error={!!emailError}
+                        helperText={emailError}
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -80,6 +114,8 @@ const LoginPage: React.FC = () => {
                         value={password}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                         type="password"
+                        error={!!passwordError}
+                        helperText={passwordError}
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -110,15 +146,7 @@ const LoginPage: React.FC = () => {
                         }}
                     />
                     <CustomButton label="Login" className="loginButton" id="loginPage_loginButton" onClick={() => {
-                        if (!email || !password) {
-                            if (!email) {
-                                alert('Please fill in the email.');
-                            } else if (!password) {
-                                alert('Please fill in the password.');
-                            }
-                        } else {
                             handleSubmit(new Event('submit') as unknown as React.FormEvent);
-                        }
                     }}/>
                 </div>
 

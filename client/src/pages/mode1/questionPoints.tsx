@@ -32,7 +32,7 @@ const QuestionPoints: React.FC<{
                 <div className="mode1_questionDiv" key={index} id={`mode1_question${index + 1}Div`}>
                     <h1 className="mode1_question" style={
                         (question.correctVariant !== undefined && question.correctVariant !== null)
-                        && {color: question.selectedVariant === question.correctVariant ? '#00FF00' : '#FF0000'}
+                        && {color: question.selectedVariant === question.correctVariant ? '#46C36C' : '#D61F34'}
                         || {}
                     }>{question.question}</h1>
                     <BulletPoints 

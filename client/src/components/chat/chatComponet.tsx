@@ -118,7 +118,7 @@ const ChatComponent: React.FC = () => {
                                         {activeUsers.map((user, index) => (
                                             <li key={index} className='listActive'>
                                                 <span className='activeUser'>{user}</span>
-                                                <div className='circle'>.</div>
+                                                <div className='circle'><i className='fas fa-circle'></i></div>
                                             </li>
                                         ))}
                                     </ul>
