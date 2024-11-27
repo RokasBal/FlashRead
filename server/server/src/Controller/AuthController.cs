@@ -28,6 +28,7 @@ namespace server.Controller {
             catch (UserAlreadyExistsException e)
             {
                 return StatusCode(500, e.Message);
+                
             }
         }
         [HttpPost("Users/Login")]

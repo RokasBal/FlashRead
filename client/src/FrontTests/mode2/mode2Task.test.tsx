@@ -1,7 +1,65 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import Mode2Task, {getMaxHealth} from '../../pages/mode2/mode2Task';
+import Mode2Task, {getMaxHealth, getCanvasOffset, handleResize} from '../../pages/mode2/mode2Task';
+
+describe('handleResize', () => {
+    it('sets the canvas size correctly when the mainGameMode2 element exists', () => {
+        // Mock the getElementById method
+        const mockGetElementById = vi.spyOn(document, 'getElementById').mockReturnValue({
+            getBoundingClientRect: vi.fn().mockReturnValue({
+                width: 800,
+                height: 600,
+            }),
+        } as unknown as HTMLElement);
+
+        const setCanvasSize = vi.fn();
+        handleResize(setCanvasSize);
+
+        expect(setCanvasSize).toHaveBeenCalledWith({ x: 800, y: 600 });
+
+        // Restore the original implementation
+        mockGetElementById.mockRestore();
+    });
+
+    it('does nothing when the mainGameMode2 element does not exist', () => {
+        // Mock the getElementById method to return null
+        const mockGetElementById = vi.spyOn(document, 'getElementById').mockReturnValue(null);
+
+        const setCanvasSize = vi.fn();
+        handleResize(setCanvasSize);
+
+        expect(setCanvasSize).not.toHaveBeenCalled();
+
+        // Restore the original implementation
+        mockGetElementById.mockRestore();
+    });
+});
+
+describe('getCanvasOffset', () => {
+    it('returns the correct offset when canvas element has a bounding rect', () => {
+        const mockCanvasRef = {
+            current: {
+                getBoundingClientRect: vi.fn().mockReturnValue({
+                    left: 100,
+                    top: 200,
+                }),
+            },
+        } as unknown as React.MutableRefObject<HTMLCanvasElement | null>;
+
+        const offset = getCanvasOffset(mockCanvasRef);
+        expect(offset).toBe(100);
+    });
+
+    it('returns zero offset when canvas element is null', () => {
+        const mockCanvasRef = {
+            current: null,
+        } as unknown as React.MutableRefObject<HTMLCanvasElement | null>;
+
+        const offset = getCanvasOffset(mockCanvasRef);
+        expect(offset).toBe(0);
+    });
+});
 
 describe('Mode2Task Component', () => {
     const defaultProps = {
