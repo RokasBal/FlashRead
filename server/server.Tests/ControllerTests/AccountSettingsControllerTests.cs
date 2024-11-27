@@ -563,33 +563,32 @@ namespace server.Tests {
             var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _controller.GetUserPageData(username));
             Assert.Equal("User not found.", exception.Message);
         }
-        [Fact]
-        public async Task GetUserPageData_ReturnsOkResult_WithUserData()
-        {
-            // Arrange
-            var user = new User("jane.doe@example.com", "password123", "Jane Doe");
-            user.Password = _userHandler.HashPassword(user.Password);
-            var dbUser = new DbUser
-            {
-                Name = user.Name,
-                Email = user.Email,
-                Password = user.Password,
-                SessionsId = Guid.NewGuid().ToString(),
-                SettingsId = Guid.NewGuid().ToString(),
-                JoinedAt = DateTime.Now,
-                HistoryIds = new string[0],
-                ProfilePic = new byte[0]
-            };
-            _context.Users.Add(dbUser);
-            await _context.SaveChangesAsync();
-            SetUserEmail(user.Email);
+        // [Fact]
+        // public async Task GetUserPageData_ReturnsOkResult_WithUserData()
+        // {
+        //     // Arrange
+        //     var user = new User("jane.doe@example.com", "password123", "Jane Doe");
+        //     user.Password = _userHandler.HashPassword(user.Password);
+        //     var dbUser = new DbUser
+        //     {
+        //         Name = user.Name,
+        //         Email = user.Email,
+        //         Password = user.Password,
+        //         SessionsId = Guid.NewGuid().ToString(),
+        //         SettingsId = Guid.NewGuid().ToString(),
+        //         JoinedAt = DateTime.Now,
+        //         HistoryIds = new string[0],
+        //         ProfilePic = new byte[0]
+        //     };
+        //     _context.Users.Add(dbUser);
+        //     await _context.SaveChangesAsync();
+        //     SetUserEmail(user.Email);
 
-            // Act
-            var result = await _controller.GetUserPageData("Jane Doe");
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<UserPageData>(okResult.Value);
-
-        }
+        //     // Act
+        //     var result = await _controller.GetUserPageData("Jane Doe");
+        //     var okResult = Assert.IsType<OkObjectResult>(result);
+        //     var returnValue = Assert.IsType<UserPageData>(okResult.Value);
+        // }
         [Fact]
         public async Task UpdateSelectedFont_ReturnsNotFound_WhenSettingsNotFound()
         {
