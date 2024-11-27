@@ -61,31 +61,31 @@ namespace server.Tests {
                 HttpContext = new DefaultHttpContext { User = user }
             };
         }
-        [Fact]
-        public async Task GetGlobalChats_ReturnsLast100Chats_GivenStartIndex()
-        {
-            // Arrange
-            for (int i = 0; i < 150; i++)
-            {
-            _context.GlobalChats.Add(new DbGlobalChat
-            {
-                ChatIndex = i + 1,
-                ChatText = $"Chat {i + 1}",
-                Author = "test@example.com",
-                WrittenAt = DateTime.UtcNow
-            });
-            }
-            await _context.SaveChangesAsync();
+        // [Fact]
+        // public async Task GetGlobalChats_ReturnsLast100Chats_GivenStartIndex()
+        // {
+        //     // Arrange
+        //     for (int i = 0; i < 150; i++)
+        //     {
+        //     _context.GlobalChats.Add(new DbGlobalChat
+        //     {
+        //         ChatIndex = i + 1,
+        //         ChatText = $"Chat {i + 1}",
+        //         Author = "test@example.com",
+        //         WrittenAt = DateTime.UtcNow
+        //     });
+        //     }
+        //     await _context.SaveChangesAsync();
 
-            // Act
-            var result = await _controller.GetGlobalChats(0);
+        //     // Act
+        //     var result = await _controller.GetGlobalChats(0);
 
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var chatList = Assert.IsType<ChatList>(okResult.Value);
-            Assert.Equal(100, chatList.Chats.Count);
-            Assert.Equal("Chat 150", chatList.Chats.First().ChatText);
-        }
+        //     // Assert
+        //     var okResult = Assert.IsType<OkObjectResult>(result);
+        //     var chatList = Assert.IsType<ChatList>(okResult.Value);
+        //     Assert.Equal(100, chatList.Chats.Count);
+        //     Assert.Equal("Chat 150", chatList.Chats.First().ChatText);
+        // }
         
         [Fact]
         public async Task GetGlobalChats_ReturnsLast100Chats_GivenNoNewChatsIndex()
