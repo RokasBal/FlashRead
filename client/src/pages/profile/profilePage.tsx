@@ -30,6 +30,7 @@ export const fetchGameHistory = async (
     setGameHistory: React.Dispatch<React.SetStateAction<TableRow[]>>,
     setGamesPlayed: React.Dispatch<React.SetStateAction<number>>,
     setTotalScore: React.Dispatch<React.SetStateAction<number>>,
+    // eslint-disable-next-line
     tokenHandler: (token: string) => any
 ) => {
     try {

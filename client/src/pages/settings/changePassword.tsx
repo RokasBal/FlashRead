@@ -92,6 +92,13 @@ const ChangePassword: React.FC = () => {
                                 color: 'var(--textColor)', 
                                 fontFamily: 'var(--fontStyle)',
                             },
+                            '& .MuiFormLabel-root.Mui-focused': {
+                                color: '#1976d2',
+                            },
+                            '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
+                                color: 'var(--textColor)',
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderWidth: '3px',
@@ -122,6 +129,13 @@ const ChangePassword: React.FC = () => {
                                 color: 'var(--textColor)', 
                                 fontFamily: 'var(--fontStyle)',
                             },
+                            '& .MuiFormLabel-root.Mui-focused': {
+                                color: '#1976d2',
+                            },
+                            '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
+                                color: 'var(--textColor)',
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderWidth: '3px',
@@ -151,6 +165,13 @@ const ChangePassword: React.FC = () => {
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
                                 fontFamily: 'var(--fontStyle)',
+                            },
+                            '& .MuiFormLabel-root.Mui-focused': {
+                                color: '#1976d2',
+                            },
+                            '& .MuiInputBase-input': {
+                                fontFamily: 'var(--fontStyle)',
+                                color: 'var(--textColor)',
                             },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {

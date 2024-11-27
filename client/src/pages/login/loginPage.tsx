@@ -48,6 +48,7 @@ const LoginPage: React.FC = () => {
 
                 if (err instanceof Error) {
                     console.log("Error message:", err);
+                    console.log("Error message:", err.message);
                     if (err.message === 'User not found') {
                         setEmailError('User not found.');
                     } else if (err.message === 'Invalid password') {

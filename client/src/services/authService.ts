@@ -18,7 +18,7 @@ export const login = async (email: string, password: string) => {
     } catch (error) {
         console.error('Login error:', error);
         if (isAxiosError(error) && error.response) {
-            const errorMessage = (error.response.data as { error: string }).error;
+            const errorMessage = (error.response.data as  string );
             throw new Error(errorMessage);
         } else {
             throw new Error('An unknown error occurred.');
@@ -37,9 +37,7 @@ export const register = async (email: string, password: string, username: string
     } catch (error) {
         console.error('Register error:', error);
         if (isAxiosError(error) && error.response) {
-            console.log('Error response:', error.response);
-            const errorMessage = (error.response.data as { error: string }).error;
-            console.log('Error message:', errorMessage);
+            const errorMessage = (error.response.data as string );
             throw new Error(errorMessage);
         } else {
             throw new Error('An unknown error occurred.');
