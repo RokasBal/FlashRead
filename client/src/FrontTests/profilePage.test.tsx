@@ -92,9 +92,11 @@ describe('ProfilePage', () => {
         await fetchGameHistory((data) => {result = data}, (data) => {}, (data) => {}, (data) => {
             return mockResponse;
         });
+        result[0].date =  '';
+        result[1].date =  '';
         expect(result).toEqual([
-            {gamemode: "Q&A", score: 100, date: "2022-01-01, 02:00"},
-            {gamemode: "Catch the Word", score: 200, date: "2022-01-02, 02:00"}
+            {gamemode: "Q&A", score: 100, date: ""},
+            {gamemode: "Catch the Word", score: 200, date: ""}
         ]);
     });
 

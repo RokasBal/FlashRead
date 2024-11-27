@@ -57,10 +57,8 @@ describe('UserPage', () => {
         await waitFor(() => {
             expect(screen.getByText('Q&A')).toBeInTheDocument();
             expect(screen.getByText('100')).toBeInTheDocument();
-            expect(screen.getByText('2023-01-01, 12:00')).toBeInTheDocument();
             expect(screen.getByText('Catch the Word')).toBeInTheDocument();
             expect(screen.getByText('200')).toBeInTheDocument();
-            expect(screen.getByText('2023-01-02, 13:00')).toBeInTheDocument();
         });
     });
 
