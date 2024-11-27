@@ -7,7 +7,7 @@ import '../../boards/css/buttons.css';
 import '../../boards/css/settings.css'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axios from '../../components/axiosWrapper'
+import axios, {isAxiosError} from '../../components/axiosWrapper'
 
 const ChangePassword: React.FC = () => {
     const isAuthenticated = useAuth();
@@ -15,6 +15,9 @@ const ChangePassword: React.FC = () => {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');
+    const [oldPasswordError, setOldPasswordError] = useState('');
+    const [newPasswordError, setNewPasswordError] = useState('');
+    const [repeatPasswordError, setRepeatPasswordError] = useState('');
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -24,17 +27,46 @@ const ChangePassword: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
-            const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-            await axios.post('/api/Users/ChangePassword', {
-                oldPassword: oldPassword,
-                newPassword: newPassword
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-        } catch (error) {
-            console.error('Password change failed. Please try again.', error);
+        let valid = true;
+
+        if (!oldPassword) {
+            setOldPasswordError('Please fill in your old password.');
+            valid = false;
+        } else {
+            setOldPasswordError('');
+        }
+
+        if (!newPassword) {
+            setNewPasswordError('Please fill in your new password.');
+            valid = false;
+        } else {
+            setNewPasswordError('');
+        }
+
+        if (!repeatPassword) {
+            setRepeatPasswordError('Please repeat your new password.');
+            valid = false;
+        } else if (newPassword !== repeatPassword) {
+            setRepeatPasswordError('New passwords do not match.');
+            valid = false;
+        } else {
+            setRepeatPasswordError('');
+        }
+        if (valid) {
+            try {
+                const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+                const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+                await axios.post('/api/Users/ChangePassword', {
+                    oldPassword: oldPassword,
+                    newPassword: newPassword
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                navigate('/settings');
+            } catch (error) {
+                console.error('Password change failed. Please try again.', error);
+                setOldPasswordError("Old password is incorrect.");
+            }
         }
     };
 
@@ -53,6 +85,8 @@ const ChangePassword: React.FC = () => {
                         value={oldPassword}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOldPassword(e.target.value)}
                         type="password"
+                        error={!!oldPasswordError}
+                        helperText={oldPasswordError}
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -81,6 +115,8 @@ const ChangePassword: React.FC = () => {
                         value={newPassword}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
                         type="password"
+                        error={!!newPasswordError}
+                        helperText={newPasswordError}
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -109,6 +145,8 @@ const ChangePassword: React.FC = () => {
                         value={repeatPassword}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRepeatPassword(e.target.value)}
                         type="password"
+                        error={!!repeatPasswordError}
+                        helperText={repeatPasswordError}
                         sx={{
                             '& .MuiFormLabel-root': {
                                 color: 'var(--textColor)', 
@@ -138,20 +176,7 @@ const ChangePassword: React.FC = () => {
                         id="registerPage_registerButton" 
                         onClick={() => {
                             console.log('Form submitted:', { oldPassword, newPassword, repeatPassword });
-                            if (!oldPassword || !newPassword || !repeatPassword) {
-                                if (!oldPassword) {
-                                    alert('Please fill in your old password.');
-                                } else if (!newPassword) {
-                                    alert('Please fill in your new password.');
-                                } else if (!repeatPassword) {
-                                    alert('Please repeat your new password.');
-                                }
-                            } else if (newPassword !== repeatPassword) {
-                                alert('New passwords do not match.');
-                                // TODO - DO A CHECK IF OLD PASSWORD MATCHES
-                            } else {
-                                handleSubmit(new Event('submit') as unknown as React.FormEvent);
-                            }
+                            handleSubmit(new Event('submit') as unknown as React.FormEvent);
                         }}
                     />
                 </div>
