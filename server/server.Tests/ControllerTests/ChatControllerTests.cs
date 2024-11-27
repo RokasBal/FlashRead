@@ -190,9 +190,60 @@ namespace server.Tests {
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal("Invalid token.", unauthorizedResult.Value);
         }
+        [Fact]
+        public void ChatRecord_ShouldInitializeCorrectly() {
+            // Arrange
+            var chatIndex = 1;
+            var username = "testuser";
+            var chatText = "Hello, world!";
+            var author = "testauthor";
+            var writtenAt = DateTime.UtcNow;
+            var profilePic = new byte[] { 1, 2, 3, 4, 5 };
 
-        
+            // Act
+            var chat = new Chat(chatIndex, username, chatText, author, writtenAt, profilePic);
 
+            // Assert
+            Assert.Equal(chatIndex, chat.ChatIndex);
+            Assert.Equal(username, chat.Username);
+            Assert.Equal(chatText, chat.ChatText);
+            Assert.Equal(author, chat.Author);
+            Assert.Equal(writtenAt, chat.WrittenAt);
+            Assert.Equal(profilePic, chat.ProfilePic);
+        }
+
+        [Fact]
+        public void ChatRecord_ShouldSupportValueEquality() {
+            // Arrange
+            var chatIndex = 1;
+            var username = "testuser";
+            var chatText = "Hello, world!";
+            var author = "testauthor";
+            var writtenAt = DateTime.UtcNow;
+            var profilePic = new byte[] { 1, 2, 3, 4, 5 };
+
+            var chat1 = new Chat(chatIndex, username, chatText, author, writtenAt, profilePic);
+            var chat2 = new Chat(chatIndex, username, chatText, author, writtenAt, profilePic);
+
+            // Act & Assert
+            Assert.Equal(chat1, chat2);
+            Assert.True(chat1 == chat2);
+            Assert.False(chat1 != chat2);
+        }
+
+        [Fact]
+        public void ChatList_ShouldInitializeCorrectly() {
+            // Arrange
+            var chat1 = new Chat(1, "user1", "Hello", "author1", DateTime.UtcNow, new byte[] { 1, 2, 3 });
+            var chat2 = new Chat(2, "user2", "Hi", "author2", DateTime.UtcNow, new byte[] { 4, 5, 6 });
+            var chats = new List<Chat> { chat1, chat2 };
+
+            // Act
+            var chatList = new ChatList { Chats = chats };
+
+            // Assert
+            Assert.Equal(chats, chatList.Chats);
+        }
 
         public void Dispose()
         {

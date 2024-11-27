@@ -289,6 +289,37 @@ namespace server.Tests {
         //     Assert.Equal("defaultPicture.jpg", fileResult.FileDownloadName);
         // }
         [Fact]
+        public async Task UpdateProfilePicture_InvalidProfilePic_ReturnsBadRequest()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            var profilePicture = new FormFile(new MemoryStream(new byte[] { }), 0, 0, "profilePicture", "profile.jpg");
+
+            // Act
+
+            var result = await _controller.UpdateProfilePicture(profilePicture);
+
+            // Assert
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Invalid profile picture.", badRequestResult.Value);
+
+        }
+        [Fact]
         public async Task UpdateProfilePicture_ValidToken_UpdatesProfilePicture()
         {
             // Arrange
@@ -523,6 +554,37 @@ namespace server.Tests {
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("New password cannot be null or empty.", badRequestResult.Value);
         }
+        [Fact]
+        public async Task ChangeUserPassword_UserNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var user = new User("john.doe@example.com", "password123", "John Doe");
+            user.Password = _userHandler.HashPassword(user.Password);
+            var dbUser = new DbUser
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                SessionsId = Guid.NewGuid().ToString(), // Set to a valid value
+                SettingsId = Guid.NewGuid().ToString()  // Set to a valid value
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+
+            SetUserEmail(user.Email);
+
+            _context.Users.Remove(dbUser);
+            await _context.SaveChangesAsync();
+
+
+            // Act
+            var result = await _controller.ChangeUserPassword(new ChangePasswordRequest { OldPassword = "password123", NewPassword = "newpassword123" });
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", notFoundResult.Value);
+        }
+
         [Fact]
         public async Task ChangeUserName_ValidToken_ChangesUserName()
         {
@@ -780,6 +842,99 @@ namespace server.Tests {
             Assert.Equal("Invalid page number.", badRequestResult.Value);
         }
 
+        [Fact]
+        public void UserScore_ShouldInitializeCorrectly() {
+            // Arrange
+            var name = "testuser";
+            var score = 100;
+            var gamemode = 1;
+
+            // Act
+            var userScore = new UserScore { Name = name, Score = score, Gamemode = gamemode };
+
+            // Assert
+            Assert.Equal(name, userScore.Name);
+            Assert.Equal(score, userScore.Score);
+            Assert.Equal(gamemode, userScore.Gamemode);
+        }
+
+        [Fact]
+        public void ChangePasswordRequest_ShouldInitializeCorrectly() {
+            // Arrange
+            var oldPassword = "oldpassword";
+            var newPassword = "newpassword";
+
+            // Act
+            var changePasswordRequest = new ChangePasswordRequest { OldPassword = oldPassword, NewPassword = newPassword };
+
+            // Assert
+            Assert.Equal(oldPassword, changePasswordRequest.OldPassword);
+            Assert.Equal(newPassword, changePasswordRequest.NewPassword);
+        }
+
+        [Fact]
+        public void ChangeUserNameRequest_ShouldInitializeCorrectly() {
+            // Arrange
+            var newName = "newusername";
+
+            // Act
+            var changeUserNameRequest = new ChangeUserNameRequest { NewName = newName };
+
+            // Assert
+            Assert.Equal(newName, changeUserNameRequest.NewName);
+        }
+
+        [Fact]
+        public void ActivityRequest_ShouldInitializeCorrectly() {
+            // Arrange
+            var email = "test@example.com";
+            var from = DateTime.UtcNow.AddDays(-1);
+            var to = DateTime.UtcNow;
+
+            // Act
+            var activityRequest = new ActivityRequest { Email = email, From = from, To = to };
+
+            // Assert
+            Assert.Equal(email, activityRequest.Email);
+            Assert.Equal(from, activityRequest.From);
+            Assert.Equal(to, activityRequest.To);
+        }
+
+        [Fact]
+        public void UserScore_ShouldSupportValueEquality() {
+            // Arrange
+            var userScore1 = new UserScore { Name = "testuser", Score = 100, Gamemode = 1 };
+            var userScore2 = new UserScore { Name = "testuser", Score = 100, Gamemode = 1 };
+
+            // Act & Assert
+            Assert.Equal(userScore1, userScore2);
+            Assert.True(userScore1 == userScore2);
+            Assert.False(userScore1 != userScore2);
+        }
+
+        [Fact]
+        public void ChangePasswordRequest_ShouldSupportValueEquality() {
+            // Arrange
+            var changePasswordRequest1 = new ChangePasswordRequest { OldPassword = "oldpassword", NewPassword = "newpassword" };
+            var changePasswordRequest2 = new ChangePasswordRequest { OldPassword = "oldpassword", NewPassword = "newpassword" };
+
+            // Act & Assert
+            Assert.Equal(changePasswordRequest1, changePasswordRequest2);
+            Assert.True(changePasswordRequest1 == changePasswordRequest2);
+            Assert.False(changePasswordRequest1 != changePasswordRequest2);
+        }
+
+        [Fact]
+        public void ChangeUserNameRequest_ShouldSupportValueEquality() {
+            // Arrange
+            var changeUserNameRequest1 = new ChangeUserNameRequest { NewName = "newusername" };
+            var changeUserNameRequest2 = new ChangeUserNameRequest { NewName = "newusername" };
+
+            // Act & Assert
+            Assert.Equal(changeUserNameRequest1, changeUserNameRequest2);
+            Assert.True(changeUserNameRequest1 == changeUserNameRequest2);
+            Assert.False(changeUserNameRequest1 != changeUserNameRequest2);
+        }
 
         public void Dispose()
         {
